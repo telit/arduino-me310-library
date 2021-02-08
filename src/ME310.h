@@ -1,4 +1,4 @@
-/*Copyright (C) 2020 Telit Communications S.p.A. Italy - All Rights Reserved.*/
+/*Copyright (C) 2021 Telit Communications S.p.A. Italy - All Rights Reserved.*/
 /*    See LICENSE file in the project root for full license information.     */
 
 /**
@@ -13,7 +13,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version 
-    1.0.0
+    1.0.1
   
   @note
     Dependencies:
@@ -31,6 +31,9 @@
 
 #include "Arduino.h"
 
+namespace me310
+{
+
 
 #define ME310_BUFFSIZE 2046 ///< Exchange buffer size
 
@@ -40,6 +43,17 @@
 #define _READ(A,B,C) return_t read_ ## A(tout_t aTimeout = C){return read_send_wait(F(B),OK_STRING,aTimeout);}
 #define _TEST(A,B,C) return_t test_ ## A(tout_t aTimeout = C){return test_send_wait(F(B),OK_STRING,aTimeout);}
 #define _READ_TEST(A,B,C) _READ(A,B,C) _TEST(A,B,C)
+
+
+typedef enum {
+   RETURN_VALID = 0,      ///< Return value if valid return code detected
+   RETURN_ERROR = 1,      ///< Return value if ERROR or CME ERROR return code detected
+   RETURN_DATA  = 2,      ///< Return value for generic data detected
+
+   RETURN_TOUT = -1,      ///< Return value on timeout
+   RETURN_CONTINUE = -2,  ///< Return value to continue parsing modem answer
+   RETURN_ASYNC = -3      ///< Return Value for async call
+} return_t;
 
 // timeout in milliseconds
 
@@ -60,19 +74,12 @@
 class ME310
 {
 public:
-typedef enum {
-   RETURN_VALID = 0,      ///< Return value if valid return code detected
-   RETURN_ERROR = 1,      ///< Return value if ERROR or CME ERROR return code detected
-   RETURN_DATA  = 2,      ///< Return value for generic data detected
 
-   RETURN_TOUT = -1,      ///< Return value on timeout
-   RETURN_CONTINUE = -2,  ///< Return value to continue parsing modem answer
-   RETURN_ASYNC = -3      ///< Return Value for async call
-} return_t;
+
 
 typedef enum 
 {
-
+   NO_ANSW = 0,
    TOUT_100MS =   100, TOUT_200MS =   200, TOUT_300MS =   300, TOUT_400MS =   400, TOUT_500MS =   500, TOUT_600MS =   600, TOUT_700MS =   700, TOUT_800MS =   800, TOUT_900MS =   900,
    TOUT_1SEC =   1000, TOUT_2SEC =   2000, TOUT_3SEC =   3000, TOUT_4SEC =   4000, TOUT_5SEC =   5000, TOUT_6SEC =   6000, TOUT_7SEC =   7000, TOUT_8SEC =   8000, TOUT_9SEC =   9000,
    TOUT_10SEC = 10000, TOUT_20SEC = 20000, TOUT_30SEC = 30000, TOUT_45SEC = 45000, 
@@ -1113,8 +1120,8 @@ typedef enum
    static const char *str_start(const char *buffer, const char *string);
    static const char *str_equal(const char *buffer, const char *string);
    static const char *return_string(return_t rc);
-protected:
    void send(const char *aCommand, const char *aTerm = "\r");
+protected:
    return_t read_send_wait(const char *aCommand, const char *aAnswer = OK_STRING, tout_t aTimeout = TOUT_100MS);
    return_t test_send_wait(const char *aCommand, const char *aAnswer = OK_STRING, tout_t aTimeout = TOUT_100MS);
    return_t send_wait(const char *aCommand, const char *aAnswer = OK_STRING, tout_t aTimeout = TOUT_100MS);
@@ -1133,5 +1140,6 @@ static const char *WAIT_DATA_STRING;
    
 };
 
+} /*Namespace*/
 
 #endif // __ME310__H

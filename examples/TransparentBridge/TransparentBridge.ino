@@ -16,7 +16,9 @@
     ME310 myME310 (SerialModule); 
     
  */
- 
+
+using namespace me310;
+
 ME310 myME310; 
 
 void turnOnModule (){
@@ -25,7 +27,7 @@ void turnOnModule (){
   digitalWrite(LED_BUILTIN, LOW);
   delay(500);
   
-  while(myME310.attention() == ME310::RETURN_TOUT)
+  while(myME310.attention() == RETURN_TOUT)
    {
       digitalWrite(ON_OFF, HIGH);  
       digitalWrite(LED_BUILTIN, HIGH); 
@@ -45,9 +47,9 @@ void setup() {
   myME310.begin(115200);
   delay(1000);
   
-  Serial.println("TURN ON ME310");
+  Serial.println("TURN ON ME310G1");
   turnOnModule();
-  Serial.println("ME310 TURNED ON");
+  Serial.println("ME310G1 TURNED ON");
   Serial.println("Bridge Communication Enabled");
   
 }
