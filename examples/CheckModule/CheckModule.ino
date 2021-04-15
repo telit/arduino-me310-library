@@ -17,7 +17,7 @@
     
  */
 using namespace me310;
-
+ 
 ME310 myME310; 
 
 void turnOnModule (){
@@ -26,7 +26,7 @@ void turnOnModule (){
   digitalWrite(LED_BUILTIN, LOW);
   delay(500);
   
-  while(myME310.attention() == RETURN_TOUT)
+  while(myME310.attention() == ME310::RETURN_TOUT)
    {
       digitalWrite(ON_OFF, HIGH);  
       digitalWrite(LED_BUILTIN, HIGH); 
