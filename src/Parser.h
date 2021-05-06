@@ -78,6 +78,11 @@ namespace telitAT
         int _startPayloadOffset;                    //!< Start position to payload offset
         bool _response;                             //!< Command Response flag
         bool _pendingRead;                          //!< Pending read flag
+
+        static const char *OK_STRING;
+        static const char *ERROR_STRING;
+        static const char *CME_ERROR_STRING;
+        static const char *NO_CARRIER_STRING;
     };
 
     /*-----------------------------------
@@ -188,7 +193,7 @@ namespace telitAT
       public:
         ~PingParser(){}
 
-      protected:            
+      protected:
         int findPayloadStart();
         int expectedBytes();
         uint8_t * extractedData();
@@ -210,7 +215,7 @@ namespace telitAT
       public:
         ~GenericParser(){}
 
-      protected:            
+      protected:
         int findPayloadStart();
         int expectedBytes();
         uint8_t * extractedData();
@@ -219,7 +224,7 @@ namespace telitAT
 
       private:
 
-      int _posCommandResponse;
+        int _posCommandResponse;
     };
 } //end namespace telitAT
 #endif //__PARSER__H

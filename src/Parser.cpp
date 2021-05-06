@@ -33,6 +33,12 @@
 /* Start namespace telitAT================================================================================*/
 namespace telitAT
 {
+    const char *Parser::OK_STRING = "OK";                   ///< String for OK modem answer
+    const char *Parser::ERROR_STRING = "ERROR";             ///< String for ERROR modem answer
+    const char *Parser::CME_ERROR_STRING = "+CME ERROR: ";  ///< String for +CME ERROR modem answer
+    const char *Parser::NO_CARRIER_STRING = "NO CARRIER";   ///< String for NO CARRIER modem answer
+
+
     //! \brief Implements the parse method.
     /*! \details
         This methods calls the methods to parser the different part of received string.
@@ -180,7 +186,7 @@ namespace telitAT
             else
             {
                 return posSecondComma;  
-            }    
+            }
         }
         else
         {
@@ -247,7 +253,7 @@ namespace telitAT
                 else
                 {
                     return posComma;
-                }           
+                }
             }  
             else
             {
@@ -303,7 +309,6 @@ namespace telitAT
         }
     }
 
-    
 
     /*====================================
             FTPRECVParser class methods
@@ -419,17 +424,17 @@ namespace telitAT
                 else
                 {
                     return posSecondNewRow;
-                }                                 
+                }
             }
             else
             { 
                 return posDots;
-            }   
+            }
         }
         else
         {
             return posNewRow;
-        }              
+        }
     }
 
     //! \brief Implements  the search for command response string
@@ -448,26 +453,32 @@ namespace telitAT
             _commandResponse[len] = '\0';
             string tmp_cmd;
             tmp_cmd = _commandResponse;
-            std::size_t posNewRow = tmp_cmd.find_first_of("\n");
-            if(posNewRow != string::npos)
+            std::size_t posResponse = tmp_str.find(OK_STRING);
+            if(posResponse != string::npos)
             {
-                std::size_t posSecondNewRow = tmp_cmd.find_first_of("\n", posNewRow+1);
-                if(posSecondNewRow != string::npos)
-                {
-                    len = tmp_cmd.copy(_commandResponse, ((posSecondNewRow-1) - posNewRow), posNewRow+1);
-                    _commandResponse[len] = '\0';
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                strcpy(_commandResponse, OK_STRING);
+                return true;
             }
-            else
+            posResponse = tmp_str.find(ERROR_STRING);
+            if(posResponse != string::npos)
             {
-                return false;
+                strcpy(_commandResponse, ERROR_STRING);
+                return true;
             }
-        }
+            posResponse = tmp_str.find(NO_CARRIER_STRING);
+            if(posResponse != string::npos)
+            {
+                strcpy(_commandResponse, NO_CARRIER_STRING);
+                return true;
+            }
+            posResponse = tmp_str.find(CME_ERROR_STRING);
+            if(posResponse != string::npos)
+            {
+                strcpy(_commandResponse, CME_ERROR_STRING);
+                return true;
+            }
+            return false; 
+            }
         else
         {
             return false;
@@ -594,7 +605,6 @@ namespace telitAT
                         {
                             return posSecondNewRow;
                         }
-                            
                     }
                     else
                     {
@@ -610,7 +620,6 @@ namespace telitAT
             {
                 return posDots;
             }
-                
         }
         else
         {
@@ -775,8 +784,7 @@ namespace telitAT
                 else
                 {
                     return false;
-                }
-                    
+                } 
             }
             else
             {
@@ -919,24 +927,23 @@ namespace telitAT
             _commandResponse[len] = '\0';
             string tmp_cmd;
             tmp_cmd = _commandResponse;
-            std::size_t posNewRow = tmp_cmd.find_first_of("\n");
-            if(posNewRow != string::npos)
+            std::size_t posResponse = tmp_cmd.find(OK_STRING);
+            if(posResponse != string::npos)
             {
-                std::size_t posSecondNewRow = tmp_cmd.find_first_of("\n", posNewRow+1);
-                if(posSecondNewRow != string::npos)
-                {
-                    len = tmp_cmd.copy(_commandResponse, (posSecondNewRow - posNewRow), posSecondNewRow+1);
-                    _commandResponse[len] = '\0';
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+            strcpy(_commandResponse, OK_STRING);
+            return true;
             }
-            else
+            posResponse = tmp_cmd.find(ERROR_STRING);
+            if(posResponse != string::npos)
             {
-                return false;
+                strcpy(_commandResponse, ERROR_STRING);
+                return true;
+            }
+            posResponse = tmp_cmd.find(CME_ERROR_STRING);
+            if(posResponse != string::npos)
+            {
+                strcpy(_commandResponse, CME_ERROR_STRING);
+                return true;
             }
         }
         else
@@ -967,7 +974,7 @@ namespace telitAT
         else
         {
             return posNewRow;
-        }     
+        }
     }
 
     //! \brief Implements  the search for expected bytes
@@ -1036,27 +1043,34 @@ namespace telitAT
         memset(_commandResponse, 0, MAX_CMD_RESPONSE);
         string tmp_str;
         tmp_str = _rawData;
-        std::size_t posResponse = tmp_str.find("\r\nOK\r\n");
+        std::size_t posResponse = tmp_str.find(OK_STRING);
         if(posResponse != string::npos)
         {
-           strcpy(_commandResponse, "OK");
+           strcpy(_commandResponse, OK_STRING);
            _posCommandResponse = posResponse;
            return true;
         }
-        posResponse = tmp_str.find("\r\nERROR\r\n");
+        posResponse = tmp_str.find(ERROR_STRING);
         if(posResponse != string::npos)
         {
-            strcpy(_commandResponse, "ERROR");
+            strcpy(_commandResponse, ERROR_STRING);
            _posCommandResponse = posResponse;
             return true;
         }
-        posResponse = tmp_str.find("\r\nNO CARRIER\r\n");
+        posResponse = tmp_str.find(NO_CARRIER_STRING);
         if(posResponse != string::npos)
         {
-            strcpy(_commandResponse, "\r\nNO CARRIER\r\n");
+            strcpy(_commandResponse, NO_CARRIER_STRING);
            _posCommandResponse = posResponse;
             return true;
         }
-        return false;        
+        posResponse = tmp_str.find(CME_ERROR_STRING);
+        if(posResponse != string::npos)
+        {
+            strcpy(_commandResponse, CME_ERROR_STRING);
+            _posCommandResponse = posResponse;
+            return true;
+        }
+        return false;
     }
 } //end namespace telitAT

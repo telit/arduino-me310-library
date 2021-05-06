@@ -6,6 +6,11 @@ using namespace std;
 namespace telitAT
 {
 
+    const char *ResponseFind::OK_STRING = "OK";                   ///< String for OK modem answer
+    const char *ResponseFind::ERROR_STRING = "ERROR";             ///< String for ERROR modem answer
+    const char *ResponseFind::CME_ERROR_STRING = "+CME ERROR: ";  ///< String for +CME ERROR modem answer
+    const char *ResponseFind::NO_CARRIER_STRING = "NO CARRIER";   ///< String for NO CARRIER modem answer
+
     //! \brief Class Constructor
     /*! 
     * \param str pointer to a char string
@@ -87,22 +92,28 @@ namespace telitAT
     {
         string tmp_str;
         tmp_str = str;
-        std::size_t posResponse = tmp_str.find("\r\nOK\r\n");
+        std::size_t posResponse = tmp_str.find(OK_STRING);
         if(posResponse != string::npos)
         {
-           strcpy(_commandResponse, "OK");
+           strcpy(_commandResponse, OK_STRING);
            return true;
         }
-        posResponse = tmp_str.find("\r\nERROR\r\n");
+        posResponse = tmp_str.find(ERROR_STRING);
         if(posResponse != string::npos)
         {
-            strcpy(_commandResponse, "ERROR");
+            strcpy(_commandResponse, ERROR_STRING);
             return true;
         }
-        posResponse = tmp_str.find("\r\nNO CARRIER\r\n");
+        posResponse = tmp_str.find(CME_ERROR_STRING);
         if(posResponse != string::npos)
         {
-            strcpy(_commandResponse, "NO CARRIER");
+            strcpy(_commandResponse, CME_ERROR_STRING);
+            return true;
+        }
+        posResponse = tmp_str.find(NO_CARRIER_STRING);
+        if(posResponse != string::npos)
+        {
+            strcpy(_commandResponse, NO_CARRIER_STRING);
             return true;
         }
         return false;        

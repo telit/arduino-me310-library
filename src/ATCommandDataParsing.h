@@ -15,7 +15,7 @@
     1.0.0
 
   @note
-    Dependencies: 
+    Dependencies:
     Arduino.h
     string.h
 
@@ -41,7 +41,7 @@ using namespace telitAT;
 /*! \class ATCommandDataParsing
     \brief Implements the data parsing to AT command
     \details 
-    The class implements the data parsing function.\n    
+    The class implements the data parsing function.\n
 */
 class ATCommandDataParsing
 {
