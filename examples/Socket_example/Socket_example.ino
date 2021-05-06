@@ -27,13 +27,13 @@
 #include <ME310.h>
 //#include <string.h>
 
-#define APN "nbiot.tids.tim.it"
+#define APN "apn"
 using namespace me310;
 int cID = 1;            //PDP Context Identifier
 int connID = 1;         //Socket connection identifier.
 char ipProt[] = "IP";   //Packet Data Protocol type
 
-char server[] = "185.86.42.218";    //echo server
+char server[] = "modules.telit.com";    //echo server
 int port = 10510;
 
 ME310 myME310;

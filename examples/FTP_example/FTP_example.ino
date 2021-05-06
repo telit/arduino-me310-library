@@ -28,11 +28,11 @@
 #include <ME310.h>
 #include <string.h>
 
-#define APN "nbiot.tids.tim.it"
+#define APN "apn"
 
 #define FTP_ADDR_PORT "ftp.telit.com"
-#define FTP_USER "guest0181"
-#define FTP_PASS "g2hs3tx6"
+#define FTP_USER "Username"
+#define FTP_PASS "Password"
 
 using namespace me310;
 
@@ -148,7 +148,7 @@ void loop() {
           if(rc == ME310::RETURN_VALID)
           {
             delay(3000);
-            myME310.ftp_size("test.txt", ME310::TOUT_10SEC);
+            myME310.ftp_get_file_size("test.txt", ME310::TOUT_10SEC);
             Serial.print("File size: ");
             Serial.println(myME310.buffer_cstr(0));
             Serial.println(myME310.buffer_cstr(1));

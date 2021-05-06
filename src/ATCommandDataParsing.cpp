@@ -40,7 +40,7 @@ using namespace telitAT;
 */
 ATCommandDataParsing::ATCommandDataParsing(char* aCommand, char* str, int flag)
 {
-    _str = str;   
+    _str = str;
     char* cmd;
     cmd = findCommand(aCommand);
     if(cmd == NULL && flag == -1)
@@ -77,7 +77,7 @@ ATCommandDataParsing::ATCommandDataParsing(char* aCommand, char* str, int flag)
             }
         }
         _parser->parse(_str);
-    } 
+    }
 }
 
 //! \brief Implements the extraction of the payload from the string
@@ -88,7 +88,9 @@ ATCommandDataParsing::ATCommandDataParsing(char* aCommand, char* str, int flag)
 uint8_t * ATCommandDataParsing::extractedPayload()
 {    
     if(_parser == nullptr)
+    {
         return NULL;
+    }
     return _parser->getPayload();
 }
 
@@ -100,9 +102,13 @@ uint8_t * ATCommandDataParsing::extractedPayload()
 bool ATCommandDataParsing::parserIs()
 {
     if(_parser == nullptr)
+    {
         return false;
+    }
     else
+    {
         return true;
+    }
 }
 //! \brief Implements the  extraction of the received bytes from the string
 /*! \details
@@ -112,7 +118,9 @@ bool ATCommandDataParsing::parserIs()
 int ATCommandDataParsing::receivedBytes()
 {
     if(_parser == nullptr)
+    {
         return -1;
+    }
     return _parser->getReceivedBytes();
 }
 //! \brief Implements the  extraction of the command response from the string
@@ -179,12 +187,13 @@ char* ATCommandDataParsing::findCommand(char* aCommand)
     {
         len = tmp_str.copy(_command, posColon, 0);
         _command[len] = '\0';
-        return _command;
     }
     else
     {
-        return NULL;
+        tmp_str.copy(_command, tmp_str.length(), 0);
+        _command[len] = '\0';
     }
+    return _command;
 }
 
 //!\brief Class Destructor

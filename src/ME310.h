@@ -197,7 +197,7 @@ namespace me310
       return_t power_saving_mode_ring_indicator(int n = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(power_saving_mode_ring_indicator,"AT#PSMRI",TOUT_100MS) 
 
-      return_t select_te_character_set(int chset = 0, tout_t aTimeout = TOUT_100MS);
+      return_t select_te_character_set(const char* chset = "IRA", tout_t aTimeout = TOUT_100MS);
       _READ_TEST(select_te_character_set,"AT+CSCS",TOUT_100MS) 
 
       return_t multiplexing_mode(int mode = 0, int subset = 0, int port_speed = 5, int n1 = 31, int t1=10, int n2=3, int t2=30, int t3 = 10, int k=2, tout_t aTimeout = TOUT_100MS);
@@ -227,7 +227,7 @@ namespace me310
       return_t set_active_firmware_image(int image_number = 0, int storage_conf = 1, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(set_active_firmware_image, "AT#FWSWITCH", TOUT_100MS)
 
-      return_t ims_pdp_apn_number_set(int pdpApnName, tout_t aTimeout = TOUT_100MS);
+      return_t ims_pdp_apn_number_set(const char* pdpApnName, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(ims_pdp_apn_number_set,"AT#IMSPDPSET",TOUT_100MS) 
 
       return_t request_telit_id(tout_t aTimeout = TOUT_100MS);
@@ -240,7 +240,7 @@ namespace me310
       return_t ring_counter(tout_t aTimeout = TOUT_100MS);
       _READ(ring_counter,"ATS1",TOUT_100MS) 
 
-      return_t escape_character(int chr, tout_t aTimeout = TOUT_100MS);
+      return_t escape_character(int chr = 43, tout_t aTimeout = TOUT_100MS);
       _READ(escape_character,"ATS2",TOUT_100MS) 
 
       return_t command_line_terminator_character(int chr = 13, tout_t aTimeout = TOUT_100MS);
@@ -282,9 +282,9 @@ namespace me310
       _READ_TEST(uart_dce_interface_speed,"AT+IPR",TOUT_100MS) 
 
       return_t dte_modem_local_control_flow(int byDTE = 2, int byDCE = 2, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(dte_modem_local_control_flow,"AT+AT+IFC",TOUT_100MS) 
+      _READ_TEST(dte_modem_local_control_flow,"AT+IFC",TOUT_100MS) 
 
-      return_t dte_modem_character_framing(int format = 1, int parity = 0, tout_t aTimeout = TOUT_100MS);
+      return_t dte_modem_character_framing(int format = 3, int parity = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(dte_modem_character_framing,"AT+ICF",TOUT_100MS) 
 
       return_t skip_escape_sequence(int mode = 0, tout_t aTimeout = TOUT_100MS);
@@ -293,7 +293,7 @@ namespace me310
       return_t escape_sequence_guard_time(int gt = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(escape_sequence_guard_time,"AT#E2ESC",TOUT_100MS) 
       
-      return_t extended_result_codes(int n = 0, tout_t aTimeout = TOUT_100MS);
+      return_t extended_result_codes(int n = 1, tout_t aTimeout = TOUT_100MS);
 
    // Call Control ----------------------------------------------------------------
       return_t dialup_connection(tout_t aTimeout = TOUT_100MS);
@@ -315,7 +315,8 @@ namespace me310
 
       return_t network_registration_status(int mode = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(network_registration_status,"AT+CREG",TOUT_100MS) 
-         
+      
+      return_t operator_selection(int mode = 0, tout_t aTimeout = TOUT_100MS);
       return_t operator_selection(int mode, int format, const char *oper, int act, tout_t aTimeout = TOUT_100MS);
       return_t operator_selection(int mode, int format, int oper, int act, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(operator_selection,"AT+COPS",TOUT_100MS)
@@ -330,6 +331,7 @@ namespace me310
       _TEST(list_current_calls, "AT+CLCC", TOUT_100MS)
 
       return_t preferred_operator_list(int index, int format, const char *oper, int gsm_act, int gsm_compact_cact, int utran_act, int e_utran_actn, tout_t aTimeout = TOUT_100MS);
+      return_t preferred_operator_list(tout_t aTimeout = TOUT_100MS);
       _READ_TEST(preferred_operator_list,"AT+CPOL",TOUT_100MS)
 
       return_t selection_preferred_plmn_list(int list = 0, tout_t aTimeout = TOUT_100MS);
@@ -365,8 +367,8 @@ namespace me310
       return_t extended_numeric_error_report_net(tout_t aTimeout = TOUT_100MS);
       _TEST(extended_numeric_error_report_net,"AT#CEERNET",TOUT_100MS) 
          
-      return_t automatic_band_selection_net(int func = 0, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(automatic_band_selection_net,"AT#CEERNETEXT",TOUT_100MS)
+      return_t extended_error_report_network_reject_cause(int func = 0, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(extended_error_report_network_reject_cause,"AT#CEERNETEXT",TOUT_100MS)
 
       return_t ciphering_indication(int mode = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(ciphering_indication,"AT#CIPHIND",TOUT_100MS)
@@ -389,7 +391,8 @@ namespace me310
       return_t select_wireless_network(int value,tout_t aTimeout = TOUT_100MS);
       _READ_TEST(select_wireless_network,"AT+WS46",TOUT_100MS)
 
-      return_t edrx_settings(int mode, int acttype, const char * req_edrx,tout_t aTimeout = TOUT_100MS);
+      return_t edrx_settings(int mode = 0, tout_t aTimeout = TOUT_100MS);
+      return_t edrx_settings(int mode, int acttype, const char * req_edrx, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(edrx_settings,"AT+CEDRXS",TOUT_100MS)
 
       return_t select_iot_technology(int n , tout_t aTimeout = TOUT_100MS);
@@ -407,21 +410,27 @@ namespace me310
       return_t read_sim_field_spn(tout_t aTimeout = TOUT_100MS);
       _TEST(read_sim_field_spn,"AT#SPN",TOUT_100MS) 
          
-      return_t extended_edrx_settings(int mode, int acttype, const char *req_edrx, const char *reqpagetimewindow , tout_t aTimeout = TOUT_100MS);
+      return_t extended_edrx_settings(int mode = 0, int acttype = 2, const char *req_edrx = "0000", const char *reqpagetimewindow = "0000", tout_t aTimeout = TOUT_100MS);
       _READ_TEST(extended_edrx_settings,"AT#CEDRXS",TOUT_100MS)
 
-      return_t cell_monitor(int number, tout_t aTimeout = TOUT_100MS);
-      return_t cell_monitor(tout_t aTimeout = TOUT_100MS);
+      return_t cell_monitor(int number = 0, tout_t aTimeout = TOUT_100MS);
       _TEST(cell_monitor,"AT#MONI",TOUT_100MS)
+
+      return_t LTE_frame_information( tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LTE_frame_information, "AT#LTESFN", TOUT_100MS)
 
       return_t SNR_set_level(int level = 2, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(SNR_set_level, "AT#SNRSET", TOUT_100MS)
 
       return_t catm1_nbiot_band_setting(int m1_band_1_64, int m1_band_65_128, int nb1_band_1_64, int nb1_band_65_128 , tout_t aTimeout = TOUT_100MS);
+      return_t catm1_nbiot_band_setting(tout_t aTimeout = TOUT_100MS);
       _READ_TEST(catm1_nbiot_band_setting,"AT#IOTBND",TOUT_100MS)
          
       return_t inter_RAT_timer_setting(int irat_timer = 60, int search_alignment = 20, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(inter_RAT_timer_setting, "AT#IRATTIMER", TOUT_100MS)
+
+      return_t enable_NB2_mode(int ena = 0, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(enable_NB2_mode, "AT#NB2ENA", TOUT_100MS)
 
    // SIM -------------------------------------------------------------------------   
    
@@ -468,11 +477,14 @@ namespace me310
       return_t generic_uicc_logical_channell_access(int sessionid, int length, const char *command,tout_t aTimeout = TOUT_100MS);
       _TEST(generic_uicc_logical_channell_access,"AT+CGLA",TOUT_100MS) 
 
-      return_t read_ICCID_2(tout_t aTimeout = TOUT_100MS);
-      _TEST(read_ICCID_2, "AT+ICCID", TOUT_100MS)
+      return_t read_iccid_2(tout_t aTimeout = TOUT_100MS);
+      _TEST(read_iccid_2, "AT+ICCID", TOUT_100MS)
 
       return_t simin_pin_configuration(int gpiopin, int simindetmode, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(simin_pin_configuration,"AT#SIMINCFG",TOUT_100MS) 
+
+      return_t automatic_switch_firmware(int mode = 0, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(automatic_switch_firmware, "AT#FWAUTOSIM", TOUT_100MS)
 
    // SIM Toolkit -----------------------------------------------------------------      
 
@@ -515,8 +527,8 @@ namespace me310
       return_t more_message_send(int n = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(more_message_send,"AT+CMMS",TOUT_100MS) 
 
-      return_t new_message_indications_te(int mode = 0, int mt = 0, int bm = 0, int ds= 0, int bfr = 0, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(new_message_indications_te,"AT+CNMI",TOUT_100MS) 
+      return_t new_message_indications_TE(int mode = 0, int mt = 0, int bm = 0, int ds= 0, int bfr = 0, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(new_message_indications_TE,"AT+CNMI",TOUT_100MS) 
 
       return_t new_message_ack(int n, int length, tout_t aTimeout = TOUT_100MS);
       return_t new_message_ack(tout_t aTimeout = TOUT_100MS);
@@ -524,6 +536,7 @@ namespace me310
 
       return_t list_messages(int stat, tout_t aTimeout = TOUT_100MS);
       return_t list_messages(const char *stat, tout_t aTimeout = TOUT_100MS);
+      return_t list_messages(tout_t aTimeout = TOUT_100MS);
       _TEST(list_messages,"AT+CMGL",TOUT_100MS) 
 
       return_t read_message(int index, tout_t aTimeout = TOUT_100MS);
@@ -564,6 +577,7 @@ namespace me310
    // Phonebook -------------------------------------------------------------------
          
       return_t phonebook_select_memory_storage(const char *storage, const char *password, tout_t aTimeout = TOUT_100MS);
+      return_t phonebook_select_memory_storage(const char *storage,tout_t aTimeout = TOUT_100MS);
       _READ_TEST(phonebook_select_memory_storage,"AT+CPBS",TOUT_100MS) 
          
       return_t phonebook_read_entries( int index1, int index2, tout_t aTimeout = TOUT_100MS);
@@ -574,6 +588,7 @@ namespace me310
       _TEST(phonebook_find_entries,"AT+CPBF",TOUT_100MS) 
          
       return_t phonebook_write_entry(int index, const char *number, int type, const char *text, const char *group, const char * adnumber, int adtype, const char *secondtext, const char * email, int hidden, tout_t aTimeout = TOUT_100MS);
+      return_t phonebook_write_entry(int index, const char *number, int type, const char *text, const char *group, tout_t aTimeout = TOUT_100MS);
       _TEST(phonebook_write_entry,"AT+CPBW",TOUT_100MS) 
          
       return_t phonebook_read_group_entries( int indexFirst, int indexLast, tout_t aTimeout = TOUT_100MS);
@@ -588,7 +603,7 @@ namespace me310
 
    // Time & Alarm ----------------------------------------------------------------
 
-      return_t clock_management(const char *time,tout_t aTimeout = TOUT_100MS);
+      return_t clock_management(const char *time, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(clock_management,"AT+CCLK",TOUT_100MS) 
 
       return_t alarm_management(const char *time, int index = 0, int type = 1, const char *string ="", const char *recurr="", int silent = 0,tout_t aTimeout = TOUT_100MS);
@@ -609,8 +624,8 @@ namespace me310
       return_t network_identity_time_zone(int val = 7, int mode = 0,tout_t aTimeout = TOUT_100MS);
       _READ_TEST(network_identity_time_zone,"AT#NITZ",TOUT_100MS) 
 
-      return_t clock_management2(const char *time,tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(clock_management2,"AT#CCLK",TOUT_100MS) 
+      return_t clock_management_ext(const char *time,tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(clock_management_ext,"AT#CCLK",TOUT_100MS) 
          
       return_t clock_mode(int mode = 0,tout_t aTimeout = TOUT_100MS);
       _READ_TEST(clock_mode,"AT#CCLKMODE",TOUT_100MS) 
@@ -662,13 +677,13 @@ namespace me310
       return_t v24_output_pin_control(int pin = 0,int state = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(v24_output_pin_control,"AT#V24",TOUT_100MS) 
 
-      return_t i2c_write(int sdaPin,int sclPin, int deviceId, int registerId, int len, tout_t aTimeout = TOUT_100MS);
+      return_t i2c_write(int sdaPin,int sclPin, int deviceId, int registerId, int len, char* data, tout_t aTimeout = TOUT_100MS);
       _TEST(i2c_write,"AT#I2CWR",TOUT_100MS) 
 
       return_t i2c_read(int sdaPin,int sclPin, int deviceId, int registerId, int len, tout_t aTimeout = TOUT_100MS);
       _TEST(i2c_read,"AT#I2CRD",TOUT_100MS) 
 
-      return_t i2c_write_read(int sdaPin,int sclPin, int deviceId, int lenwr, int lenrd, tout_t aTimeout = TOUT_100MS);
+      return_t i2c_write_read(int sdaPin,int sclPin, int deviceId, int lenwr, int lenrd, char* data, tout_t aTimeout = TOUT_100MS);
       _TEST(i2c_write_read,"AT#I2CCF",TOUT_100MS) 
 
       return_t test_mode_configuration(const char *cmd, tout_t aTimeout = TOUT_100MS);
@@ -680,7 +695,7 @@ namespace me310
       return_t module_reboot(tout_t aTimeout = TOUT_100MS);
       _TEST(module_reboot,"AT#REBOOT",TOUT_100MS) 
       
-      return_t periodic_reset(int mode, int delay, tout_t aTimeout = TOUT_100MS);
+      return_t periodic_reset(int mode, int delay = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(periodic_reset,"AT#ENHRST",TOUT_100MS) 
 
       return_t software_shutdown(tout_t aTimeout = TOUT_100MS);
@@ -690,7 +705,7 @@ namespace me310
       _READ_TEST(system_turnoff,"AT#SYSHALT",TOUT_100MS) 
 
       return_t fast_shutdown_configuration(int enable, int gpio, tout_t aTimeout = TOUT_100MS);
-      return_t fast_shutdown(tout_t aTimeout = TOUT_100MS);
+      return_t fast_shutdown_configuration(tout_t aTimeout = TOUT_100MS);
       _READ_TEST(fast_shutdown_configuration,"AT#FASTSHDN",TOUT_100MS) 
 
    // Easy Scan -------------------------------------------------------------------
@@ -724,15 +739,16 @@ namespace me310
       _READ_TEST(define_pdp_context,"AT+CGDCONT",TOUT_100MS) 
 
       return_t show_pdp_address(int cid, tout_t aTimeout = TOUT_1SEC); 
+      return_t show_pdp_address(tout_t aTimeout = TOUT_1SEC); 
       _TEST(show_pdp_address,"AT+CGPADDR",TOUT_100MS) 
 
-      return_t auto_attach_property(int _auto, tout_t aTimeout = TOUT_1SEC); 
+      return_t auto_attach_property(int _auto = 0, tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(auto_attach_property,"AT#AUTOATT",TOUT_100MS) 
 
       return_t multislot_class_control(int _class = 33, int autoattach = 0, tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(multislot_class_control,"AT#MSCLASS",TOUT_100MS) 
 
-      return_t ppp_data_connection_auth_type(int type, tout_t aTimeout = TOUT_1SEC); 
+      return_t ppp_data_connection_auth_type(int type = 3, tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(ppp_data_connection_auth_type,"AT#GAUTH",TOUT_100MS) 
 
       return_t define_pdp_context_auth_params(int cid, int auth_type, const char *username, const char *password, tout_t aTimeout = TOUT_1SEC); 
@@ -746,6 +762,7 @@ namespace me310
       _READ_TEST(printing_ip_address_format,"AT+CGPIAF",TOUT_100MS) 
 
       return_t pdp_context_activate(int cid, int stat, tout_t aTimeout = TOUT_1SEC); 
+      return_t pdp_context_activate(tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(pdp_context_activate,"AT+CGACT",TOUT_100MS) 
          
       return_t packet_domain_event_reporting(int mode = 0, int bfr = 0, tout_t aTimeout = TOUT_1SEC); 
@@ -760,10 +777,10 @@ namespace me310
       return_t ps_attach_detach(int state, tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(ps_attach_detach,"AT+CGATT",TOUT_100MS) 
 
-      return_t sending_originating_data(int cid, int cpdataLength, const char *cpdata, int rai, int typeOfUserData, tout_t aTimeout = TOUT_1SEC); 
+      return_t sending_originating_data(int cid, int cpdataLength, const char *cpdata, int rai = 0, int typeOfUserData = 0, tout_t aTimeout = TOUT_1SEC); 
       _TEST(sending_originating_data,"AT+CSODCP",TOUT_100MS) 
 
-      return_t reporting_terminating_data(int reporting, tout_t aTimeout = TOUT_1SEC); 
+      return_t reporting_terminating_data(int reporting = 0, tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(reporting_terminating_data,"AT+CRTDCP",TOUT_100MS) 
 
    // IPEasy ----------------------------------------------------------------------
@@ -772,7 +789,7 @@ namespace me310
       return_t context_activation(int cid, int stat, tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(context_activation,"AT#SGACT",TOUT_100MS) 
 
-      return_t pdp_context_auth_type(int type = 0, tout_t aTimeout = TOUT_1SEC); 
+      return_t pdp_context_auth_type(int type = 1, tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(pdp_context_auth_type,"AT#SGACTAUTH",TOUT_100MS) 
 
       return_t pdp_automatic_context_activation(int cid, int retry = 0, int delay = 180, int urcmode = 0, tout_t aTimeout = TOUT_1SEC); 
@@ -787,7 +804,7 @@ namespace me310
       return_t socket_configuration_extended(int connId = 1, int srMode = 0, int recvDataMode = 0, int keepalive = 0, int listenAutoRsp = 0, int sendDataMode = 0, tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(socket_configuration_extended,"AT#SCFGEXT",TOUT_100MS) 
          
-      return_t socket_configuration_extended_2(int connId = 1, int bufferStart = 0, int abortConnAttempt= 0, int unusedB = 0, int unusedC = 0, int noCarrierMode = 0, tout_t aTimeout = TOUT_1SEC); 
+      return_t socket_configuration_extended_2(int connId, int bufferStart = 0, int abortConnAttempt= 0, int unusedB = 0, int unusedC = 0, int noCarrierMode = 0, tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(socket_configuration_extended_2,"AT#SCFGEXT2",TOUT_100MS) 
          
       return_t socket_parameters_reset(tout_t aTimeout = TOUT_100MS);
@@ -809,7 +826,7 @@ namespace me310
       return_t socket_listen_UDP(int connId, int listenState, int listenPort, tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(socket_listen_UDP,"AT#SLUDP",TOUT_100MS) 
          
-      return_t socket_accept(int connId, int connMode, tout_t aTimeout = TOUT_1SEC); 
+      return_t socket_accept(int connId, int connMode = 0, tout_t aTimeout = TOUT_1SEC); 
       _TEST(socket_accept,"AT#SA",TOUT_100MS) 
          
       return_t socket_send_data_command_mode(int connId, char* data,int rai = 1, tout_t aTimeout = TOUT_1SEC); 
@@ -821,10 +838,10 @@ namespace me310
       return_t socket_receive_data_command_mode(int connId, int maxByte, int udpInfo = 0, tout_t aTimeout = TOUT_1SEC); 
       _TEST(socket_receive_data_command_mode,"AT#SRECV",TOUT_100MS) 
          
-      return_t socket_send_udp_data_specific_remote_host(int connId, const char *remoteIP, int remotePort, int rai, tout_t aTimeout = TOUT_1SEC); 
+      return_t socket_send_udp_data_specific_remote_host(int connId, const char *remoteIP, int remotePort, int rai, char* data, tout_t aTimeout = TOUT_1SEC); 
       _TEST(socket_send_udp_data_specific_remote_host,"AT#SSENDUDP",TOUT_100MS) 
          
-      return_t socket_send_udp_data_specific_remote_host_extended(int connId, int bytesToSend, const char *remoteIP, int remotePort, int rai, tout_t aTimeout = TOUT_1SEC); 
+      return_t socket_send_udp_data_specific_remote_host_extended(int connId, int bytesToSend, const char *remoteIP, int remotePort, int rai, char* data, tout_t aTimeout = TOUT_1SEC); 
       _TEST(socket_send_udp_data_specific_remote_host_extended,"AT#SSENDUDPEXT",TOUT_100MS) 
          
       return_t socket_detect_cause_disconnection(int connId, tout_t aTimeout = TOUT_1SEC); 
@@ -851,7 +868,7 @@ namespace me310
       return_t base64_encode(int connId, int enc = 0, int dec = 0, tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(base64_encode,"AT#BASE64",TOUT_100MS) 
          
-      return_t firewall_setup(int action, const char *ip_addr,  const char *net_mask, tout_t aTimeout = TOUT_1SEC); 
+      return_t firewall_setup(int action, const char *ip_addr = "000.000.000.000",  const char *net_mask = "000.000.000.000", tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(firewall_setup,"AT#FRWL",TOUT_100MS) 
          
       return_t socket_listen_ring_indicator(int n = 0, tout_t aTimeout = TOUT_1SEC); 
@@ -867,13 +884,14 @@ namespace me310
       return_t dns_query(const char *host_name, tout_t aTimeout = TOUT_1SEC);
       _TEST(dns_query,"AT#QDNS",TOUT_100MS) 
 
-      return_t dns_from_network(int cid, tout_t aTimeout = TOUT_1SEC); 
+      return_t dns_from_network(int cid, tout_t aTimeout = TOUT_1SEC);
+      return_t dns_from_network(tout_t aTimeout = TOUT_1SEC); 
       _TEST(dns_from_network,"AT#NWDNS",TOUT_100MS) 
 
       return_t ntp(const char *ntpaddress, int ntpport, int updModClock =1, int timeout = 2, int timezone = 4, tout_t aTimeout = TOUT_100MS);
       _TEST(ntp,"AT#NTP",TOUT_100MS) 
          
-      return_t configure_ntp_parameters(int cid, int authType = 0, tout_t aTimeout = TOUT_100MS);
+      return_t configure_ntp_parameters(int cid, int authType = 0, int keyID = 0, char* keysFilePath = "",  tout_t aTimeout = TOUT_100MS);
       _READ_TEST(configure_ntp_parameters,"AT#NTPCFG",TOUT_100MS) 
       
       return_t socket_configuration_extended3(int connId, int immRsp = 0, int closureType = 0, int fastSRing = 0,int ssendTimeout = 0, tout_t aTimeout = TOUT_100MS);
@@ -891,13 +909,14 @@ namespace me310
       _TEST(ftp_close,"AT#FTPCLOSE",TOUT_100MS) 
 
       return_t ftp_change_working_directory(const char *dirname, tout_t aTimeout = TOUT_100MS);
+      return_t ftp_change_working_directory(tout_t aTimeout = TOUT_100MS);
       _TEST(ftp_change_working_directory,"AT#FTPCWD",TOUT_100MS) 
 
       return_t ftp_delete(const char *filename, tout_t aTimeout = TOUT_100MS);
       _TEST(ftp_delete,"AT#FTPDELE",TOUT_100MS) 
 
-      return_t ftp_size(const char *filename, tout_t aTimeout = TOUT_100MS);
-      _TEST(ftp_size,"AT#FTPFSIZE",TOUT_100MS) 
+      return_t ftp_get_file_size(const char *filename, tout_t aTimeout = TOUT_100MS);
+      _TEST(ftp_get_file_size,"AT#FTPFSIZE",TOUT_100MS) 
 
       return_t ftp_get(const char *filename, tout_t aTimeout = TOUT_100MS);
       _TEST(ftp_get,"AT#FTPGET",TOUT_100MS) 
@@ -927,7 +946,7 @@ namespace me310
       return_t ftp_restart_posizion_get(int restartPosition, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(ftp_restart_posizion_get,"AT#FTPREST",TOUT_100MS) 
 
-      return_t ftp_time_out(int tout, tout_t aTimeout = TOUT_100MS);
+      return_t ftp_time_out(int tout = 100, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(ftp_time_out,"AT#FTPTO",TOUT_100MS) 
 
       return_t ftp_type(int type = 0, tout_t aTimeout = TOUT_100MS);
@@ -951,7 +970,7 @@ namespace me310
       return_t smtp_read_message(tout_t aTimeout = TOUT_100MS);
       _TEST(smtp_read_message,"AT#EMAILMSG",TOUT_100MS) 
 
-      return_t smtp_configure(int ssl_enabled, int port, int mode, int un1 = 0, int un2 =0, int cid=1, tout_t aTimeout = TOUT_100MS);
+      return_t smtp_configure(int ssl_enabled = 0, int port = 25, int mode = 0, int un1 = 0, int un2 = 0, int cid = 1, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(smtp_configure,"AT#SMTPCFG",TOUT_100MS) 
 
       return_t smtp_reset_parameters(tout_t aTimeout = TOUT_100MS);
@@ -966,7 +985,7 @@ namespace me310
       return_t smtp_password(const char *ePwd, tout_t aTimeout = TOUT_100MS);
       _TEST(smtp_password,"AT#EPASSW",TOUT_100MS) 
 
-      return_t smtp_mail_send(const char *da, const char *subj, tout_t aTimeout = TOUT_100MS);
+      return_t smtp_mail_send(const char *da, const char *subj, char* data, tout_t aTimeout = TOUT_100MS);
       _TEST(smtp_mail_send,"AT#EMAILD",TOUT_100MS) 
 
       return_t smtp_sender_address(const char *eAddr, tout_t aTimeout = TOUT_100MS);
@@ -989,9 +1008,9 @@ namespace me310
       return_t receive_http_data(int prof_id, int max_byte = 0,tout_t aTimeout = TOUT_100MS);
       _TEST(receive_http_data,"AT#HTTPRCV",TOUT_100MS) 
       
-   // SSL -------------------------------------------------------------------------  
+   // SSL -------------------------------------------------------------------------
 
-      return_t ssl_configure_general_param(int ssid , int cid, int pktSx =0, int maxTo = 90, int defTo = 100, int txTo = 50, int skipHostMismatch = 1, int sslRingMode = 0, int equalizeTx = 0,tout_t aTimeout = TOUT_100MS);
+      return_t ssl_configure_general_param(int ssid , int cid, int pktSx =0, int maxTo = 90, int defTo = 100, int txTo = 50, int SSLSRingMode = 0, int noCarrierMode = 0, int skipHostMismatch = 1, int equalizeTx = 0, int unused1 = 0, int unused2 = 0,tout_t aTimeout = TOUT_100MS);
       _READ_TEST(ssl_configure_general_param,"AT#SSLCFG",TOUT_100MS) 
          
       return_t ssl_configure_security_param(int ssid, int cipherSuite = 0, int authMode = 0,tout_t aTimeout = TOUT_100MS);
@@ -1022,18 +1041,34 @@ namespace me310
       return_t ssl_socket_info(tout_t aTimeout = TOUT_100MS);
       _TEST(ssl_socket_info,"AT#SSLI",TOUT_100MS) 
          
-      return_t ssl_socket_send_data_command_mode(int ssid, int bytestosend, int timeout = 100, tout_t aTimeout = TOUT_100MS);
+      return_t ssl_socket_send_data_command_mode(int ssid, int bytestosend, char* data, int timeout = 100, tout_t aTimeout = TOUT_100MS);
       _TEST(ssl_socket_send_data_command_mode,"AT#SSLSENDEXT",TOUT_100MS) 
 
-      return_t ssl_security_data(int ssid, int action, int dataType, int size, int md5WhenReading = 0, tout_t aTimeout = TOUT_100MS);
+      return_t ssl_security_data(int ssid, int action, int dataType, int size = 0, int md5WhenReading = 0, char* data= "", tout_t aTimeout = TOUT_100MS);
       _READ_TEST(ssl_security_data,"AT#SSLSECDATA",TOUT_100MS) 
 
-      return_t ssl_additional_parameters(int ssid, int version = 4, int SNI = 0, tout_t aTimeout = TOUT_100MS);
+      return_t ssl_additional_parameters(int ssid, int version = 4, int SNI = 0, int preloadedCA = 1, int customCA = 1, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(ssl_additional_parameters,"AT#SSLSECCFG2",TOUT_100MS) 
 
    // CIoT Optimization -----------------------------------------------------------
       return_t ciot_optimization_configuration(int n = 0, int supportedUEopt = 3, int preferredUEopt = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(ciot_optimization_configuration, "AT+CCIOTOPT", TOUT_100MS)
+
+      return_t ciot_optimization_configuration2(char *bitmask, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(ciot_optimization_configuration2, "AT#CCIOTOPT", TOUT_100MS)
+
+   // IoT Portal-------------------------------------------------------------------
+      return_t odis_command_saving_retrieving_parameters(char* hostUniqueDevId = "HUID0", char *hostManufacturer = "HMAN0", char* hostModel = "HMOD0", char *hostSwVersion = "HSW0", tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(odis_command_saving_retrieving_parameters, "AT+ODIS", TOUT_100MS)
+
+      return_t FOTA_set_extended_URC(int enable = 0, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(FOTA_set_extended_URC, "AT#FOTAURC", TOUT_100MS)
+
+      return_t OTA_delta_write(int size,  tout_t aTimeout = TOUT_100MS);
+      _TEST(OTA_delta_write, "AT#OTAUPW", TOUT_100MS)
+
+      return_t odis_parameters_management(int param, int action, char* value = "", int instance = 0, tout_t aTimeout = TOUT_100MS);
+      _TEST(odis_parameters_management, "AT#HOSTODIS", TOUT_100MS)
    // M2M -------------------------------------------------------------------------
 
       return_t m2m_chdir(const char *path,tout_t aTimeout = TOUT_100MS);
@@ -1051,7 +1086,7 @@ namespace me310
       return_t m2m_application_execution(int mode = 0, int delay = 10,tout_t aTimeout = TOUT_100MS);
       _READ_TEST(m2m_application_execution,"AT+M2M",TOUT_100MS) 
          
-      return_t m2m_set_run_file_permission(int mode, const char * file_bin, int delay,tout_t aTimeout = TOUT_100MS);
+      return_t m2m_set_run_file_permission(int mode, const char * file_bin, int delay = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(m2m_set_run_file_permission,"AT#M2MRUN",TOUT_100MS) 
 
       return_t m2m_delete(const char *file_name,tout_t aTimeout = TOUT_100MS);
@@ -1071,7 +1106,7 @@ namespace me310
       _TEST(m2m_ram_info,"AT#M2MRAM",TOUT_100MS) 
       
       return_t m2m_set_arguments(const char* file_bin, tout_t aTimeout = TOUT_100MS);
-      _TEST(m2m_set_arguments, "AT#M2MARG", TOUT_100MS)
+      _READ_TEST(m2m_set_arguments, "AT#M2MARG", TOUT_100MS)
 
    // MQTT ------------------------------------------------------------------------
 
@@ -1084,7 +1119,7 @@ namespace me310
       return_t mqtt_configure_2(int instanceNumber, int keepalive = 20, int cleanSession = 1, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(mqtt_configure_2,"AT#MQCFG2",TOUT_100MS) 
 
-      return_t mqtt_configure_lastwill_testament(int instanceNumber, int willFlag, int willRetain, int willQos, const char *willTopic, const char *willMessage, tout_t aTimeout = TOUT_100MS);
+      return_t mqtt_configure_lastwill_testament(int instanceNumber, int willFlag = 0, int willRetain = 0, int willQos = 0, const char *willTopic = "", const char *willMessage = "", tout_t aTimeout = TOUT_100MS);
       _READ_TEST(mqtt_configure_lastwill_testament,"AT#MQWCFG",TOUT_100MS) 
 
       return_t mqtt_configure_timeout(int instanceNumber, int pktTimeout = 10, tout_t aTimeout = TOUT_100MS);
@@ -1116,8 +1151,8 @@ namespace me310
       return_t gnss_restore_default_GPS_parameters(tout_t aTimeout = TOUT_100MS);
       _TEST(gnss_restore_default_GPS_parameters, "AT$GPSRST", TOUT_100MS)
 
-      return_t gnss_save_parameters_configuratior(tout_t aTimeout = TOUT_100MS);
-      _TEST(gnss_save_parameters_configuratior, "AT$GPSSAV", TOUT_100MS)
+      return_t gnss_save_parameters_configuration(tout_t aTimeout = TOUT_100MS);
+      _TEST(gnss_save_parameters_configuration, "AT$GPSSAV", TOUT_100MS)
 
       return_t gnss_controller_power_management(int status = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(gnss_controller_power_management,"AT$GPSP",TOUT_100MS) 
@@ -1125,12 +1160,20 @@ namespace me310
       return_t gnss_software_version(tout_t aTimeout = TOUT_100MS);
       _READ_TEST(gnss_software_version,"AT$GPSSW",TOUT_100MS) 
 
+      return_t gnss_reset_GPS_controller(int resetType, tout_t aTimeout = TOUT_100MS);
+      _TEST(gnss_reset_GPS_controller, "AT$GPSR", TOUT_100MS)
+
       return_t gnss_nmea_data_configuration(int enable = 0, int gga = 0, int gll = 0, int gsa = 0, int gsv = 0, int rmc = 0, int vtg = 0, tout_t aTimeout = TOUT_100MS);
-      return_t gnss_nmea_data_configuration(int enable = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(gnss_nmea_data_configuration,"AT$GPSNMUN",TOUT_100MS) 
          
       return_t gnss_nmea_extended_data_configuration(int gngns = 0, int gngsa = 0, int glgsv = 0, int gpgrs = 0, int gagsv = 0, int gagsa = 0, int gavtg = 0, int gpgga = 0, int pqgsa = 0, int pqgsv = 0, int gnvtg = 0, int gnrmc = 0, int gngga = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(gnss_nmea_extended_data_configuration,"AT$GPSNMUNEX",TOUT_100MS) 
+
+      return_t get_position_GTP_WWAN_service(tout_t aTimeout = TOUT_100MS);
+      _TEST(get_position_GTP_WWAN_service, "AT#GTP", TOUT_100MS)
+
+      return_t enable_GTP_WWAN_service(int enable = 0, tout_t aTimeout = TOUT_100MS);
+      _TEST(enable_GTP_WWAN_service, "AT#GTPENA", TOUT_100MS)
 
       return_t gps_get_acquired_position(tout_t aTimeout = TOUT_100MS);
       _READ_TEST(gps_get_acquired_position, "AT$GPSACP", TOUT_100MS)
@@ -1140,13 +1183,13 @@ namespace me310
 
    // Mobile Broadband ------------------------------------------------------------
 
-      return_t ecm_setup(int cid, int did, tout_t aTimeout = TOUT_100MS);
+      return_t ecm_setup(int cid, int did = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(ecm_setup,"AT#ECM",TOUT_100MS) 
 
-      return_t ecm_shutdown(int cid, tout_t aTimeout = TOUT_100MS);
+      return_t ecm_shutdown(int did, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(ecm_shutdown,"AT#ECMD",TOUT_100MS) 
 
-   // PSM -------------------------------------------------------------------------      
+   // PSM -------------------------------------------------------------------------
 
       return_t psm_setting(int mode, const char * reqPeriodicRau, const char * reqGPRSreadyTimer, const char * reqPeriodicTau, const char * reqActiveTime, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(psm_setting,"AT+CPSMS",TOUT_100MS) 
@@ -1158,8 +1201,8 @@ namespace me310
       _READ_TEST(psm_URC, "AT#PSMURC", TOUT_100MS)
    //IMS --------------------------------------------------------------------------
 
-      return_t ims_regustration_status(int mode, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(ims_regustration_status, "AT+CIREG", TOUT_100MS)
+      return_t ims_registration_status(int mode = 0, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(ims_registration_status, "AT+CIREG", TOUT_100MS)
 
    // Debugging -------------------------------------------------------------------
 
@@ -1190,6 +1233,8 @@ namespace me310
       static const char *str_equal(const char *buffer, const char *string);
       static const char *return_string(return_t rc);
 
+      Uart* getSerial(){return &mSerial;}
+
       protected:
 
       void send(const char *aCommand, const char *aTerm = "\r");
@@ -1199,9 +1244,9 @@ namespace me310
       return_t send_wait(const char *aCommand, int flag, const char *aAnswer = OK_STRING, tout_t aTimeout = TOUT_200MS );
       return_t send_wait(const char *aCommand, const char *aAnswer = OK_STRING, const char* term = TERMINATION_STRING, tout_t aTimeout = TOUT_200MS);
 
-      Uart &mSerial;                    //!< Reference to Uart used for communication  
+      Uart &mSerial;                    //!< Reference to Uart used for communication
       uint8_t mBuffer[ME310_BUFFSIZE];  //!< Transmission buffer
-      uint8_t *mpBuffer = 0;            //!< Pointer to free position in buffer  
+      uint8_t *mpBuffer = 0;            //!< Pointer to free position in buffer
       size_t  mBuffLen = 0;             //!< Buffer length 
       uint8_t *_payloadData = 0;        //!< Pointer to free position in buffer for payload data
 
@@ -1213,7 +1258,6 @@ namespace me310
       static const char *WAIT_DATA_STRING;
       static const char *TERMINATION_STRING;
       static const char *NO_CARRIER_STRING;
-      
    };
 
 } // end namespace

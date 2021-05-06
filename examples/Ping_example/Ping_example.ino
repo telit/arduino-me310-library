@@ -31,7 +31,7 @@
 
 using namespace me310;
 
-#define APN "nbiot.tids.tim.it"
+#define APN "apn"
 
 char server[] = "8.8.8.8";
 

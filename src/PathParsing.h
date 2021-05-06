@@ -67,6 +67,13 @@ namespace telitAT
     
     private:
       char _commandResponse[64];
+
+    protected:
+
+      static const char *OK_STRING;
+      static const char *ERROR_STRING;
+      static const char *CME_ERROR_STRING;
+      static const char *NO_CARRIER_STRING;
     
   };
 } //end namespace

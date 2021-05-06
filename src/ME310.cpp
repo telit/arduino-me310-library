@@ -39,13 +39,13 @@ using namespace me310;
 using namespace std; 
 
 const char *ME310::OK_STRING = "OK";                   ///< String for OK modem answer
-const char *ME310::ERROR_STRING = "ERROR";             ///< String for ERROR modem answer   
+const char *ME310::ERROR_STRING = "ERROR";             ///< String for ERROR modem answer
 const char *ME310::CONNECT_STRING = "CONNECT";         ///< String for CONNECT modem answer
 const char *ME310::CME_ERROR_STRING = "+CME ERROR: ";  ///< String for +CME ERROR modem answer
-const char *ME310::SEQUENCE_STRING = ">>>";            ///< Sequence string  
+const char *ME310::SEQUENCE_STRING = ">>> ";           ///< Sequence string  
 const char *ME310::WAIT_DATA_STRING = "> ";            ///< Wait Data string  
 const char *ME310::TERMINATION_STRING = "";            ///< Termination character
-const char *ME310::NO_CARRIER_STRING = "NO CARRIER";
+const char *ME310::NO_CARRIER_STRING = "NO CARRIER";   ///< String for NO CARRIER modem answer
 
 
 //! \brief Class Constructor
@@ -69,10 +69,10 @@ ME310::~ME310()
 */
 void ME310::begin(unsigned long baudRate)
 {
-    mSerial.begin(baudRate);
+   mSerial.begin(baudRate);
 }
 
-// Command Line Prefixes -------------------------------------------------------   
+// Command Line Prefixes -------------------------------------------------------
 //! \brief Implements the AT command and waits for OK answer
 /*!
  * \param aTimeout timeout in ms
@@ -562,10 +562,10 @@ The command purpose is to set different character sets that are used by the devi
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::select_te_character_set(int chset, tout_t aTimeout)
+ME310::return_t ME310::select_te_character_set(const char* chset, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CSCS=%d"), chset);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CSCS=%s"), chset);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
@@ -718,10 +718,10 @@ command and appropriated context will be opened for IMS.
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::ims_pdp_apn_number_set(int pdpApnName, tout_t aTimeout)
+ME310::return_t ME310::ims_pdp_apn_number_set(const char* pdpApnName, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#IMSPDPSET=%d"), pdpApnName);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#IMSPDPSET=%s"), pdpApnName);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
@@ -1115,7 +1115,7 @@ This command establishes a GPRS communication between the TE and the external PD
  */ 
 ME310::return_t ME310::dialup_connection(tout_t aTimeout) 
 {
-   return send_wait(F("ATD"), OK_STRING, aTimeout);
+   return send_wait(F("ATD"), NO_CARRIER_STRING, aTimeout);
 }
 
 //! \brief Implements the ATH command and waits for OK answer
@@ -1180,7 +1180,7 @@ Execution command returns the MSISDN (if the phone number of the device has been
  */ 
 ME310::return_t ME310::subscriber_number(tout_t aTimeout)
 {
-   return send_wait(F("AT+CNUM"), OK_STRING, aTimeout);
+   return send_wait(F("AT+CNUM"), 0, OK_STRING, aTimeout);
 } 
 
 //! \brief Implements the AT+COPN command and waits for OK answer
@@ -1191,7 +1191,7 @@ This command read operator names.
  */ 
 ME310::return_t ME310::read_operator_names(tout_t aTimeout)
 {
-   return send_wait(F("AT+COPN"),OK_STRING,aTimeout);
+   return send_wait(F("AT+COPN"), 0, OK_STRING, aTimeout);
 } 
 
 //! \brief Implements the AT+CREG command and waits for OK answer
@@ -1206,6 +1206,20 @@ ME310::return_t ME310::network_registration_status(int mode, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CREG=%d"), mode);
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
+//! \brief Implements the AT+COPS command and waits for OK answer
+/*! \details
+The command selects a network operator and registers the module.
+ * \param mode    defines the operator selection: automatic or manual
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
+ME310::return_t ME310::operator_selection(int mode,  tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+COPS=%d"), mode);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
@@ -1309,6 +1323,20 @@ ME310::return_t ME310::preferred_operator_list(int index, int format, const char
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
+//! \brief Implements the AT+CPOL command and waits for OK answer
+/*! \details
+The command is used to edit or update the UICC preferred list of networks. The list is read in the UICC file
+selected by the command +CPLS
+ * \param aTimeout timeout in ms
+ * \return return code
+ */
+ME310::return_t ME310::preferred_operator_list(tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CPOL="));
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
 //! \brief Implements the AT+CPLS command and waits for OK answer
 /*! \details
 The command is used to select a list of preferred PLMNs in the SIM/USIM card.
@@ -1360,7 +1388,7 @@ This command enables/disable the single BCCH ARFCN locking.
 ME310::return_t ME310::lock_to_single_BCCH_ARFCN(int lockedBcch, int lockedUarfcn, int lockedPsc, int lockedEarfcn, const char *lockedPci, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#BCCHLOCK=%d,%d,%d,%d,\"%s\""), lockedBcch, lockedUarfcn, lockedPsc, lockedEarfcn, lockedPci);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#BCCHLOCK=%d,%d,%d,%d,%s"), lockedBcch, lockedUarfcn, lockedPsc, lockedEarfcn, lockedPci);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
@@ -1478,7 +1506,7 @@ This command is both a set and an execution command.
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::automatic_band_selection_net(int func, tout_t aTimeout)
+ME310::return_t ME310::extended_error_report_network_reject_cause(int func, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#CEERNETEXT=%d"), func);
@@ -1598,6 +1626,19 @@ ME310::return_t ME310::edrx_settings(int mode, int acttype, const char *req_edrx
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
+//! \brief Implements the AT+CEDRXS command and waits for OK answer
+/*! \details
+This command controls the setting of the UEs eDRX parameters.
+ * \param mode    disable or enable the use of eDRX in the UE
+ * \return return code
+ */ 
+ME310::return_t ME310::edrx_settings(int mode, tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CEDRXS=%d"), mode);
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
 //! \brief Implements the AT\#WS46 command and waits for OK answer
 /*! \details
 This command selects the IoT technology.
@@ -1690,16 +1731,16 @@ ME310::return_t ME310::cell_monitor(int number, tout_t aTimeout)
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
-//! \brief Implements the AT\#MONI command and waits for OK answer
+//! \brief Implements the AT#LTESFN command and waits for OK answer
 /*! \details
-This command is both a set and an execution command.
+Execution command returns system frame number and subframe number of LTE network.
  * \param aTimeout timeout in ms
  * \return return code
- */ 
-ME310::return_t ME310::cell_monitor(tout_t aTimeout)
+ */
+ME310::return_t ME310::LTE_frame_information( tout_t aTimeout)
 {
-   return send_wait(F("AT#MONI"), OK_STRING, aTimeout);
-} 
+   return send_wait(F("AT#LTESFN=?"), OK_STRING, aTimeout);
+}
 
 //! \brief Implements the AT#SNRSET command and waits for OK answer
 /*! \details
@@ -1732,6 +1773,18 @@ ME310::return_t ME310::catm1_nbiot_band_setting(int m1_band_1_64, int m1_band_65
    return send_wait((char*)mBuffer,OK_STRING,aTimeout);
 }
 
+//! \brief Implements the AT\#IOTBND command and waits for OK answer
+/*! \details
+Set command configures the CAT-M1 and NB-IoT bands.
+ * \return return code
+ */ 
+ME310::return_t ME310::catm1_nbiot_band_setting(tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#IOTBND="));
+   return send_wait((char*)mBuffer,OK_STRING,aTimeout);
+}
+
 //! \brief Implements the AT#IRATTIMER command and waits for OK answer
 /*! \details
 This function sets command configures the IRAT timer and search alignment timer in dedicated 
@@ -1750,6 +1803,19 @@ ME310::return_t ME310::inter_RAT_timer_setting(int irat_timer, int search_alignm
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
+//! \brief Implements the AT#NB2ENA command and waits for OK answer
+/*! \details
+This function enables/disables NB2 mode.
+ * \param ena    Enable/Disable NB2 mode
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
+ME310::return_t ME310::enable_NB2_mode(int ena, tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#NB2ENA=%d"), ena);
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
 
 // SIM -------------------------------------------------------------------------
 //! \brief Implements the AT+CPIN command and waits for OK answer
@@ -1965,9 +2031,23 @@ It is the card identification number that provides a unique identification numbe
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::read_ICCID_2(tout_t aTimeout)
+ME310::return_t ME310::read_iccid_2(tout_t aTimeout)
 {
    return send_wait(F("AT+ICCID"), OK_STRING, aTimeout);
+}
+
+//! \brief Implements the "AT#FWAUTOSIM command and waits for OK answer
+/*! \details
+This command allows to set automatically the active firmware image in accordance with the inserted SIM.
+ * \param mode disable/enable automatic setting of active firmware image switch by SIM
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
+ME310::return_t ME310::automatic_switch_firmware(int mode, tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#FWAUTOSIM=%d"), mode);
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
 //! \brief Implements the AT\#SIMINCFG command and waits for OK answer
@@ -2200,7 +2280,7 @@ This command sets the parameters for receiving SMS messages.
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::new_message_indications_te(int mode, int mt, int bm, int ds, int bfr, tout_t aTimeout)
+ME310::return_t ME310::new_message_indications_TE(int mode, int mt, int bm, int ds, int bfr, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CNMI=%d,%d,%d,%d,%d"), mode, mt, bm, ds, bfr);
@@ -2244,7 +2324,7 @@ ME310::return_t ME310::list_messages(int stat, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CMGL=%d"), stat);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   return send_wait((char*)mBuffer, 0, OK_STRING, aTimeout);
 }
 
 //! \brief Implements the AT+CMGL command and waits for OK answer
@@ -2258,7 +2338,20 @@ ME310::return_t ME310::list_messages(const char *stat, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CMGL=\"%s\""), stat);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   return send_wait((char*)mBuffer, 0, OK_STRING, aTimeout);
+}
+
+//! \brief Implements the AT+CMGL command and waits for OK answer
+/*! \details
+This command is used to list the messages.
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
+ME310::return_t ME310::list_messages(tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CMGL"));
+   return send_wait((char*)mBuffer,0, OK_STRING, aTimeout);
 }
 
 //! \brief Implements the AT+CMGR command and waits for OK answer
@@ -2288,6 +2381,7 @@ ME310::return_t ME310::send_short_message(int length, char *data, tout_t aTimeou
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CMGS=%d"), length);
    ret =  send_wait((char*)mBuffer, WAIT_DATA_STRING, aTimeout);
+   Serial.println(WAIT_DATA_STRING);
    if ((ret == RETURN_VALID))
    {
       memset(mBuffer, 0,  ME310_BUFFSIZE);
@@ -2498,6 +2592,20 @@ ME310::return_t ME310::phonebook_select_memory_storage(const char *storage, cons
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
       
+//! \brief Implements the AT+CPBS command and waits for OK answer
+/*! \details
+This set command selects phonebook memory storage, which will be used by other phonebook commands.
+ * \param storage    specify the phonebook memory storage
+ * \param password    string type value representing the PIN2-code required when selecting PIN2-code locked <storage> above "FD"
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
+ME310::return_t ME310::phonebook_select_memory_storage(const char *storage, tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CPBS=\"%s\""), storage);
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
 //! \brief Implements the AT+CPBR command and waits for OK answer
 /*! \details
 The command reads phonebook entries.
@@ -2563,7 +2671,30 @@ ME310::return_t ME310::phonebook_write_entry(int index, const char *number, int 
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CPBW=%d,\"%s\",%d,\"%s\",\"%s\",\"%s\",%d,\"%s\",\"%s\",%d"), index, number, type, text, group, adnumber, adtype, secondtext, email, hidden);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
-      
+
+//! \brief Implements the AT+CPBW command and waits for OK answer
+/*! \details
+This command writes phonebook entry in the current phonebook memory.
+ * \param index    value in the range of location numbers of the currently selected phonebook memory storage
+ * \param number    phone number in the format <type>
+ * \param type    type of number
+ * \param text    text associated to the number
+ * \param group    string type field of maximum length <glength> indicating a group the entry may belong to
+ * \param adnumber    additional number; string type phone number of format <adtype>
+ * \param adtype    type of address octet
+ * \param secondtext    string type field of maximum length <slength> indicating a second text field associated with the number
+ * \param email    field of maximum length <elength> indicating an email address
+ * \param hidden    indicates if the entry is hidden or not
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
+ME310::return_t ME310::phonebook_write_entry(int index, const char *number, int type, const char *text, const char *group, tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CPBW=%d,\"%s\",%d,\"%s\",\"%s\""), index, number, type, text, group);
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
 //! \brief Implements the AT+CPBGR command and waits for OK answer
 /*! \details
 This command returns Grouping information Alpha String (GAS) USIM file entries.
@@ -2605,7 +2736,7 @@ USIM file in a specified location number <index>.
 ME310::return_t ME310::phonebook_write_group_entry(int index, const char *text, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CPBGW=%d,\"%s\""), index, text);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#CPBGW=%d,\"%s\""), index, text);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
@@ -2632,7 +2763,7 @@ Set command sets the real-time clock of the module.
 ME310::return_t ME310::clock_management(const char *time, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CCLK=%s"), time);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CCLK=\"%s\""), time);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
@@ -2735,7 +2866,7 @@ The command is related to real time clock management.
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::clock_management2(const char *time, tout_t aTimeout)
+ME310::return_t ME310::clock_management_ext(const char *time, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#CCLK=\"%s\""), time);
@@ -2973,11 +3104,22 @@ This command is used to send data to an I2C peripheral connected to module.
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::i2c_write(int sdaPin,int sclPin, int deviceId, int registerId, int len, tout_t aTimeout)
+ME310::return_t ME310::i2c_write(int sdaPin,int sclPin, int deviceId, int registerId, int len, char* data, tout_t aTimeout)
 {
+   ME310::return_t ret;
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#I2CWR=%d,%d,%x,%x,%d"), sdaPin, sclPin, deviceId, registerId, len);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   ret =  send_wait((char*)mBuffer, WAIT_DATA_STRING, aTimeout);
+   if ((ret == RETURN_VALID))
+   {
+      char dataF[ME310_BUFFSIZE-1];
+      strcat(dataF, data);
+      strcat(dataF, "0x1A");
+      memset(mBuffer, 0,  ME310_BUFFSIZE);
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, data);
+      ret =  send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   }
+   return ret;
 }
 
 //! \brief Implements the AT\#I2CRD command and waits for OK answer
@@ -2995,7 +3137,7 @@ ME310::return_t ME310::i2c_read(int sdaPin,int sclPin, int deviceId, int registe
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#I2CRD=%d,%d,%x,%x,%d"), sdaPin, sclPin, deviceId, registerId, len);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   return send_wait((char*)mBuffer,0, OK_STRING, aTimeout);
 }
 
 //! \brief Implements the AT\#I2CCF command and waits for OK answer
@@ -3010,11 +3152,29 @@ module acts as an I2C master.
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::i2c_write_read(int sdaPin,int sclPin, int deviceId, int lenwr, int lenrd, tout_t aTimeout)
+ME310::return_t ME310::i2c_write_read(int sdaPin,int sclPin, int deviceId, int lenwr, int lenrd, char* data, tout_t aTimeout)
 {
+   ME310::return_t ret;
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#I2CCF=%d,%d,%x,%d,%d"), sdaPin, sclPin, deviceId, lenwr, lenrd);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   if(lenwr > 0)
+   {
+      ret =  send_wait((char*)mBuffer, WAIT_DATA_STRING, aTimeout);
+      if ((ret == RETURN_VALID))
+      {
+         char dataF[ME310_BUFFSIZE-1];
+         strcat(dataF, data);
+         strcat(dataF, "0x1A");
+         memset(mBuffer, 0,  ME310_BUFFSIZE);
+         snprintf((char *)mBuffer, ME310_BUFFSIZE-1, data);
+         ret =  send_wait((char*)mBuffer, OK_STRING, aTimeout);
+      }
+      return ret;
+   }
+   else
+   {
+      return send_wait((char*)mBuffer, 0, OK_STRING, aTimeout);
+   }
 }
 
 //! \brief Implements the AT\#TESTMODE command and waits for OK answer
@@ -3055,8 +3215,16 @@ Enable or Disable the one shot or periodic unit reset
 ME310::return_t ME310::periodic_reset(int mode, int delay, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#ENHRST=%d,%d"), mode,delay);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   if(mode == 0)
+   {
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#ENHRST=%d"), mode);
+      return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   }
+   else
+   {
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#ENHRST=%d,%d"), mode,delay);
+      return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   }
 }
 
 //! \brief Implements the AT\#SHDN command and waits for OK answer
@@ -3069,7 +3237,7 @@ ME310::return_t ME310::software_shutdown(tout_t aTimeout)
 {
    return send_wait(F("AT#SHDN"), OK_STRING, aTimeout);
 }
-   
+
 //! \brief Implements the AT\#SYSHALT command and waits for OK answer
 /*! \details
 The execution command sets the module in SYSHALT state. To power down the module, the serial port
@@ -3107,7 +3275,7 @@ shutdown.
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::fast_shutdown(tout_t aTimeout)
+ME310::return_t ME310::fast_shutdown_configuration(tout_t aTimeout)
 {
    return send_wait(F("AT#FASTSHDN"), OK_STRING, aTimeout);
 }
@@ -3125,7 +3293,7 @@ The command performs a survey on the selected band channels.
 ME310::return_t ME310::network_survey(int s, int e, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#CSURV=%d,%d"), s,e);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#CSURV=%d,%d"),s ,e);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
@@ -3211,7 +3379,7 @@ ME310::return_t ME310::network_survey_extended(int value, tout_t aTimeout)
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#CSURVEXT=%d"), value);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
-     
+
 // Jamming Detection and Report ------------------------------------------------     
 
 //! \brief Implements the AT\#JDRENH2 command and waits for OK answer
@@ -3229,7 +3397,7 @@ This command enables/disable jamming detection, and reports the relative result 
 ME310::return_t ME310::jamming_detect_report(int mode, int sat2G, int carrNum2G, int pRxLevT2G, int p_rssi_t4g, int p_rsrq_t4g, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#JDRENH2=%d,%d,,%d,%d,,,,%d,%d"), mode, sat2G, carrNum2G,pRxLevT2G);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#JDRENH2=%d,%d,0,%d,%d,0,0,0,%d,%d,0"), mode, sat2G, carrNum2G,pRxLevT2G, p_rssi_t4g, p_rsrq_t4g);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
@@ -3250,9 +3418,9 @@ ME310::return_t ME310::jamming_detect_threshold(int p_rsrp_t4g, int p_rsrq_t4g, 
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#JDR4GCFG=%d,%d,%d,%d,%d"), p_rsrp_t4g, p_rsrq_t4g, initial_delay, sampling_number,p_rssi_s4g);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
-      
+
 // Packet Domain ---------------------------------------------------------------      
-   
+
 //! \brief Implements the AT+CGDCONT command and waits for OK answer
 /*! \details
 Define PDP Context.
@@ -3280,6 +3448,19 @@ ME310::return_t ME310::show_pdp_address(int cid, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CGPADDR=%d"), cid);
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
+//! \brief Implements the AT+CGPADDR command and waits for OK answer
+/*! \details
+This command returns a list of PDP addresses for the specified context identifiers.
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
+ME310::return_t ME310::show_pdp_address(tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CGPADDR="));
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
@@ -3339,10 +3520,10 @@ This command allows the TE to specify authentication parameters for a PDP contex
 ME310::return_t ME310::define_pdp_context_auth_params(int cid, int auth_type, const char *username, const char *password, tout_t aTimeout) 
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#CGAUTH=%d,%d,\"%s\",\"%s\""), cid, auth_type, username, password);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CGAUTH=%d,%d,\"%s\",\"%s\""), cid, auth_type, username, password);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
- 
+
 //! \brief Implements the AT+CGCONTRDP command and waits for OK answer
 /*! \details
 The execution command returns the relevant information for a PDP Context established by the network.
@@ -3386,6 +3567,20 @@ ME310::return_t ME310::printing_ip_address_format(int ipv6_addressFormat, int ip
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
+//! \brief Implements the AT+CGACT command and waits for OK answer
+/*! \details
+This command activates or deactivates the specified PDP context(s).
+ * \param state    activate/deactivate the PDP context
+ * \param cid    specifies a PDP context definition
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
+ME310::return_t ME310::pdp_context_activate(int cid, int state,  tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CGACT=%d,%d"), state, cid);
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
 
 //! \brief Implements the AT+CGACT command and waits for OK answer
 /*! \details
@@ -3395,11 +3590,17 @@ This command activates or deactivates the specified PDP context(s).
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::pdp_context_activate(int state, int cid, tout_t aTimeout)
+ME310::return_t ME310::pdp_context_activate(tout_t aTimeout)
 {
+   ME310::return_t ret;
+   int state = 1;
    memset(mBuffer, 0,  ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CGACT=%d,%d"), state, cid);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   for(int i = 1; i < 4; i++)
+   {
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CGACT=%d,%d"), state, i);
+      ret = send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   }
+   return ret;
 }
 
 //! \brief Implements the AT+CGEREP command and waits for OK answer
@@ -3492,8 +3693,7 @@ ME310::return_t ME310::reporting_terminating_data(int reporting, tout_t aTimeout
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CRTDCP=%d"), reporting);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
-}  
-
+}
 
 // IPEasy ----------------------------------------------------------------------
 
@@ -3837,11 +4037,19 @@ This command allows to send data over UDP to a specific remote host.
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::socket_send_udp_data_specific_remote_host(int connId, const char *remoteIP, int remotePort, int rai, tout_t aTimeout) 
+ME310::return_t ME310::socket_send_udp_data_specific_remote_host(int connId, const char *remoteIP, int remotePort, int rai, char* data, tout_t aTimeout) 
 {
+   ME310::return_t ret;
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#SSENDUDP=%d,\"%s\"%d,%d"), connId, remoteIP, remotePort, rai);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   ret =  send_wait((char*)mBuffer, WAIT_DATA_STRING, aTimeout);
+   if ((ret == RETURN_VALID))
+   {
+      memset(mBuffer, 0,  ME310_BUFFSIZE);
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, data);
+      ret =  send_wait((char*)mBuffer, OK_STRING, TERMINATION_STRING, aTimeout);
+   }
+   return ret;
 }
 
 //! \brief Implements the AT\#SSENDUDPEXT command and waits for OK answer
@@ -3856,11 +4064,19 @@ host including all possible octets (from 0x00 to 0xFF)
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::socket_send_udp_data_specific_remote_host_extended(int connId, int bytes_to_send, const char *remoteIP, int remotePort, int rai, tout_t aTimeout) 
+ME310::return_t ME310::socket_send_udp_data_specific_remote_host_extended(int connId, int bytes_to_send, const char *remoteIP, int remotePort, int rai, char* data, tout_t aTimeout) 
 {
+   ME310::return_t ret;
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#SSENDUDPEXT=%d,%d,\"%s\"%d,%d"), connId, bytes_to_send, remoteIP, remotePort, rai);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   ret =  send_wait((char*)mBuffer, WAIT_DATA_STRING, aTimeout);
+   if ((ret == RETURN_VALID))
+   {
+      memset(mBuffer, 0,  ME310_BUFFSIZE);
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, data);
+      ret =  send_wait((char*)mBuffer, OK_STRING, TERMINATION_STRING, aTimeout);
+   }
+   return ret;
 }
 
 //! \brief Implements the AT\#SLASTCLOSURE command and waits for OK answer
@@ -4058,7 +4274,7 @@ ME310::return_t ME310::ping(const char *ipaddr, int retryNum, int len, int timeo
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#PING=\"%s\",%d,%d,%d,%d"), ipaddr, retryNum, len, timeout, ttl);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   return send_wait((char*)mBuffer,0, OK_STRING, aTimeout);
 }
 
 //! \brief Implements the AT\#PING command and waits for OK answer
@@ -4106,6 +4322,18 @@ ME310::return_t ME310::dns_from_network(int cid, tout_t aTimeout)
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
+//! \brief Implements the AT\#NWDNS command and waits for OK answer
+/*! \details
+The command allows to get the primary and secondary DNS addresses for selected GSM or PDP context
+identifiers
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
+ME310::return_t ME310::dns_from_network(tout_t aTimeout) 
+{
+   return send_wait(F("AT#NWDNS="), OK_STRING, aTimeout);
+}
+
 //! \brief Implements the AT\#NTP command and waits for OK answer
 /*! \details
 The command handles the date and time update using NTP protocol.
@@ -4132,10 +4360,17 @@ This set command allows to configure additional parameters to be used for NTP op
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::configure_ntp_parameters(int cid, int authType, tout_t aTimeout)
+ME310::return_t ME310::configure_ntp_parameters(int cid, int authType, int keyID, char* keysFilePath, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#NTPCFG=%d,%d"), cid,authType);
+   if(authType == 0)
+   {
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#NTPCFG=%d,%d"), cid, authType);
+   }
+   else
+   {
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#NTPCFG=%d,%d,%d,%s"), cid, authType, keyID, keysFilePath);
+   }
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
@@ -4159,7 +4394,7 @@ ME310::return_t ME310::socket_configuration_extended3(int connId, int immRsp, in
 }
 
 // FTPEasy ---------------------------------------------------------------------
-      
+
 //! \brief Implements the AT\#FTPAPP command and waits for OK answer
 /*! \details
 This command is used to append data to an already existing file via FTP during an FTP session.
@@ -4170,9 +4405,30 @@ This command is used to append data to an already existing file via FTP during a
  */ 
 ME310::return_t ME310::ftp_append(const char *fileName, char* data, int connMode, tout_t aTimeout)
 {
+   ME310::return_t ret;
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#FTPAPP=\"%s\",%d"), fileName,connMode);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   if(connMode == 1)
+   {
+      ret = send_wait((char*)mBuffer, OK_STRING, aTimeout);
+      if ((ret == RETURN_VALID))
+      {
+         memset(mBuffer, 0,  ME310_BUFFSIZE);
+         snprintf((char *)mBuffer, ME310_BUFFSIZE-1, data);
+         ret =  send_wait((char*)mBuffer, OK_STRING, aTimeout);
+      }
+   }
+   else
+   {
+      ret = send_wait((char*)mBuffer, CONNECT_STRING, aTimeout);
+      if ((ret == RETURN_VALID))
+      {
+         memset(mBuffer, 0,  ME310_BUFFSIZE);
+         snprintf((char *)mBuffer, ME310_BUFFSIZE-1, data);
+         ret =  send_wait((char*)mBuffer, OK_STRING, aTimeout);
+      }
+   }
+   return ret;
 }
 
 //! \brief Implements the AT\#FTPAPPEXT command and waits for OK answer
@@ -4193,7 +4449,6 @@ ME310::return_t ME310::ftp_append_extended(int bytesToSend, char* data, int eof,
    {
       memset(mBuffer, 0,  ME310_BUFFSIZE);
       snprintf((char *)mBuffer, ME310_BUFFSIZE-1, data);
-      //ret =  send_wait((char*)mBuffer, OK_STRING, TERMINATION_STRING, aTimeout);
       ret =  send_wait((char*)mBuffer, OK_STRING, aTimeout);
    }
    return ret;
@@ -4224,6 +4479,18 @@ ME310::return_t ME310::ftp_change_working_directory(const char *dirname, tout_t 
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
+//! \brief Implements the AT\#FTPCWD command and waits for OK answer
+/*! \details
+Command to change the working directory on FTP server.
+ * \param dirname    Name of the new working directory
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
+ME310::return_t ME310::ftp_change_working_directory(tout_t aTimeout)
+{
+   return send_wait(F("AT#FTPCWD="), OK_STRING, aTimeout);
+}
+
 //! \brief Implements the AT\#FTPDELE command and waits for OK answer
 /*! \details
 This command, issued during a FTP connection, allows to delete a file from the remote working directory.
@@ -4245,7 +4512,7 @@ This command returns the size of a file located on a FTP server.
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::ftp_size(const char *filename, tout_t aTimeout)
+ME310::return_t ME310::ftp_get_file_size(const char *filename, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#FTPFSIZE=\"%s\""), filename);
@@ -4294,11 +4561,8 @@ ME310::return_t ME310::ftp_list(const char *name, tout_t aTimeout)
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#FTPLIST=\"%s\""), name);
    return send_wait((char*)mBuffer, 0, NO_CARRIER_STRING, aTimeout);
-   //return send_wait((char*)mBuffer, CONNECT_STRING, aTimeout);
-   //return send_wait((char*)mBuffer, NO_CARRIER_STRING, aTimeout);
 }
 
- 
 //! \brief Implements the AT\#FTPLIST command and waits for OK answer
 /*! \details
 This command is used during a FTP connection.
@@ -4310,7 +4574,6 @@ ME310::return_t ME310::ftp_list(tout_t aTimeout)
    return ftp_list(".", aTimeout);
 }
 
- 
 //! \brief Implements the AT\#FTPMSG command and waits for OK answer
 /*! \details
 This command returns the last response received from the FTP server.
@@ -4564,11 +4827,19 @@ This command sends an e-mail message.
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::smtp_mail_send(const char *da, const char *subj, tout_t aTimeout)
+ME310::return_t ME310::smtp_mail_send(const char *da, const char *subj, char* data, tout_t aTimeout)
 {
+   ME310::return_t ret;
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#EMAILD=\"%s\",\"%s\""), da, subj);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   ret =  send_wait((char*)mBuffer, WAIT_DATA_STRING, aTimeout);
+   if ((ret == RETURN_VALID))
+   {
+      memset(mBuffer, 0,  ME310_BUFFSIZE);
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, data);
+      ret =  send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   }
+   return ret;
 }
 
 //! \brief Implements the AT\#EADDR command and waits for OK answer
@@ -4689,7 +4960,7 @@ ME310::return_t ME310::send_http_send(int prof_id, int command, const char *reso
    }
    return ret;
 }
-  
+
 //! \brief Implements the AT\#HTTPRCV command and returns
 /*! \details
 This command permits the user to read data from HTTP server in response to a previous HTTP module
@@ -4703,7 +4974,7 @@ void ME310::receive_http_data_start(int prof_id, int max_byte)
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#HTTPRCV=%d,%d"), prof_id, max_byte);
    send((char*)mBuffer);
 }
-   
+
 //! \brief Implements the AT\#HTTPRCV command and waits for OK answer
 /*! \details
 This command permits the user to read data from HTTP server in response to a previous HTTP module
@@ -4717,9 +4988,8 @@ ME310::return_t ME310::receive_http_data(int prof_id, int max_byte, tout_t aTime
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#HTTPRCV=%d,%d"), prof_id, max_byte);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   return send_wait((char*)mBuffer,0, OK_STRING, aTimeout);
 }
-   
 
 // SSL -------------------------------------------------------------------------  
 
@@ -4738,14 +5008,13 @@ This command configures SSL connection parameters.
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::ssl_configure_general_param(int ssid , int cid, int pktSx, int maxTo, int defTo, int txTo, int skipHostMismatch, int sslRingMode, int equalizeTx, tout_t aTimeout)
+ME310::return_t ME310::ssl_configure_general_param(int ssid , int cid, int pktSx, int maxTo, int defTo, int txTo, int SSLSRingMode, int noCarrierMode, int skipHostMismatch , int equalizeTx, int unused1, int unused2, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#SSLCFG=%d,%d,%d,%d,%d,%d,%d,%d,%d"), ssid, cid, pktSx, maxTo, defTo, txTo, skipHostMismatch, sslRingMode, equalizeTx);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#SSLCFG=%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d"), ssid, cid, pktSx, maxTo, defTo, txTo, SSLSRingMode, noCarrierMode, skipHostMismatch, equalizeTx, unused1, unused2);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
-      
 //! \brief Implements the AT\#SSLSECCFG command and waits for OK answer
 /*! \details
 This command allows configuring SSL connection parameters.
@@ -4777,7 +5046,6 @@ ME310::return_t ME310::ssl_enable(int ssid, int enable, tout_t aTimeout)
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
-      
 //! \brief Implements the AT\#SSLD command and waits for OK answer
 /*! \details
 This command opens a remote connection via socket secured through SSL.
@@ -4794,10 +5062,16 @@ ME310::return_t ME310::ssl_socket_open(int ssid, int rPort, const char *IPAddres
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#SSLD=%d,%d,\"%s\",%d,%d,%d"), ssid, rPort, IPAddress, closureType, connMode, timeout);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   if(connMode == 1)
+   {
+      return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   }
+   else
+   {
+      return send_wait((char*)mBuffer, CONNECT_STRING, aTimeout);
+   }
 }
 
-      
 //! \brief Implements the AT\#SSLO command and waits for OK answer
 /*! \details
 This command restores a SSL connection (online mode) suspended by an escape sequence (+++).
@@ -4812,7 +5086,6 @@ ME310::return_t ME310::ssl_socket_restore(int ssid, tout_t aTimeout)
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
-      
 //! \brief Implements the AT\#SSLH command and waits for OK answer
 /*! \details
 This command allows closing the SSL connection.
@@ -4828,7 +5101,6 @@ ME310::return_t ME310::ssl_socket_close(int ssid, int closureType, tout_t aTimeo
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
-      
 //! \brief Implements the AT\#SSLSEND command and waits for OK answer
 /*! \details
 This command allows sending data through a secure socket.
@@ -4851,7 +5123,7 @@ ME310::return_t ME310::ssl_socket_send_data(int ssid, char *data, int timeout, t
    }
    return ret;
 }
-      
+
 //! \brief Implements the AT\#SSLRECV command and waits for OK answer
 /*! \details
 This command reads data from a SSL socket.
@@ -4865,9 +5137,9 @@ ME310::return_t ME310::ssl_socket_receive_data(int ssid, int maxNumByte, int tim
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#SSLRECV=%d,%d,%d"), ssid, maxNumByte, timeout);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   return send_wait((char*)mBuffer, 0, OK_STRING, aTimeout);
 }
-      
+
 //! \brief Implements the AT\#SSLS command and waits for OK answer
 /*! \details
 This command reports the status of secure sockets.
@@ -4895,7 +5167,7 @@ ME310::return_t ME310::ssl_socket_info(int ssid, tout_t aTimeout)
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#SSLI=%d"), ssid);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
-      
+
 //! \brief Implements the AT\#SSLI command and waits for OK answer
 /*! \details
 This command is used to get information about secure socket data traffic.
@@ -4906,7 +5178,7 @@ ME310::return_t ME310::ssl_socket_info(tout_t aTimeout)
 {
    return send_wait(F("AT#SSLI"), OK_STRING, aTimeout);
 }
-      
+
 //! \brief Implements the AT\#SSLSENDEXT command and waits for OK answer
 /*! \details
 This command sends data through a secure socket.
@@ -4916,11 +5188,19 @@ This command sends data through a secure socket.
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::ssl_socket_send_data_command_mode(int ssid, int bytestosend, int timeout, tout_t aTimeout)
+ME310::return_t ME310::ssl_socket_send_data_command_mode(int ssid, int bytestosend, char* data, int timeout, tout_t aTimeout)
 {
+   ME310::return_t ret;
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#SSLSENDEXT=%d,%d,%d"), ssid, bytestosend, timeout);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   ret =  send_wait((char*)mBuffer, WAIT_DATA_STRING, aTimeout);
+   if ((ret == RETURN_VALID))
+   {
+      memset(mBuffer, 0,  ME310_BUFFSIZE);
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, data);
+      ret =  send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   }
+   return ret;
 }
 
 //! \brief Implements the AT\#SSLSECDATA command and waits for data or for OK answer
@@ -4934,14 +5214,29 @@ The command stores, reads, and deletes security data (Certificate, CA certificat
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::ssl_security_data(int ssid, int action, int dataType, int size, int md5WhenReading, tout_t aTimeout)
+ME310::return_t ME310::ssl_security_data(int ssid, int action, int dataType, int size, int md5WhenReading, char* data, tout_t aTimeout)
 {
+    ME310::return_t ret;
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#SSLSECDATA=%d,%d,%d,%d,%d"), ssid, action, dataType, size, md5WhenReading);
-   if(action == 1)
+   if(action == 1 || action == 3)
+   {
       return send_wait((char*)mBuffer, WAIT_DATA_STRING, aTimeout);
+      if ((ret == RETURN_VALID))
+      {
+         memset(mBuffer, 0,  ME310_BUFFSIZE);
+         snprintf((char *)mBuffer, ME310_BUFFSIZE-1, data);
+         ret =  send_wait((char*)mBuffer, OK_STRING, aTimeout);
+      }
+   }
+   else if(action == 2)
+   {
+      return send_wait((char*)mBuffer, 0, OK_STRING, aTimeout);
+   } 
    else
+   {
       return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+   }
 }
 
 //! \brief Implements the AT\#SSLSECCFG2 command and waits for OK answer
@@ -4953,10 +5248,10 @@ This command allows configuring additional SSL security parameters.
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::ssl_additional_parameters(int ssid, int version, int SNI, tout_t aTimeout)
+ME310::return_t ME310::ssl_additional_parameters(int ssid, int version, int SNI, int preloadedCA, int customCA, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#SSLSECCFG2=%d,%d,%d"), ssid,version, SNI);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#SSLSECCFG2=%d,%d,%d,%d,%d"), ssid,version, SNI, preloadedCA, customCA);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
@@ -4966,7 +5261,7 @@ ME310::return_t ME310::ssl_additional_parameters(int ssid, int version, int SNI,
 This command controls CIoT EPS (Cellular Internet of Things, Evolved Packet System) optimizations.
  * \param n    enables/disables reporting of unsolicited
  * \param supportedUEopt     indicates the UE's support for CIoT EPS optimizations
- * \param preferredUEopt  indicates the UE's preference for CIoT EPS optimizations.
+ * \param preferredUEopt  indicates the UE's preference for CIoT EPS optimizations
  * \param aTimeout timeout in ms
  * \return return code
  */ 
@@ -4975,8 +5270,94 @@ ME310::return_t ME310::ciot_optimization_configuration(int n, int supportedUEopt
    memset(mBuffer, 0,  ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CCIOTOPT=%d,%d,%d"), n, supportedUEopt, preferredUEopt);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
-}   
+}
 
+//! \brief Implements the AT#CCIOTOPT command and waits for OK answer
+/*! \details
+This command controls CIoT EPS (Cellular Internet of Things, Evolved Packet System) optimizations.
+ * \param bitmask    used to store the mask in NVM for subsequent use by protocol stack
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
+ME310::return_t ME310::ciot_optimization_configuration2(char *bitmask, tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#CCIOTOPT=%s"), bitmask);
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
+// IoT Portal-------------------------------------------------------------------
+//! \brief Implements the AT+ODIS command and waits for OK answer
+/*! \details
+This command allows the end-user to handle the Host Odis parameters. In case of AT&T LwM2M agent up
+and running, the command is executed internally to the LwM2M client, updating this client about the values
+change
+ * \param hostUniqueDevId    contains a string, between double quotes, with the host unique device identifier
+ * \param hostManufacturer   contains a string, between double quotes, with the host manufacturer identifier
+ * \param hostModel          contains a string, between double quotes, with the host model identifier
+ * \param hostSwVersion      contains a string, between double quotes, with the host software version identifier
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
+ME310::return_t ME310::odis_command_saving_retrieving_parameters(char* hostUniqueDevId, char *hostManufacturer, char* hostModel, char *hostSwVersion, tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+ODIS=%s,%s,%s,%s"), hostUniqueDevId, hostManufacturer, hostModel, hostSwVersion);
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
+//! \brief Implements the AT#FOTAURC command and waits for OK answer
+/*! \details
+This command allows the end-user to enable/disable the FOTA extended URCs, resulting in a verbosity FOTA
+operations. Those settings are generally neither related nor manageable with other LwM2M agent commands.
+ * \param enable    enable/disable extended URCs
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
+ME310::return_t ME310::FOTA_set_extended_URC(int enable, tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#FOTAURC=%d"), enable);
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
+//! \brief Implements the AT#OTAUPW command and waits for OK answer
+/*! \details
+Execution command starts injection of a delta file into the device
+ * \param size    size in bytes of data to be injected
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
+ME310::return_t ME310::OTA_delta_write(int size,  tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#OTAUPW=%d"), size);
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
+//! \brief Implements the AT#HOSTODIS command and waits for OK answer
+/*! \details
+The command manages the Host Odis parameters related to AT&T OMA-DM Client
+ * \param param    selects the specific item on which work
+ * \param action   selects the action to be performed on the item selected by param
+ * \param value    contains a string, between double quotes, with data to be set. Maximum string length is 64 characters. It is valid only if <Action> = 0 ("SET" action)
+ * \param instance instance number
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
+ME310::return_t ME310::odis_parameters_management(int param, int action, char* value, int instance, tout_t aTimeout)
+{
+   memset(mBuffer, 0,  ME310_BUFFSIZE);
+   if(action == 0)
+   {
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#HOSTODIS=%d,%d,%s,%d"), param, action, value, instance);
+   }
+   else
+   {
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#HOSTODIS=%d,%d,%d"), param, action,instance);
+   }
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
 // M2M -------------------------------------------------------------------------
 
 //! \brief Implements the AT\#M2MCHDIR command and waits for OK answer
@@ -4992,7 +5373,7 @@ ME310::return_t ME310::m2m_chdir(const char *path, tout_t aTimeout)
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#M2MCHDIR=\"%s\""), path);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
-      
+
 //! \brief Implements the AT\#M2MMKDIR command and waits for OK answer
 /*! \details
 This command manages the M2M File System.
@@ -5006,7 +5387,7 @@ ME310::return_t ME310::m2m_mkdir(const char *directory_name, ME310::tout_t aTime
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#M2MMKDIR=\"%s\""), directory_name);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
-      
+
 //! \brief Implements the AT\#M2MBACKUP command and waits for OK answer
 /*! \details
 This command manages the M2M File System and backup partition.
@@ -5020,7 +5401,7 @@ ME310::return_t ME310::m2m_set_backup(int enable, tout_t aTimeout)
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#M2MBACKUP=%d"), enable);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
-      
+
 //! \brief Implements the AT\#M2MRMDIR command and waits for OK answer
 /*! \details
 This command removes a directory in the M2M file system.
@@ -5034,7 +5415,7 @@ ME310::return_t ME310::m2m_rmdir(const char *directory_name, tout_t aTimeout)
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#M2MRMDIR=\"%s\""), directory_name);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
-      
+
 //! \brief Implements the AT+M2M command and waits for OK answer
 /*! \details
 This command enable/disable the M2M Application execution start mode.
@@ -5046,10 +5427,17 @@ This command enable/disable the M2M Application execution start mode.
 ME310::return_t ME310::m2m_application_execution(int mode, int delay, tout_t aTimeout)
 {
    memset(mBuffer, 0,  ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+M2M=%d,%d"), mode, delay);
+   if(mode == 4)
+   {
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+M2M=%d,%d"), mode, delay);
+   }
+   else
+   {
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+M2M=%d"), mode);
+   }   
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
-      
+
 //! \brief Implements the AT+M2MRUN command and waits for OK answer
 /*! \details
 Set command sets/resets the RUN file permission and the delay start of the executable binary files with ".bin"
@@ -5114,12 +5502,11 @@ ME310::return_t ME310::m2m_write_file(const char *file_name, int size, int binTo
          memset(mBuffer, 0, ME310_BUFFSIZE);
          memcpy(mBuffer, data, size);
          ret =  send_wait((char*)mBuffer, OK_STRING, TERMINATION_STRING, aTimeout);
-
       }
    }
    return ret;
 }
-      
+
 //! \brief Implements the AT\#M2MLIST command and waits for OK answer
 /*! \details
 This command lists the contents of a folder in the File System.
@@ -5189,6 +5576,7 @@ ME310::return_t ME310::m2m_set_arguments(const char* file_bin, tout_t aTimeout)
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#M2MARG -=\"%s\""), file_bin);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
+
 // MQTT ------------------------------------------------------------------------
 
 //! \brief Implements the AT\#MQEN command and waits for OK answer
@@ -5403,7 +5791,7 @@ This command stores the current GNSS parameters in the NVM of the cellular modul
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::gnss_save_parameters_configuratior( tout_t aTimeout)
+ME310::return_t ME310::gnss_save_parameters_configuration( tout_t aTimeout)
 {
    return send_wait(F("AT$GPSSAV"), OK_STRING, aTimeout);
 }
@@ -5433,6 +5821,20 @@ ME310::return_t ME310::gnss_software_version(tout_t aTimeout)
    return send_wait(F("AT$GPSSW"), OK_STRING, aTimeout);
 }
 
+//! \brief Implements the AT$GPSR command and waits for OK answer
+/*! \details
+This command resets the GNSS controller.
+ * \param resetType set the type of GNSS controller reset
+ * \param aTimeout timeout in ms
+ * \return return code
+ */
+ME310::return_t ME310::gnss_reset_GPS_controller(int resetType, tout_t aTimeout)
+{
+   memset(mBuffer, 0, ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT$GPSR=%d"), resetType);
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
 //! \brief Implements the AT$GPSNMUN command and waits for OK answer
 /*! \details
 Set command activates an unsolicited GNSS data stream built with NMEA sentences on the standard serial
@@ -5454,21 +5856,6 @@ ME310::return_t ME310::gnss_nmea_data_configuration(int enable, int gga, int gll
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
-//! \brief Implements the AT$GPSNMUN command and waits for OK answer
-/*! \details
-Set command activates an unsolicited GNSS data stream built with NMEA sentences on the standard serial
-port and defines which NMEA sentences will be available.
- * \param enable    Enables unsolicited GNSS data stream and selects one of the available GNSS data stream format display.
- * \param aTimeout timeout in ms
- * \return return code
- */ 
-ME310::return_t ME310::gnss_nmea_data_configuration(int enable, tout_t aTimeout)
-{
-   memset(mBuffer, 0, ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT$GPSNMUN=%d"), enable);
-   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
-}
-      
 //! \brief Implements the AT$GPSNMUNEX command and waits for OK answer
 /*! \details
 Set command activates an unsolicited streaming of GNSS (or GLONASS) data (in NMEA extended format)
@@ -5495,13 +5882,37 @@ ME310::return_t ME310::gnss_nmea_extended_data_configuration(int gngns, int gngs
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT$GPSNMUNEX=%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d"), gngns, gngsa, glgsv, gpgrs, gagsv, gagsa, gavtg, gpgga, pqgsa, pqgsv, gnvtg, gnrmc, gngga);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
-     
+
+//! \brief Implements the AT#GTP command and waits for OK answer
+/*! \details
+Execute command returns a position based on cellular database from GTP (Global Terrestrial Positioning) WWAN service.
+ * \param aTimeout timeout in ms
+ * \return return code
+ */     
+ME310::return_t ME310::get_position_GTP_WWAN_service(tout_t aTimeout)
+{
+   return send_wait(F("AT#GTP"), OK_STRING, aTimeout);
+}
+
 //! \brief Implements the AT$GPSACP command and waits for OK answer
 /*! \details
 This command returns information about the last GPS position.
  * \param aTimeout timeout in ms
  * \return return code
- */      
+ */ 
+ME310::return_t ME310::enable_GTP_WWAN_service(int enable, tout_t aTimeout)
+{
+   memset(mBuffer, 0, ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#GTPENA=%d"), enable);
+   return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
+//! \brief Implements the AT$GPSACP command and waits for OK answer
+/*! \details
+This command returns information about the last GPS position.
+ * \param aTimeout timeout in ms
+ * \return return code
+ */ 
 ME310::return_t ME310::gps_get_acquired_position(tout_t aTimeout)
 {
    return send_wait(F("AT$GPSACP"), OK_STRING, aTimeout);
@@ -5521,6 +5932,7 @@ ME310::return_t ME310::gnss_set_agnss_enable(int provider, int status, tout_t aT
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT$AGNSS=%d,%d"), provider, status);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
+
 // Mobile Broadband ------------------------------------------------------------
 
 //! \brief Implements the AT\#ECM command and waits for OK answer
@@ -5537,18 +5949,18 @@ ME310::return_t ME310::ecm_setup(int cid, int did, tout_t aTimeout)
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#ECM=%d,%d"), cid, did);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
- 
+
 //! \brief Implements the AT\#ECMD command and waits for OK answer
 /*! \details
 This command is used to shutdown an Ethernet Control Model (ECM) session.
- * \param cid    context id that will be used by ECM
+ * \param did    Device id, currently limited to 0 (only one device)
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::ecm_shutdown(int cid, tout_t aTimeout)
+ME310::return_t ME310::ecm_shutdown(int did, tout_t aTimeout)
 {
    memset(mBuffer, 0, ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#ECMD=%d"), cid);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#ECMD=%d"), did);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
@@ -5562,7 +5974,7 @@ registration information.
  * \param aTimeout timeout in ms
  * \return return code
  */ 
-ME310::return_t ME310::ims_regustration_status(int mode, tout_t aTimeout)
+ME310::return_t ME310::ims_registration_status(int mode, tout_t aTimeout)
 {
    memset(mBuffer, 0, ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CIREG=%d"), mode);
@@ -5774,45 +6186,56 @@ ME310::return_t ME310::wait_for(const char *aAnswer, ME310::tout_t aTimeout)
    mBuffLen = 0;
    mpBuffer = mBuffer;
    memset(mBuffer,0,ME310_BUFFSIZE);
+   const uint8_t *pBuffer;
    unsigned long timeout = 0;
    do
    {
-      int bytesRead=mSerial.readBytesUntil('\n', mpBuffer, ME310_BUFFSIZE-mBuffLen-1);
-      if(bytesRead>1) // if full string add to buffer
+      if(mBuffLen != ME310_BUFFSIZE)
       {
-         if(mpBuffer[bytesRead-1] != '\r')
-            bytesRead++; // add space for 0 terminator
-         mpBuffer[bytesRead-1] = 0;
-         const uint8_t *pBuffer = mpBuffer;
-         mpBuffer += bytesRead;
-         mBuffLen += bytesRead;
-         return_t rc = on_message((const char *)pBuffer);
-         if(rc != RETURN_CONTINUE)
-            return rc;
-         if(str_equal((const char *)pBuffer,aAnswer))
+         int bytesRead=mSerial.readBytesUntil('\n', mpBuffer, ME310_BUFFSIZE-mBuffLen-1);
+         if(bytesRead>1) // if full string add to buffer
          {
+            if(mpBuffer[bytesRead-1] != '\r')
+               bytesRead++; // add space for 0 terminator
+            mpBuffer[bytesRead-1] = 0;
+            pBuffer = mpBuffer;
+            mpBuffer += bytesRead;
+            mBuffLen += bytesRead;
+            return_t rc = on_message((const char *)pBuffer);
+            if(rc != RETURN_CONTINUE)
+               return rc;
+            if(str_equal((const char *)pBuffer,aAnswer))
+            {
                on_valid((const char *)pBuffer);
                return RETURN_VALID;
+            }
+            if(str_equal((const char *)pBuffer,ERROR_STRING))
+            {
+               on_error((const char *)pBuffer);
+               return RETURN_ERROR;
+            }
+            if(str_start((const char *)pBuffer,CME_ERROR_STRING))
+            {
+               on_error((const char *)pBuffer);
+               return RETURN_ERROR;
+            }
          }
-         if(str_equal((const char *)pBuffer,ERROR_STRING))
-         {
-            on_error((const char *)pBuffer);
-            return RETURN_ERROR;
-         }
-         if(str_start((const char *)pBuffer,CME_ERROR_STRING))
-         {
-            on_error((const char *)pBuffer);
-            return RETURN_ERROR;
-         }
+         else if(bytesRead == 1) // if empty string do no add to buffer
+            {}
+         else
+            timeout+=mSerial.getTimeout();
       }
-      else if(bytesRead == 1) // if empty string do no add to buffer
-         {}
       else
-         timeout+=mSerial.getTimeout();
+      {
+         on_pending_receive((const char *)pBuffer);
+         mBuffLen = 0;
+         mpBuffer = mBuffer;
+         memset(mBuffer,0,ME310_BUFFSIZE);
+      }
 
    }while(timeout < aTimeout);
    on_timeout();
-return RETURN_TOUT;   
+return RETURN_TOUT;
 }
 
 //! \brief Waits for the answer to an AT command or timeouts
@@ -5824,6 +6247,7 @@ return RETURN_TOUT;
  */ 
 ME310::return_t ME310::wait_for(const char* aCommand, int flag, const char *aAnswer, ME310::tout_t aTimeout)
 {
+   
    char cmd[64];
    strcpy(cmd, aCommand);
    ATCommandDataParsing* dataParsing;
@@ -5837,6 +6261,7 @@ ME310::return_t ME310::wait_for(const char* aCommand, int flag, const char *aAns
    on_receive();
    mBuffLen = 0;
    mpBuffer = mBuffer;
+   _payloadData = nullptr;
    memset(mBuffer,0,ME310_BUFFSIZE);
    unsigned long timeout = 0;
    do
@@ -5849,7 +6274,7 @@ ME310::return_t ME310::wait_for(const char* aCommand, int flag, const char *aAns
             mpBuffer[bytesRead+1] = '\0';
             bytesRead++; 
             pBuffer = mpBuffer;
-            strcat(tmp_str, (char*)mpBuffer); 
+            strcat(tmp_str, (char*)mpBuffer);
             mpBuffer += bytesRead;
             mBuffLen += bytesRead;   
             rc = on_message((const char *)pBuffer);
@@ -5884,19 +6309,23 @@ ME310::return_t ME310::wait_for(const char* aCommand, int flag, const char *aAns
       {
          if(dataParsing->commandResponseResult())
          {
-            _payloadData = (uint8_t *) dataParsing->extractedPayload(); 
-            if(str_equal(dataParsing->commandResponseString(), OK_STRING) == 0)
+            _payloadData = (uint8_t *) dataParsing->extractedPayload();
+            if(str_equal(dataParsing->commandResponseString(), OK_STRING))
             {
                rc = RETURN_VALID;
             } 
-            else if(str_equal(dataParsing->commandResponseString(), NO_CARRIER_STRING) == 0)
+            else if(str_equal(dataParsing->commandResponseString(), NO_CARRIER_STRING))
             {
                rc = RETURN_VALID;
             }            
-            else if (str_equal(dataParsing->commandResponseString(), ERROR_STRING) == 0)
+            else if (str_equal(dataParsing->commandResponseString(), ERROR_STRING))
             {
                rc = RETURN_ERROR;
-            } 
+            }
+            else if (str_start(dataParsing->commandResponseString(), CME_ERROR_STRING))
+            {
+               rc = RETURN_ERROR;
+            }
          }
          else
          {
@@ -6018,7 +6447,6 @@ const char *ME310::str_start(const char *buffer, const char *string)
    {
       return NULL;
    }
-   
    const char *rc = buffer;
    for(; ;buffer++,string++)
    {
