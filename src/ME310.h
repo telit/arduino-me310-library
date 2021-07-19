@@ -1060,7 +1060,19 @@ namespace me310
    // IoT Portal-------------------------------------------------------------------
       return_t odis_command_saving_retrieving_parameters(char* hostUniqueDevId = "HUID0", char *hostManufacturer = "HMAN0", char* hostModel = "HMOD0", char *hostSwVersion = "HSW0", tout_t aTimeout = TOUT_100MS);
       _READ_TEST(odis_command_saving_retrieving_parameters, "AT+ODIS", TOUT_100MS)
+	
+	 return_t enableLWM2M(int enable, int ctxID,tout_t aTimeout=TOUT_1SEC);
+	  _READ_TEST(enableLWM2M,"AT#LWM2MENA",TOUT_100MS)
+	  
+	  return_t writeResource(int agent,int objID,int instanceID,int resourceID, int resourceInstance,int value, tout_t aTimeout=TOUT_100MS);
+	  return_t  writeResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance,float value, tout_t aTimeout=TOUT_100MS);
+	  
+	  return_t disableLWM2M(int disable, tout_t aTimeout=TOUT_1SEC);
 
+      return_t setResourcefloat(int type,int objID,int instanceID,int resourceID, int resourceInstance,float value, tout_t aTimeout=TOUT_100MS);
+      return_t  setResourceBool(int type,int objID,int instanceID,int resourceID, int resourceInstance,int value, tout_t aTimeout=TOUT_100MS);
+	 
+	  
       return_t FOTA_set_extended_URC(int enable = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(FOTA_set_extended_URC, "AT#FOTAURC", TOUT_100MS)
 
