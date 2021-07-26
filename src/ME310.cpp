@@ -5414,6 +5414,12 @@ ME310::return_t ME310::writeResourcefloat(int agent,int objID,int instanceID,int
  	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MSET=%d,%d,%d,%d,%d,%d"), type,objID,instanceID,resourceID, resourceInstance,value);
  	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
  }
+ 
+ ME310::return_t ME310::readResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout){
+ 	memset(mBuffer,0,ME310_BUFFSIZE);
+ 	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MR=%d,%d,%d,%d,%d"), agent,objID,instanceID,resourceID, resourceInstance);
+ 	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+ }
 // M2M -------------------------------------------------------------------------
 
 //! \brief Implements the AT\#M2MCHDIR command and waits for OK answer

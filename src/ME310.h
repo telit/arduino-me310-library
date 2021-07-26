@@ -1071,6 +1071,7 @@ namespace me310
 
       return_t setResourcefloat(int type,int objID,int instanceID,int resourceID, int resourceInstance,float value, tout_t aTimeout=TOUT_100MS);
       return_t  setResourceBool(int type,int objID,int instanceID,int resourceID, int resourceInstance,int value, tout_t aTimeout=TOUT_100MS);
+      return_t readResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout=TOUT_100MS);
 	 
 	  
       return_t FOTA_set_extended_URC(int enable = 0, tout_t aTimeout = TOUT_100MS);
