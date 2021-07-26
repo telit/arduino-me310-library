@@ -1080,7 +1080,7 @@ namespace me310
       _READ_TEST(setResourceBool,"AT#LWM2MSET",TOUT_100MS);
       
       return_t readResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout=TOUT_100MS);
-      _READ_TEST(readResourcefloat,"AT#LWM2MSET",TOUT_100MS);
+      _READ_TEST(readResourcefloat,"AT#LWM2MR",TOUT_100MS);
 	 
 	  
       return_t FOTA_set_extended_URC(int enable = 0, tout_t aTimeout = TOUT_100MS);
