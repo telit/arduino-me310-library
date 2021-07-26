@@ -1,0 +1,1 @@
+[{"ownerOrgId":"5bf801741c5bd71fcc80aa2c","key":"me310g1-ww","name":"ME310G1-WW","version":2,"autoDefProps":false,"autoDefAttrs":false,"alarms":{"interrupt_status":{"name":"interruptstatus","states":[{"name":"False","color":"#FF0000"},{"name":"True","color":"#09EB27"}],"searchable":false}},"tunnelAdHoc":false,"locations":{"noDecode":false,"simpleMode":false}}]

@@ -1,6 +1,26 @@
 
+/*MIT License
 
-/*Copyright (C) 2020 Telit Communications S.p.A. Italy - All Rights Reserved.*/
+  Copyright (c) 2021 Telit
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
 
 /* Sketch that uses the functionality of Telit Charlie board.
   This application allows to detect a freefall and to send an email that warns about it with the GPS coordinates.
@@ -8,7 +28,9 @@
   the document "How to generate freefall interrupt using BMA400" by Bosch Sensortec.
 
 
+  Sketch for 4G products only->AT+WS46=28
 
+  author: Cristina Ceron
 */
 
 
@@ -18,7 +40,7 @@ using namespace me310;
 float x = 0, y = 0, z = 0;
 const byte INTERRUPT = ACC_INT_1;
 bool isr = false;
-bool radius = false; // variable to control the GPS accuracy
+bool radius = false;
 const char *resp;
 
 
@@ -46,7 +68,6 @@ void turnOnModule () {
 void setup() {
   char pin[] = "XXXX";
 
-  /*network registration*/
   int rc;
   pinMode(ON_OFF, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
@@ -61,25 +82,14 @@ void setup() {
   myME310.module_reboot();
 
   delay(10000);
-  Serial.println("Telit Test AT access network technology");
+  Serial.println("Telit Test AT LWM2M accelerometer");
   turnOnModule();
   Serial.println("ME310 ON");
 
   //issue command AT+CMEE=2 and wait for answer or timeout
   myME310.report_mobile_equipment_error(2);
-  myME310.select_wireless_network(28);
-  rc = myME310.request_model_identification(ME310::TOUT_1SEC);
-  if (rc == ME310::RETURN_VALID) {
-    Serial.println(myME310.buffer_cstr(1));
-    resp = myME310.buffer_cstr(1);
-    if (resp[9] == 'W') {
-      myME310.select_wireless_network(12);
-      Serial.println(myME310.buffer_cstr(0));
-    } else if (resp[9] == '1') {
-      myME310.select_wireless_network(28);
-      Serial.println(myME310.buffer_cstr(0));
-    }
-  }
+
+
   //issue command AT+CPIN? in read mode, check that the SIM is inserted and the module is not waiting for the PIN
   myME310.read_enter_pin();
 
@@ -93,66 +103,9 @@ void setup() {
     if (rc == ME310::RETURN_VALID)
     {
       Serial.println("PIN inserted");
-      rc = myME310.read_select_wireless_network();
-      if (strcmp(myME310.buffer_cstr(1), "+WS46: 12") == 0) {
-        //issue command AT+CREG? to check the network status
-        Serial.println("Network status");
 
-        rc = myME310.read_network_registration_status();
-        Serial.println(myME310.buffer_cstr(1));
-        if (rc == ME310::RETURN_VALID)
-        {
-          //if +CREG!=0,1 and +CREG!=0,5, wait 3 second than retry the reading
-          while ((strcmp(myME310.buffer_cstr(1), "+CREG: 0,1") != 0) &&  (strcmp(myME310.buffer_cstr(1), "+CREG: 0,5") != 0))
-          {
-            delay(3000);
-            myME310.read_network_registration_status();
-            Serial.println(myME310.buffer_cstr(1));
-          }
-        }
-      }
-      else if (strcmp(myME310.buffer_cstr(1), "+WS46: 28") == 0) {
-        //issue command AT+CEREG? to check the network status
-        Serial.println("Network status");
-
-        rc = myME310.read_eps_network_registration_status();
-        Serial.println(myME310.buffer_cstr(1));
-        if (rc == ME310::RETURN_VALID)
-        {
-          //if +CEREG!=0,1 and +CEREG!=0,5, wait 3 second than retry the reading
-          while ((strcmp(myME310.buffer_cstr(1), "+CEREG: 0,1") != 0) &&  (strcmp(myME310.buffer_cstr(1), "+CEREG: 0,5") != 0))
-          {
-            delay(3000);
-            myME310.read_eps_network_registration_status();
-            Serial.println(myME310.buffer_cstr(1));
-          }
-        }
-      }
-
-    }
-  } else if (strcmp(myME310.buffer_cstr(1), "+CPIN: READY") == 0) {
-    rc = myME310.read_select_wireless_network();
-    if (strcmp(myME310.buffer_cstr(1), "+WS46: 12") == 0) {
       //issue command AT+CREG? to check the network status
       Serial.println("Network status");
-
-      rc = myME310.read_network_registration_status();
-      Serial.println(myME310.buffer_cstr(1));
-      if (rc == ME310::RETURN_VALID)
-      {
-        //if +CREG!=0,1 and +CREG!=0,5, wait 3 second than retry the reading
-        while ((strcmp(myME310.buffer_cstr(1), "+CREG: 0,1") != 0) &&  (strcmp(myME310.buffer_cstr(1), "+CREG: 0,5") != 0))
-        {
-          delay(3000);
-          myME310.read_network_registration_status();
-          Serial.println(myME310.buffer_cstr(1));
-        }
-      }
-    }
-    else if (strcmp(myME310.buffer_cstr(1), "+WS46: 28") == 0) {
-      //issue command AT+CEREG? to check the network status
-      Serial.println("Network status");
-
       rc = myME310.read_eps_network_registration_status();
       Serial.println(myME310.buffer_cstr(1));
       if (rc == ME310::RETURN_VALID)
@@ -165,8 +118,29 @@ void setup() {
           Serial.println(myME310.buffer_cstr(1));
         }
       }
+
     }
+  } else if (strcmp(myME310.buffer_cstr(1), "+CPIN: READY") == 0) {
+
+    //issue command AT+CREG? to check the network status
+    Serial.println("Network status");
+    rc = myME310.read_eps_network_registration_status();
+    Serial.println(myME310.buffer_cstr(1));
+    if (rc == ME310::RETURN_VALID)
+    {
+      //if +CEREG!=0,1 and +CEREG!=0,5, wait 3 second than retry the reading
+      while ((strcmp(myME310.buffer_cstr(1), "+CEREG: 0,1") != 0) &&  (strcmp(myME310.buffer_cstr(1), "+CEREG: 0,5") != 0))
+      {
+        delay(3000);
+        myME310.read_eps_network_registration_status();
+        Serial.println(myME310.buffer_cstr(1));
+      }
+    }
+
+
+
   }
+
   /*Registers setup for detecting freefall. Some register can be fine-tuned*/
   Wire.begin();
   while (!Serial);
@@ -311,7 +285,7 @@ void loop() {
         delay(2000);
         // The following line is used to restore the variable isr to false to do the sketch' test.
         //If you don't need to do testing, please comment the following line with //
-        //myME310.setResourceBool(0, 3200, 0, 5500, 0, 0, ME310::TOUT_20SEC);
+        myME310.setResourceBool(0, 3200, 0, 5500, 0, 0, ME310::TOUT_20SEC);
 
         delay(2000);
       }
