@@ -13,9 +13,9 @@
   @details
     In this example sketch, the use of methods offered by the ME310 library for using AT commands is shown.
 
-  @version 
+  @version
     1.0.0
-  
+
   @note
 
   @author
@@ -46,15 +46,15 @@ void turnOnModule (){
   delay(200);
   digitalWrite(LED_BUILTIN, LOW);
   delay(500);
-  
+
   while(myME310.attention() == ME310::RETURN_TOUT)
    {
-      digitalWrite(ON_OFF, HIGH);  
-      digitalWrite(LED_BUILTIN, HIGH); 
-      delay(6000);                      
+      digitalWrite(ON_OFF, HIGH);
+      digitalWrite(LED_BUILTIN, HIGH);
+      delay(6000);
       digitalWrite(ON_OFF, LOW);
-      digitalWrite(LED_BUILTIN, LOW);    
-      delay(1000);                      
+      digitalWrite(LED_BUILTIN, LOW);
+      delay(1000);
    }
 }
 
@@ -86,7 +86,7 @@ void setup() {
       Serial.println(myME310.buffer_cstr(1));              //print second line of modem answer
 
       Serial.print("gprs network registration status :");
-      rc = myME310.read_gprs_network_registration_status();  //issue command AT+CGREG=? (read mode) 
+      rc = myME310.read_gprs_network_registration_status();  //issue command AT+CGREG? (read mode)
       Serial.println(myME310.buffer_cstr(1));
       if(rc == ME310::RETURN_VALID)
       {
@@ -97,7 +97,7 @@ void setup() {
               Serial.println(myME310.buffer_cstr(1));
           }
       }
-      Serial.println("Activate context");               
+      Serial.println("Activate context");
       myME310.context_activation(cID, 1);        //issue command AT#SGACT=cid,state and wait for answer or timeout
     }
   }
@@ -122,7 +122,7 @@ void loop() {
     if(rc == ME310::RETURN_VALID)
     {
       Serial.println("Ftp list in current directory: ");
-      myME310.ftp_list(ME310::TOUT_10SEC);      
+      myME310.ftp_list(ME310::TOUT_10SEC);
       Serial.println(myME310.buffer_cstr_raw());
 
       Serial.print("Ftp Change Working Directory: ");
@@ -135,7 +135,7 @@ void loop() {
         Serial.println(myME310.buffer_cstr(1));
 
         Serial.println("Ftp list in current directory: ");
-        myME310.ftp_list(ME310::TOUT_10SEC);      
+        myME310.ftp_list(ME310::TOUT_10SEC);
         Serial.println("-------------");
         Serial.println("Buffer cstr raw");
         Serial.println(myME310.buffer_cstr_raw());
