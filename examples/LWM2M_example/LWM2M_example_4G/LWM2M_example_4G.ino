@@ -137,8 +137,6 @@ void setup() {
       }
     }
 
-
-
   }
 
   /*Registers setup for detecting freefall. Some register can be fine-tuned*/

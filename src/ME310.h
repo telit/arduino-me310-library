@@ -13,7 +13,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version 
-    1.1.0
+    2.1.0
   
   @note
     Dependencies:
@@ -1060,29 +1060,28 @@ namespace me310
    // IoT Portal-------------------------------------------------------------------
       return_t odis_command_saving_retrieving_parameters(char* hostUniqueDevId = "HUID0", char *hostManufacturer = "HMAN0", char* hostModel = "HMOD0", char *hostSwVersion = "HSW0", tout_t aTimeout = TOUT_100MS);
       _READ_TEST(odis_command_saving_retrieving_parameters, "AT+ODIS", TOUT_100MS)
-	
-	 return_t enableLWM2M(int enable, int ctxID,tout_t aTimeout=TOUT_1SEC);
-	  _READ_TEST(enableLWM2M,"AT#LWM2MENA",TOUT_100MS)
-	  
-	  return_t writeResource(int agent,int objID,int instanceID,int resourceID, int resourceInstance,int value, tout_t aTimeout=TOUT_100MS);
-	  _READ_TEST(writeResource,"AT#LWM2MW",TOUT_100MS);
-	  
-	  return_t  writeResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance,float value, tout_t aTimeout=TOUT_100MS);
-	  _READ_TEST(writeResourcefloat,"AT#LWM2MW", TOUT_100MS);
-	  
-	  return_t disableLWM2M(int disable, tout_t aTimeout=TOUT_1SEC);
-	  _READ_TEST(disableLWM2M,"AT#LWM2MENA",TOUT_100MS);
+
+      return_t enableLWM2M(int enable, int ctxID,tout_t aTimeout=TOUT_1SEC);
+      _READ_TEST(enableLWM2M,"AT#LWM2MENA",TOUT_100MS)
+
+      return_t writeResource(int agent,int objID,int instanceID,int resourceID, int resourceInstance,int value, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(writeResource,"AT#LWM2MW",TOUT_100MS);
+
+      return_t  writeResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance,float value, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(writeResourcefloat,"AT#LWM2MW", TOUT_100MS);
+
+      return_t disableLWM2M(int disable, tout_t aTimeout=TOUT_1SEC);
+      _READ_TEST(disableLWM2M,"AT#LWM2MENA",TOUT_100MS);
 
       return_t setResourcefloat(int type,int objID,int instanceID,int resourceID, int resourceInstance,float value, tout_t aTimeout=TOUT_100MS);
       _READ_TEST(setResorcefloat,"AT#LWM2MSET",TOUT_100MS);
-      
+
       return_t  setResourceBool(int type,int objID,int instanceID,int resourceID, int resourceInstance,int value, tout_t aTimeout=TOUT_100MS);
       _READ_TEST(setResourceBool,"AT#LWM2MSET",TOUT_100MS);
-      
+
       return_t readResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout=TOUT_100MS);
       _READ_TEST(readResourcefloat,"AT#LWM2MR",TOUT_100MS);
-	 
-	  
+
       return_t FOTA_set_extended_URC(int enable = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(FOTA_set_extended_URC, "AT#FOTAURC", TOUT_100MS)
 
@@ -1091,6 +1090,7 @@ namespace me310
 
       return_t odis_parameters_management(int param, int action, char* value = "", int instance = 0, tout_t aTimeout = TOUT_100MS);
       _TEST(odis_parameters_management, "AT#HOSTODIS", TOUT_100MS)
+
    // M2M -------------------------------------------------------------------------
 
       return_t m2m_chdir(const char *path,tout_t aTimeout = TOUT_100MS);

@@ -12,6 +12,8 @@
 
   @details
     In this example sketch, it is shown how to use BMA400 library of management the BMA400 accelerometer from Bosch Sensortec.
+    To run this sketch, it is necessary to download the Grove_3Axis_Digital_Accelerometer_BMA400 library from
+    https://github.com/Seeed-Studio/Grove_3Axis_Digital_Accelerometer_BMA400.
 
   @version 
     2.0.0
