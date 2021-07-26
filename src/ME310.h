@@ -1065,13 +1065,22 @@ namespace me310
 	  _READ_TEST(enableLWM2M,"AT#LWM2MENA",TOUT_100MS)
 	  
 	  return_t writeResource(int agent,int objID,int instanceID,int resourceID, int resourceInstance,int value, tout_t aTimeout=TOUT_100MS);
+	  _READ_TEST(writeResource,"AT#LWM2MW",TOUT_100MS);
+	  
 	  return_t  writeResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance,float value, tout_t aTimeout=TOUT_100MS);
+	  _READ_TEST(writeResourcefloat,"AT#LWM2MW", TOUT_100MS);
 	  
 	  return_t disableLWM2M(int disable, tout_t aTimeout=TOUT_1SEC);
+	  _READ_TEST(disableLWM2M,"AT#LWM2MENA",TOUT_100MS);
 
       return_t setResourcefloat(int type,int objID,int instanceID,int resourceID, int resourceInstance,float value, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(setResorcefloat,"AT#LWM2MSET",TOUT_100MS);
+      
       return_t  setResourceBool(int type,int objID,int instanceID,int resourceID, int resourceInstance,int value, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(setResourceBool,"AT#LWM2MSET",TOUT_100MS);
+      
       return_t readResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(readResourcefloat,"AT#LWM2MSET",TOUT_100MS);
 	 
 	  
       return_t FOTA_set_extended_URC(int enable = 0, tout_t aTimeout = TOUT_100MS);
