@@ -74,7 +74,7 @@ void setup() {
 
   Serial.println("AT Command");
   myME310.report_mobile_equipment_error(2);           //issue command AT+CMEE=2 and wait for answer or timeout
-  rc = myME310.read_enter_pin();                            //issue command AT+pin? in read mode, check that the SIM is inserted and the module is not waiting for the PIN
+  rc = myME310.read_enter_pin();                            //issue command AT+cpin? in read mode, check that the SIM is inserted and the module is not waiting for the PIN
   if(strcmp(myME310.buffer_cstr(2), "OK") == 0)        // read response in 2 array position
   {
     Serial.println("Define PDP Context");
