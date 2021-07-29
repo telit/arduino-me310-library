@@ -13,7 +13,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version 
-    2.1.0
+    2.2.0
   
   @note
     Dependencies:
@@ -46,15 +46,15 @@ namespace me310
    /*! \class ME310
       \brief Implements the ME310 driver with synchronous calls
       \details
-      The library implements all AT commands described in ME310 AT command reference manual.\n 
-      The library implements synchronous calls, but has virtual callbacks for intercepting async messages.\n 
-      The last parameter of each call is the timeout between the command and the expected answer.\n 
-      Each function returns a code of type return_t that informs if the call was correcly executed or not or if the timeout is reached.\n 
-      Most functions have a read_<i>function_name</i> and/or a test_<i>function_name</i> that implements the ATcommand? and ATcommand=? respectively.\n 
+      The library implements all AT commands described in ME310 AT command reference manual.\n
+      The library implements synchronous calls, but has virtual callbacks for intercepting async messages.\n
+      The last parameter of each call is the timeout between the command and the expected answer.\n
+      Each function returns a code of type return_t that informs if the call was correcly executed or not or if the timeout is reached.\n
+      Most functions have a read_<i>function_name</i> and/or a test_<i>function_name</i> that implements the ATcommand? and ATcommand=? respectively.\n
       These auxiliary function are generated with \_READ, \_TEST or \_READ_TEST macros.\n
-      The generated functions have only the timeout as argument and return a return_t code.\n 
+      The generated functions have only the timeout as argument and return a return_t code.\n
       
-      The strings returned by the modem are stored in the class memory buffer and can be requested using an index.\n 
+      The strings returned by the modem are stored in the class memory buffer and can be requested using an index.\n
       A null return value means end of string buffer.\n 
    */
    class ME310
@@ -303,7 +303,7 @@ namespace me310
       return_t set_dialing_mode(int mode = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(set_dialing_mode, "AT#DIALMODE", TOUT_100MS)
 
-   // Modulation and Compression Control ------------------------------------------   
+   // Modulation and Compression Control ------------------------------------------
       return_t line_quality_auto_retain(int n, tout_t aTimeout = TOUT_100MS);
 
    // Network ---------------------------------------------------------------------
@@ -432,7 +432,7 @@ namespace me310
       return_t enable_NB2_mode(int ena = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(enable_NB2_mode, "AT#NB2ENA", TOUT_100MS)
 
-   // SIM -------------------------------------------------------------------------   
+   // SIM -------------------------------------------------------------------------
    
       return_t enter_pin(const char* pin,tout_t aTimeout = TOUT_100MS);
       return_t enter_pin(const char* pin,const char* newpin, tout_t aTimeout = TOUT_100MS);
@@ -486,7 +486,7 @@ namespace me310
       return_t automatic_switch_firmware(int mode = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(automatic_switch_firmware, "AT#FWAUTOSIM", TOUT_100MS)
 
-   // SIM Toolkit -----------------------------------------------------------------      
+   // SIM Toolkit -----------------------------------------------------------------
 
       return_t simtoolkit_interface_action(int mode = 1, int timeout = 2, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(simtoolkit_interface_action,"AT#STIA",TOUT_100MS) 
@@ -725,7 +725,7 @@ namespace me310
       return_t network_survey_extended(int value = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(network_survey_extended,"AT#CSURVEXT",TOUT_100MS) 
       
-   // Jamming Detection and Report --------------------------------------------------     
+   // Jamming Detection and Report --------------------------------------------------
 
       return_t jamming_detect_report(int mode = 0, int sat2G = 45, int carrNum2G = 100, int pRxLevT2G = 15, int p_rssi_t4g = 20, int p_rsrq_t4g = 20, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(jamming_detect_report,"AT#JDRENH2",TOUT_100MS) 
@@ -733,7 +733,7 @@ namespace me310
       return_t jamming_detect_threshold(int p_rsrp_t4g = 20, int p_rsrq_t4g = 20, int initial_delay = 500, int sampling_number = 100,int p_rssi_s4g = -50, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(jamming_detect_threshold,"AT#JDR4GCFG",TOUT_100MS) 
 
-   // Packet Domain ---------------------------------------------------------------      
+   // Packet Domain ---------------------------------------------------------------
       
       return_t define_pdp_context(int cid, const char *pdp_type, const char * apn, tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(define_pdp_context,"AT+CGDCONT",TOUT_100MS) 
@@ -1094,38 +1094,38 @@ namespace me310
    // M2M -------------------------------------------------------------------------
 
       return_t m2m_chdir(const char *path,tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(m2m_chdir,"AT#M2MCHDIR",TOUT_100MS) 
+      _READ_TEST(m2m_chdir,"AT#M2MCHDIR",TOUT_100MS)
          
       return_t m2m_mkdir(const char *directory_name,tout_t aTimeout = TOUT_100MS);
-      _TEST(m2m_mkdir,"AT#M2MMKDIR",TOUT_100MS) 
+      _TEST(m2m_mkdir,"AT#M2MMKDIR",TOUT_100MS)
          
       return_t m2m_set_backup(int enable,tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(m2m_set_backup,"AT#M2MBACKUP",TOUT_100MS) 
+      _READ_TEST(m2m_set_backup,"AT#M2MBACKUP",TOUT_100MS)
          
       return_t m2m_rmdir(const char *directory_name,tout_t aTimeout = TOUT_100MS);
-      _TEST(m2m_rmdir,"AT#M2MRMDIR",TOUT_100MS) 
+      _TEST(m2m_rmdir,"AT#M2MRMDIR",TOUT_100MS)
          
       return_t m2m_application_execution(int mode = 0, int delay = 10,tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(m2m_application_execution,"AT+M2M",TOUT_100MS) 
+      _READ_TEST(m2m_application_execution,"AT+M2M",TOUT_100MS)
          
       return_t m2m_set_run_file_permission(int mode, const char * file_bin, int delay = 0, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(m2m_set_run_file_permission,"AT#M2MRUN",TOUT_100MS) 
+      _READ_TEST(m2m_set_run_file_permission,"AT#M2MRUN",TOUT_100MS)
 
       return_t m2m_delete(const char *file_name,tout_t aTimeout = TOUT_100MS);
-      _TEST(m2m_delete,"AT#M2MDEL",TOUT_100MS) 
+      _TEST(m2m_delete,"AT#M2MDEL",TOUT_100MS)
 
       return_t m2m_write_file(const char *file_name, int size, int binToMod, char* data, tout_t aTimeout = TOUT_100MS);
-      _TEST(m2m_write_file,"AT#M2MWRITE",TOUT_100MS) 
+      _TEST(m2m_write_file,"AT#M2MWRITE",TOUT_100MS)
          
       return_t m2m_list(const char *path,tout_t aTimeout = TOUT_100MS);
       return_t m2m_list(tout_t aTimeout = TOUT_100MS);
-      _TEST(m2m_list,"AT#M2MLIST",TOUT_100MS) 
+      _TEST(m2m_list,"AT#M2MLIST",TOUT_100MS)
 
       return_t m2m_read(const char *file_name,tout_t aTimeout = TOUT_100MS);
-      _TEST(m2m_read,"AT#M2MREAD",TOUT_100MS) 
+      _TEST(m2m_read,"AT#M2MREAD",TOUT_100MS)
 
       return_t m2m_ram_info(tout_t aTimeout = TOUT_100MS);
-      _TEST(m2m_ram_info,"AT#M2MRAM",TOUT_100MS) 
+      _TEST(m2m_ram_info,"AT#M2MRAM",TOUT_100MS)
       
       return_t m2m_set_arguments(const char* file_bin, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(m2m_set_arguments, "AT#M2MARG", TOUT_100MS)
@@ -1133,42 +1133,42 @@ namespace me310
    // MQTT ------------------------------------------------------------------------
 
       return_t mqtt_enable(int instanceNumber, int enable = 0,tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(mqtt_enable,"AT#MQEN",TOUT_100MS) 
+      _READ_TEST(mqtt_enable,"AT#MQEN",TOUT_100MS)
 
       return_t mqtt_configure(int instanceNumber, const char *hostname, int port = 0, int cid = 0, int sslEn = 0, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(mqtt_configure,"AT#MQCFG",TOUT_100MS) 
+      _READ_TEST(mqtt_configure,"AT#MQCFG",TOUT_100MS)
 
       return_t mqtt_configure_2(int instanceNumber, int keepalive = 20, int cleanSession = 1, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(mqtt_configure_2,"AT#MQCFG2",TOUT_100MS) 
+      _READ_TEST(mqtt_configure_2,"AT#MQCFG2",TOUT_100MS)
 
       return_t mqtt_configure_lastwill_testament(int instanceNumber, int willFlag = 0, int willRetain = 0, int willQos = 0, const char *willTopic = "", const char *willMessage = "", tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(mqtt_configure_lastwill_testament,"AT#MQWCFG",TOUT_100MS) 
+      _READ_TEST(mqtt_configure_lastwill_testament,"AT#MQWCFG",TOUT_100MS)
 
       return_t mqtt_configure_timeout(int instanceNumber, int pktTimeout = 10, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(mqtt_configure_timeout,"AT#MQTCFG",TOUT_100MS) 
+      _READ_TEST(mqtt_configure_timeout,"AT#MQTCFG",TOUT_100MS)
 
       return_t mqtt_connect(int instanceNumber, const char *clientId, const char *username, const char *password, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(mqtt_connect,"AT#MQCONN",TOUT_100MS) 
+      _READ_TEST(mqtt_connect,"AT#MQCONN",TOUT_100MS)
 
       return_t mqtt_disconnect(int instanceNumber, tout_t aTimeout = TOUT_100MS);
-      _TEST(mqtt_disconnect,"AT#MQDISC",TOUT_100MS) 
+      _TEST(mqtt_disconnect,"AT#MQDISC",TOUT_100MS)
 
       return_t mqtt_topic_subscribe(int instanceNumber, const char *topic, tout_t aTimeout = TOUT_100MS);
-      _TEST(mqtt_topic_subscribe,"AT#MQSUB",TOUT_100MS) 
+      _TEST(mqtt_topic_subscribe,"AT#MQSUB",TOUT_100MS)
 
       return_t mqtt_topic_unsubscribe(int instanceNumber, const char *topic, tout_t aTimeout = TOUT_100MS);
-      _TEST(mqtt_topic_unsubscribe,"AT#MQUNS",TOUT_100MS) 
+      _TEST(mqtt_topic_unsubscribe,"AT#MQUNS",TOUT_100MS)
 
       return_t mqtt_publish(int instanceNumber, const char *topic, int retain, int qos, const char *message, tout_t aTimeout = TOUT_100MS);
-      _TEST(mqtt_publish,"AT#MQPUBS",TOUT_100MS) 
+      _TEST(mqtt_publish,"AT#MQPUBS",TOUT_100MS)
 
       return_t mqtt_read(int instanceNumber, int mId, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(mqtt_read,"AT#MQREAD",TOUT_100MS) 
+      _READ_TEST(mqtt_read,"AT#MQREAD",TOUT_100MS)
 
    // GNSS ------------------------------------------------------------------------
 
       return_t gnss_configuration(int parameter, int value, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(gnss_configuration,"AT$GPSCFG",TOUT_100MS) 
+      _READ_TEST(gnss_configuration,"AT$GPSCFG",TOUT_100MS)
 
       return_t gnss_restore_default_GPS_parameters(tout_t aTimeout = TOUT_100MS);
       _TEST(gnss_restore_default_GPS_parameters, "AT$GPSRST", TOUT_100MS)
@@ -1177,10 +1177,10 @@ namespace me310
       _TEST(gnss_save_parameters_configuration, "AT$GPSSAV", TOUT_100MS)
 
       return_t gnss_controller_power_management(int status = 0, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(gnss_controller_power_management,"AT$GPSP",TOUT_100MS) 
+      _READ_TEST(gnss_controller_power_management,"AT$GPSP",TOUT_100MS)
 
       return_t gnss_software_version(tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(gnss_software_version,"AT$GPSSW",TOUT_100MS) 
+      _READ_TEST(gnss_software_version,"AT$GPSSW",TOUT_100MS)
 
       return_t gnss_reset_GPS_controller(int resetType, tout_t aTimeout = TOUT_100MS);
       _TEST(gnss_reset_GPS_controller, "AT$GPSR", TOUT_100MS)
@@ -1230,9 +1230,9 @@ namespace me310
 
       return_t set_trace(int mode, char* configuration_string, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(set_trace, "AT#TRACE", TOUT_100MS)
-   // -----------------------------------------------------------------------------      
-      const uint8_t *buffer(void) { return mBuffer;} //!< Returns pointer to local buffer 
-      size_t length(void) { return mBuffLen;}        //!< Returns length of local buffer 
+   // -----------------------------------------------------------------------------
+      const uint8_t *buffer(void) { return mBuffer;} //!< Returns pointer to local buffer
+      size_t length(void) { return mBuffLen;}        //!< Returns length of local buffer
       const char * buffer_cstr(int aIndex = 0);
       const char * buffer_cstr_raw();
 
@@ -1245,11 +1245,12 @@ namespace me310
       virtual return_t  on_message(const char *aMessage)    //!< Callback function on message received 
       {return RETURN_CONTINUE;}
       virtual const char* on_pending_receive(const char *aMessage) //!< Callback function on string received
-      {return aMessage;}             
+      {return aMessage;} 
       
       return_t read_line(const char *aAnswer, tout_t aTimeout = TOUT_1SEC);
       virtual return_t wait_for(const char *aAnswer = OK_STRING, tout_t aTimeout = TOUT_200MS);
       virtual return_t wait_for(const char* aCommand, int flag = 0, const char *aAnswer = OK_STRING, tout_t aTimeout = TOUT_200MS);
+      virtual return_t wait_for_unsolicited(tout_t aTimeout = TOUT_200MS);
       
       static const char *str_start(const char *buffer, const char *string);
       static const char *str_equal(const char *buffer, const char *string);
@@ -1271,6 +1272,8 @@ namespace me310
       uint8_t *mpBuffer = 0;            //!< Pointer to free position in buffer
       size_t  mBuffLen = 0;             //!< Buffer length 
       uint8_t *_payloadData = 0;        //!< Pointer to free position in buffer for payload data
+
+      static const char CTRZ[1];
 
       static const char *OK_STRING;
       static const char *ERROR_STRING;
