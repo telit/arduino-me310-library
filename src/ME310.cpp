@@ -5378,9 +5378,9 @@ ME310::return_t ME310::enableLWM2M(int enable, int ctxID,tout_t aTimeout)
    return ret;
 }
 
-/*! \brief This function enables the LWM2M Client
+/*! \brief This function disables the LWM2M Client
 /*! \details
- * \param enable contains the value that disables the LWM2M client
+ * \param disable contains the value that disables the LWM2M client
  */
 ME310::return_t ME310::disableLWM2M(int disable, tout_t aTimeout)
 {
@@ -5396,7 +5396,7 @@ ME310::return_t ME310::disableLWM2M(int disable, tout_t aTimeout)
    return ret;
 }
 
-/*! \brief This function writes a value in a LWM2M resource
+/*! \brief This function writes a integer value in a LWM2M resource
 /*! \details 
  * \param agent specifies the agent (0=telit agent)
  * \param objID  indentifies the object ID
@@ -5413,6 +5413,16 @@ ME310::return_t ME310::disableLWM2M(int disable, tout_t aTimeout)
 	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
 }
 
+/*! \brief This function writes a float value in a LWM2M resource
+/*! \details 
+ * \param agent specifies the agent (0=telit agent)
+ * \param objID  indentifies the object ID
+ * \param instanceID identifies the object instance
+ * \param resourceID identifies the resource ID
+ * \param resourceInstance identifies the resource's instance
+ * \param value sets the resource value
+ * \param tout_t specifies the timeout
+*/
 ME310::return_t ME310::writeResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance,float value, tout_t aTimeout)
 {
 	memset(mBuffer,0,ME310_BUFFSIZE);
@@ -5420,7 +5430,7 @@ ME310::return_t ME310::writeResourcefloat(int agent,int objID,int instanceID,int
 	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
 }
 
-/*! \brief This function sets a value in a LWM2M resource
+/*! \brief This function sets a float value in a LWM2M resource
  * \param type specifies the type of data to insert
  * \param objID identifies the object LWM2M
  * \param instanceID identifies the instance of the object
@@ -5436,12 +5446,30 @@ ME310::return_t ME310::writeResourcefloat(int agent,int objID,int instanceID,int
 	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
 }
 
+/*! \brief This function sets a boolean value in a LWM2M resource
+ * \param type specifies the type of data to insert
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value identifies the value to be set
+ * \param tout_t specifies the timeout
+*/
 ME310::return_t ME310::setResourceBool(int type,int objID,int instanceID,int resourceID, int resourceInstance,int value, tout_t aTimeout)
 {
 	memset(mBuffer,0,ME310_BUFFSIZE);
 	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MSET=%d,%d,%d,%d,%d,%d"), type,objID,instanceID,resourceID, resourceInstance,value);
 	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
 }
+/*! \brief This function reads a float value in a LWM2M resource
+ * \param type specifies the type of data to insert
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value identifies the value to be set
+ * \param tout_t specifies the timeout
+*/
 
 ME310::return_t ME310::readResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout)
 {
