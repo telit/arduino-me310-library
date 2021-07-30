@@ -16,7 +16,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version 
-    2.2.0
+    2.2.1
   
   @note
 
