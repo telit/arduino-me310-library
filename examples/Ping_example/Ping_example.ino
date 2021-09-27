@@ -29,30 +29,24 @@
 #include <ME310.h>
 #include <string.h>
 
-using namespace me310;
-
 #define APN "apn"
 
-char server[] = "8.8.8.8";
+#ifndef ARDUINO_TELIT_SAMD_CHARLIE
+#define ON_OFF 6 /*Select the GPIO to control ON_OFF*/
+#endif
 
+using namespace me310;
+/*
+ * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n 
+ * Please refer to your board configuration in variant.h file.
+ * Example:
+ * Uart Serial1(&sercom4, PIN_MODULE_RX, PIN_MODULE_TX, PAD_MODULE_RX, PAD_MODULE_TX, PIN_MODULE_RTS, PIN_MODULE_CTS);
+ * ME310 myME310 (Serial1); 
+ */
 ME310 myME310;
+ME310::return_t rc;     //Enum of return value  methods
 
-void turnOnModule (){
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(200);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(500);
-  
-  while(myME310.attention() == ME310::RETURN_TOUT)
-   {
-      digitalWrite(ON_OFF, HIGH);  
-      digitalWrite(LED_BUILTIN, HIGH); 
-      delay(6000);                      
-      digitalWrite(ON_OFF, LOW);
-      digitalWrite(LED_BUILTIN, LOW);    
-      delay(1000);                      
-   }
-}
+char server[] = "8.8.8.8";
 
 
 void setup() {
@@ -70,7 +64,7 @@ void setup() {
 
   delay(1000);
   Serial.println("Telit Test AT command Ping");
-  turnOnModule();
+  myME310.powerOn();
   Serial.println("ME310 is ON");
 
   myME310.report_mobile_equipment_error(2);           //issue command AT+CMEE=2 and wait for answer or timeout
@@ -94,7 +88,7 @@ void setup() {
             Serial.println(myME310.buffer_cstr(1));
         }
     }   
-    Serial.println("Activate context");               
+    Serial.println("Activate context");
     myME310.context_activation(cID, 1);        //issue command AT#SGACT=cid,state and wait for answer or timeout
   }
 }

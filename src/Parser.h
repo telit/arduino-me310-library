@@ -13,7 +13,7 @@
     Parser is an abstract class and handles common methods, like gets and parse.\n
     The concrete classes, derived by Parser, implement the parsing methods for the specific AT command.\n
   @version 
-    1.0.0
+    1.1.0
   
   @note
     Dependencies:
@@ -37,8 +37,18 @@
 /* Using namespace ================================================================================*/
 using namespace std;
 
-#define MAX_PAYLOAD 2048        //!< max payload len
+#define MAX_PAYLOAD 3100        //!< max payload len
+
 #define MAX_CMD_RESPONSE 64     //!< max command response len
+
+#define _IS_IRA_TX_BIT   0x00
+#define _IS_IRA_RX_BIT   0x01
+#define _UDP_INFO_BIT    0x02
+ 
+
+#define SET_BIT_MASK(m, L)    (m |= (1 << L))
+#define UNSET_BIT_MASK(m, L)  (m &= (~(1<< L)))
+#define IS_BIT_SET(m, L)      ((m & (1 << L)) ==  (1 << L))
 
 /* Start telitAT namespace ========================================================================*/
 namespace telitAT
@@ -55,7 +65,7 @@ namespace telitAT
     class Parser
     {
       public:
-        virtual int parse(char* str); 
+        virtual int parse(string str); 
         virtual int getReceivedBytes();
         virtual uint8_t * getPayload();
         virtual int getPayloadStart();
@@ -73,7 +83,7 @@ namespace telitAT
         uint8_t _payloadData[MAX_PAYLOAD];          //!< Payload buffer
         char _commandResponse[MAX_CMD_RESPONSE];    //!< Command Response buffer
         uint8_t *_payload;                          //!< Pointer to payload string
-        char *_rawData;                             //!< Pointer to string data received
+        string _rawData;                             //!< Pointer to string data received
         int _recvBytes;                             //!< Received bytes
         int _startPayloadOffset;                    //!< Start position to payload offset
         bool _response;                             //!< Command Response flag
@@ -97,6 +107,7 @@ namespace telitAT
     class SRECVParser : public Parser
     {
       public:
+        SRECVParser(uint32_t option = 0);
         ~SRECVParser(){}
 
       protected:
@@ -105,6 +116,10 @@ namespace telitAT
         uint8_t * extractedData();
         int receivedBytes();
         bool searchCommandResponseString();
+
+      private:
+      bool _isIRA;
+      bool _UDPInfo;
     };
 
     /*---------------------------------
@@ -201,6 +216,30 @@ namespace telitAT
         bool searchCommandResponseString();
     };
 
+    /*---------------------------------
+            SMSListParser class
+    ----------------------------------*/
+    /*! \class SMSListParser
+        \brief Class to parse received string, specific to parsing +CMGL AT command
+        \details 
+        This is a derivated class by Parser, specific to parsing +CMGL AT command.\n
+        It offers a series of methods that allow to parse a string obtained as a response following an AT+CMGL command.\n
+    */
+    class SMSListParser : public Parser
+    {
+      public:
+        ~SMSListParser(){}
+
+      protected:
+        int findPayloadStart();
+        int expectedBytes();
+        uint8_t * extractedData();
+        int receivedBytes();
+        bool searchCommandResponseString();
+
+      private:
+        int _posCommandResponse;
+    };
     /*-----------------------------------
             GenericParser class
     -----------------------------------*/

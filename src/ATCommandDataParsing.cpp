@@ -12,8 +12,8 @@
     The class implements the data parsing function for AT command which need specific response.\n
     It is possible obtain data payload  
 
-  @version 
-    1.0.0
+  @version
+    1.1.0
   
   @note
     Dependencies:
@@ -21,7 +21,6 @@
     Parser.h
 
   @author
-    
 
   @date
     02/23/2021
@@ -38,9 +37,9 @@ using namespace telitAT;
 /*!
  * \param str string to parse
 */
-ATCommandDataParsing::ATCommandDataParsing(char* aCommand, char* str, int flag)
+ATCommandDataParsing::ATCommandDataParsing(const char* aCommand, const char* str, int flag, uint32_t option)
 {
-    _str = str;
+    _str = (char* )str;
     char* cmd;
     cmd = findCommand(aCommand);
     if(cmd == NULL && flag == -1)
@@ -57,7 +56,7 @@ ATCommandDataParsing::ATCommandDataParsing(char* aCommand, char* str, int flag)
         {
             if(strcmp(cmd, "AT#SRECV") == 0)
             {
-                _parser = new SRECVParser();
+                _parser = new SRECVParser(option);
             }
             else if(strcmp(cmd, "AT#FTPRECV") == 0)
             {
@@ -70,6 +69,10 @@ ATCommandDataParsing::ATCommandDataParsing(char* aCommand, char* str, int flag)
             else if(strcmp(cmd, "AT#PING") == 0)
             {
                 _parser = new PingParser();
+            }
+            else if(strcmp(cmd, "AT+CMGL") == 0)
+            {
+                _parser = new SMSListParser();
             }
             else
             {
@@ -176,7 +179,7 @@ int ATCommandDataParsing::startPositionPayloadOffset()
     Searches the string of command 
 * \return command string if the format of string is right otherwise return null.
 */
-char* ATCommandDataParsing::findCommand(char* aCommand)
+char* ATCommandDataParsing::findCommand(const char* aCommand)
 {
     string tmp_str;
     tmp_str = aCommand;
@@ -201,6 +204,5 @@ char* ATCommandDataParsing::findCommand(char* aCommand)
 */
 ATCommandDataParsing::~ATCommandDataParsing()
 {
-    delete _parser;
-    delete _str;
+    delete (_parser);
 }

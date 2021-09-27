@@ -28,33 +28,28 @@
 //#include <string.h>
 
 #define APN "apn"
+
+#ifndef ARDUINO_TELIT_SAMD_CHARLIE
+#define ON_OFF 6 /*Select the GPIO to control ON_OFF*/
+#endif
+
 using namespace me310;
+/*
+ * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n 
+ * Please refer to your board configuration in variant.h file.
+ * Example:
+ * Uart Serial1(&sercom4, PIN_MODULE_RX, PIN_MODULE_TX, PAD_MODULE_RX, PAD_MODULE_TX, PIN_MODULE_RTS, PIN_MODULE_CTS);
+ * ME310 myME310 (Serial1); 
+ */
+ME310 myME310;
+ME310::return_t rc;     //Enum of return value  methods
+
 int cID = 1;            //PDP Context Identifier
 int connID = 1;         //Socket connection identifier.
 char ipProt[] = "IP";   //Packet Data Protocol type
 
 char server[] = "modules.telit.com";    //echo server
 int port = 10510;
-
-ME310 myME310;
-
-void turnOnModule (){
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(200);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(500);
-  
-  while(myME310.attention() == ME310::RETURN_TOUT)  //issue command AT and wait for answer or timeout
-   {
-      digitalWrite(ON_OFF, HIGH);  
-      digitalWrite(LED_BUILTIN, HIGH); 
-      delay(6000);                      
-      digitalWrite(ON_OFF, LOW);
-      digitalWrite(LED_BUILTIN, LOW);    
-      delay(1000);                      
-   }
-}
-
 
 void setup() {
 
@@ -68,11 +63,11 @@ void setup() {
   myME310.begin(115200);
 
   delay(3000);
-  myME310.module_reboot();                            // issue command at#reboot 
+  myME310.module_reboot();                            // issue command at#reboot
   
   delay(10000);
   Serial.println("Telit Test AT Socket command");
-  turnOnModule();
+  myME310.powerOn();
   Serial.println("ME310 ON");
 
   myME310.report_mobile_equipment_error(2);           //issue command AT+CMEE=2 and wait for answer or timeout
@@ -99,7 +94,7 @@ void setup() {
               Serial.println(myME310.buffer_cstr(1));
           }
       }
-      Serial.println("Activate context");               
+      Serial.println("Activate context");
       myME310.context_activation(cID, 1);        //issue command AT#SGACT=cid,state and wait for answer or timeout
     }
   }
@@ -140,7 +135,7 @@ void loop() {
         delay(5000);
         if(r == ME310::RETURN_VALID)
         {
-          Serial.print("READ: ");  
+          Serial.print("READ: ");
           r = myME310.socket_receive_data_command_mode(connID, (int) sizeof(data), 0, ME310::TOUT_10SEC); //issue command AT#SRECV=connID,size and wait for answer or timeout
           Serial.println(myME310.return_string(r));
           if(r == ME310::RETURN_VALID)
@@ -159,7 +154,7 @@ void loop() {
         {
           Serial.println(myME310.return_string(r));
         }
-      }   
+      }
     }
     else
     {

@@ -1,0 +1,29 @@
+ME310 0.0.0 - ????.??.??
+
+ME310 2.4.0 - 2021.09.27
+* Add SMS management in AT commands
+* Add binary mode improvements for sockets data
+
+ME310 2.3.0 - 2021.08.11
+* Added Calling Line Identification Presentation management (CLIP)
+
+ME310 2.2.0 - 2021.07.29
+
+* URC wait method added
+* Added URC management improvements in LwM2M code
+
+ME310 2.1.0 - 2021.07.26
+
+* Added MQTT and LWM2M AT commands coverage with example sketches
+
+ME310 2.0.0 - 2021.05.06
+
+* Added support to more AT commands and the command/online modes
+
+ME310 1.0.1 - 2021.03.24
+
+* Improved namespace naming convention and some AT commands management
+
+ME310 1.0.0 - 2021.02.04
+
+* Initial release

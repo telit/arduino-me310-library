@@ -11,7 +11,10 @@
     Sample test of the use of AT commands via ME310 library
 
   @details
-    In this example sketch, the use of methods offered by the ME310 library for using AT commands is shown.
+    In this example sketch, it is shown how to use MQTT management, using ME310 library.\n
+    MQTT enable, MQTT configuration, MQTT connect, MQTT topic subscribe, MQTT publish, MQTT read 
+    and MQTT disconnect methods are used and responses are printed.\
+
 
   @version 
     1.0.0
@@ -29,40 +32,33 @@
 #include <ME310.h>
 #include <string.h>
 
-using namespace me310;
-
-
-#define APN "\"web.omnitel.it\""
+#define APN "\"APN\""
 #define HOSTNAME "api-dev.devicewise.com"
 #define PORT 1883
 
-#define CLIENT_ID "test_m2mb_mqtt_id"
-#define CLIENT_USERNAME "test_m2mb_mqtt"
-#define CLIENT_PASSWORD "q3XYKetChZRdGuKF"
+#define CLIENT_ID "CLIENTID"
+#define CLIENT_USERNAME "CLIENTUSERNAME"
+#define CLIENT_PASSWORD "PASSWORD"
+
+#ifndef ARDUINO_TELIT_SAMD_CHARLIE
+#define ON_OFF 6 /*Select the GPIO to control ON_OFF*/
+#endif
+
+using namespace me310;
+/*
+ * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n 
+ * Please refer to your board configuration in variant.h file.
+ * Example:
+ * Uart Serial1(&sercom4, PIN_MODULE_RX, PIN_MODULE_TX, PAD_MODULE_RX, PAD_MODULE_TX, PIN_MODULE_RTS, PIN_MODULE_CTS);
+ * ME310 myME310 (Serial1); 
+ */
+ME310 myME310;
+ME310::return_t rc;     //Enum of return value  methods
 
 int cID = 1;          //PDP Context Identifier
 char ipProt[]= "IP";  //Packet Data Protocol type
 
-ME310 myME310;
-ME310::return_t rc;   //Enum of return value  methods
 int count = 0;
-
-void turnOnModule (){
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(200);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(500);
-  
-  while(myME310.attention() == ME310::RETURN_TOUT)
-   {
-      digitalWrite(ON_OFF, HIGH);  
-      digitalWrite(LED_BUILTIN, HIGH); 
-      delay(6000);                      
-      digitalWrite(ON_OFF, LOW);
-      digitalWrite(LED_BUILTIN, LOW);    
-      delay(1000);                      
-   }
-}
 
 void setup() {
 
@@ -75,7 +71,7 @@ void setup() {
 
   delay(1000);
  
-  turnOnModule();
+  myME310.powerOn();
   Serial.println("Telit Test AT MQTT command");
   Serial.println("ME310 ON");
   Serial.println("AT Command");
@@ -163,7 +159,7 @@ void setup() {
           //
           // AT#MQPUBS=instance_number, topic, retain, qos, message
           ////////////////////////////////////
-    
+
           myME310.mqtt_publish(1, "topic", 1, 0, "message");  //issue command AT#MQPUBS=instance_number, topic, retain, qos, message and wait for answer or timeout
           Serial.println(myME310.buffer_cstr(1));
           
@@ -186,7 +182,7 @@ void loop(){
   ////////////////////////////////////
   myME310.read_mqtt_read();       //issue command AT#MQREAD? and wait for answer or timeout
   Serial.println(myME310.buffer_cstr(1));
-  
+
   /////////////////////////////////////
   // COMMAND TO READ A MESSAGE
   //

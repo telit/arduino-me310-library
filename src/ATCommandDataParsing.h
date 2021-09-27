@@ -11,8 +11,8 @@
     The class implements the data parsing function for AT command which need specific response.\n
     It is possible obtain data payload, receivedBytes
   
-  @version 
-    1.0.0
+  @version
+    1.2.0
 
   @note
     Dependencies:
@@ -47,7 +47,7 @@ class ATCommandDataParsing
 {
     public:
 
-    ATCommandDataParsing(char* aCommand, char* str, int flag);
+    ATCommandDataParsing(const char* aCommand, const char* str, int flag, uint32_t option = 0);
     uint8_t * extractedPayload();
     int receivedBytes();
     bool commandResponseResult();
@@ -57,14 +57,14 @@ class ATCommandDataParsing
     ~ATCommandDataParsing();
 
     private:
-    
-    char* findCommand(char* aCommand);
+
+    char* findCommand(const char* aCommand);
 
     private:
 
     int _exBytes;         //!< Expected bytes
     int _recvBytes;       //!< Received bytes
-    char *_str;           //!< Pointer to string
+    string _str;
     char _command[64];    //!< Array to command string
     Parser *_parser;      //!< Pointer to class parser
 };

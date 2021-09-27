@@ -13,7 +13,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version 
-    2.2.1
+    2.4.0
   
   @note
     Dependencies:
@@ -35,7 +35,8 @@
 namespace me310
 {
 
-   #define ME310_BUFFSIZE 2046 ///< Exchange buffer size
+   #define ME310_BUFFSIZE 3100 ///< Exchange buffer size
+   #define ME310_SEND_BUFFSIZE 1500
 
    #define F(A) A
 
@@ -82,7 +83,7 @@ namespace me310
       typedef enum 
       {
 
-         TOUT_100MS =   100, TOUT_200MS =   200, TOUT_300MS =   300, TOUT_400MS =   400, TOUT_500MS =   500, TOUT_600MS =   600, TOUT_700MS =   700, TOUT_800MS =   800, TOUT_900MS =   900,
+         TOUT_0MS =   0, TOUT_100MS =   100, TOUT_200MS =   200, TOUT_300MS =   300, TOUT_400MS =   400, TOUT_500MS =   500, TOUT_600MS =   600, TOUT_700MS =   700, TOUT_800MS =   800, TOUT_900MS =   900,
          TOUT_1SEC =   1000, TOUT_2SEC =   2000, TOUT_3SEC =   3000, TOUT_4SEC =   4000, TOUT_5SEC =   5000, TOUT_6SEC =   6000, TOUT_7SEC =   7000, TOUT_8SEC =   8000, TOUT_9SEC =   9000,
          TOUT_10SEC = 10000, TOUT_20SEC = 20000, TOUT_30SEC = 30000, TOUT_45SEC = 45000, 
          TOUT_1MIN  = 60000, TOUT_2MIN = 120000
@@ -97,7 +98,14 @@ namespace me310
 
       ~ME310();
       
+      #ifdef ARDUINO_TELIT_SAMD_CHARLIE
+      void powerOn(unsigned int onoff_gpio = ON_OFF);
+      #else
+      void powerOn(unsigned int onoff_gpio);
+      #endif
+
       void begin(unsigned long baudRate);
+      void end();
       
    // Command Line Prefixes -------------------------------------------------------   
       return_t attention(tout_t aTimeout = TOUT_100MS);
@@ -159,25 +167,25 @@ namespace me310
       _TEST(request_psn_identification_echo,"AT#CGSN",TOUT_100MS) 
 
       return_t request_product_code(tout_t aTimeout = TOUT_100MS);
-      _TEST(request_product_code,"AT#CGMF",TOUT_100MS) 
-      
+      _TEST(request_product_code,"AT#CGMF",TOUT_100MS)
+
       return_t request_software_package_version(tout_t aTimeout = TOUT_100MS);
-      _TEST(request_software_package_version,"AT#SWPKGV",TOUT_100MS) 
-      
+      _TEST(request_software_package_version,"AT#SWPKGV",TOUT_100MS)
+
       return_t phone_activity_status(tout_t aTimeout = TOUT_100MS);
-      _TEST(phone_activity_status,"AT+CPAS",TOUT_100MS) 
+      _TEST(phone_activity_status,"AT+CPAS",TOUT_100MS)
 
-      return_t set_phone_functionality(int fun = 1,int rst = 0,tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(set_phone_functionality,"AT+CFUN",TOUT_100MS) 
+      return_t set_phone_functionality(int fun = 1,int rst = 0, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(set_phone_functionality,"AT+CFUN",TOUT_100MS)
 
-      return_t mobile_equipment_event_reporting(int mode = 0,int keyp = 0,int disp = 0, int ind = 0, int bfr = 0, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(mobile_equipment_event_reporting,"AT+CMER",TOUT_100MS) 
+      return_t mobile_equipment_event_reporting(int mode = 0, int keyp = 0, int disp = 0, int ind = 0, int bfr = 0, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(mobile_equipment_event_reporting,"AT+CMER",TOUT_100MS)
 
-      return_t set_voice_mail_number(int mode = 0,const char *number = "",int type = 129, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(set_voice_mail_number,"AT+CSVM",TOUT_100MS) 
+      return_t set_voice_mail_number(int mode = 0,const char *number = "", int type = 129, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(set_voice_mail_number,"AT+CSVM",TOUT_100MS)
 
-      return_t mailbox_numbers(int index = 0,const char *number = "",int type = 129, const char *text ="", const char *mboxtype="", tout_t aTimeout = TOUT_100MS);
-      _TEST(mailbox_numbers,"AT#MBN",TOUT_100MS) 
+      return_t mailbox_numbers(int index = 0, const char *number = "", int type = 129, const char *text ="", const char *mboxtype="", tout_t aTimeout = TOUT_100MS);
+      _TEST(mailbox_numbers,"AT#MBN",TOUT_100MS)
 
       return_t message_waiting_indication(int enable = 1, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(message_waiting_indication,"AT#MWI",TOUT_100MS) 
@@ -321,10 +329,12 @@ namespace me310
       return_t operator_selection(int mode, int format, int oper, int act, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(operator_selection,"AT+COPS",TOUT_100MS)
 
-      return_t facility_lock_unlock(int fac, int mode, const char *password, int _class, tout_t aTimeout = TOUT_100MS);
+      return_t facility_lock_unlock(const char * fac, int mode, const char *password, int classType, tout_t aTimeout = TOUT_100MS);
+      return_t facility_lock_unlock(const char * fac, int mode, tout_t aTimeout = TOUT_100MS);
+      return_t facility_lock_unlock(const char * fac, int mode, const char *password, tout_t aTimeout = TOUT_100MS);
       _TEST(facility_lock_unlock,"AT+CLCK",TOUT_100MS)
          
-      return_t change_facility_password(int fac, const char *old_password, const char *new_password, tout_t aTimeout = TOUT_100MS);
+      return_t change_facility_password(const char * fac, const char *old_password, const char *new_password, tout_t aTimeout = TOUT_100MS);
       _TEST(change_facility_password,"AT+CPWD",TOUT_100MS)
 
       return_t list_current_calls(tout_t aTimeout = TOUT_100MS);
@@ -394,6 +404,9 @@ namespace me310
       return_t edrx_settings(int mode = 0, tout_t aTimeout = TOUT_100MS);
       return_t edrx_settings(int mode, int acttype, const char * req_edrx, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(edrx_settings,"AT+CEDRXS",TOUT_100MS)
+
+      return_t calling_line_identification_presentation (int enable = 0, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(calling_line_identification_presentation, "AT+CLIP", TOUT_100MS)
 
       return_t select_iot_technology(int n , tout_t aTimeout = TOUT_100MS);
       _READ_TEST(select_iot_technology,"AT#WS46",TOUT_100MS)
@@ -798,7 +811,7 @@ namespace me310
       return_t extended_pdp_context_activation(int cid, int abortAttemptEnable = 0, tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(extended_pdp_context_activation,"AT#SGACTCFGEXT",TOUT_100MS) 
          
-      return_t socket_configuration(int connId, int cid, int pktSz = 300, int maxTo = 90, int connTo =600, int txTo = 50, tout_t aTimeout = TOUT_1SEC); 
+      return_t socket_configuration(int connId, int cid, int pktSz = 300, int maxTo = 90, int connTo = 600, int txTo = 50, tout_t aTimeout = TOUT_1SEC); 
       _READ_TEST(socket_configuration,"AT#SCFG",TOUT_100MS) 
          
       return_t socket_configuration_extended(int connId = 1, int srMode = 0, int recvDataMode = 0, int keepalive = 0, int listenAutoRsp = 0, int sendDataMode = 0, tout_t aTimeout = TOUT_1SEC); 
@@ -1235,10 +1248,10 @@ namespace me310
       size_t length(void) { return mBuffLen;}        //!< Returns length of local buffer
       const char * buffer_cstr(int aIndex = 0);
       const char * buffer_cstr_raw();
-
+      void ConvertBufferToIRA(uint8_t* recv_buf, uint8_t* out_buf, int size);
       
-      virtual void on_command(const char *aCommand) {}      //!< Callback function on command issued
-      virtual void on_receive() {}                   //!< Callback function on string received
+      virtual void on_command(const char *aCommand) {/*Serial.println(aCommand);*/}      //!< Callback function on command issued
+      virtual void on_receive() {}                          //!< Callback function on string received
       virtual void on_error(const char *aMessage) {}        //!< Callback function on error string received
       virtual void on_valid(const char *aMessage) {}        //!< Callback function on valid string received
       virtual void on_timeout(void) {}                      //!< Callback function on receive timeout event  
@@ -1266,13 +1279,21 @@ namespace me310
       return_t send_wait(const char *aCommand, const char *aAnswer = OK_STRING, tout_t aTimeout = TOUT_200MS);
       return_t send_wait(const char *aCommand, int flag, const char *aAnswer = OK_STRING, tout_t aTimeout = TOUT_200MS );
       return_t send_wait(const char *aCommand, const char *aAnswer = OK_STRING, const char* term = TERMINATION_STRING, tout_t aTimeout = TOUT_200MS);
+      return_t send_wait(const char *aCommand, int flag, const char *aAnswer = OK_STRING, const char* term = TERMINATION_STRING, tout_t aTimeout = TOUT_200MS);
+
+      void CheckIRAOption(char* str);
+      
 
       Uart &mSerial;                    //!< Reference to Uart used for communication
+      uint32_t mBaudrate;                //!
       uint8_t mBuffer[ME310_BUFFSIZE];  //!< Transmission buffer
       uint8_t *mpBuffer = 0;            //!< Pointer to free position in buffer
       size_t  mBuffLen = 0;             //!< Buffer length 
       uint8_t *_payloadData = 0;        //!< Pointer to free position in buffer for payload data
 
+      uint32_t _option = 0;
+      bool _isIRARx, _isIRATx;
+      
       static const char CTRZ[1];
 
       static const char *OK_STRING;
