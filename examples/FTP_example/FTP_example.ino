@@ -11,7 +11,7 @@
     Sample test of the use of AT commands via ME310 library
 
   @details
-    In this example sketch, the use of methods offered by the ME310 library for using AT commands is shown.
+    In this example sketch, it is shown how to use FTP management, using ME310 library.\n
 
   @version
     1.0.0
@@ -34,29 +34,24 @@
 #define FTP_USER "Username"
 #define FTP_PASS "Password"
 
-using namespace me310;
+#ifndef ARDUINO_TELIT_SAMD_CHARLIE
+#define ON_OFF 6 /*Select the GPIO to control ON_OFF*/
+#endif
 
-int cID = 1;            //PDP Context Identifier
-char ipProt[] = "IP";   //Packet Data Protocol type
+using namespace me310;
+/*
+ * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n 
+ * Please refer to your board configuration in variant.h file.
+ * Example:
+ * Uart Serial1(&sercom4, PIN_MODULE_RX, PIN_MODULE_TX, PAD_MODULE_RX, PAD_MODULE_TX, PIN_MODULE_RTS, PIN_MODULE_CTS);
+ * ME310 myME310 (Serial1); 
+ */
 ME310 myME310;
 ME310::return_t rc;     //Enum of return value  methods
 
-void turnOnModule (){
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(200);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(500);
+int cID = 1;            //PDP Context Identifier
+char ipProt[] = "IP";   //Packet Data Protocol type
 
-  while(myME310.attention() == ME310::RETURN_TOUT)
-   {
-      digitalWrite(ON_OFF, HIGH);
-      digitalWrite(LED_BUILTIN, HIGH);
-      delay(6000);
-      digitalWrite(ON_OFF, LOW);
-      digitalWrite(LED_BUILTIN, LOW);
-      delay(1000);
-   }
-}
 
 void setup() {
 
@@ -69,7 +64,7 @@ void setup() {
 
   delay(1000);
   Serial.println("Telit Test AT FTP command");
-  turnOnModule();
+  myME310.powerOn();
   Serial.println("ME310 ON");
 
   Serial.println("AT Command");
@@ -194,7 +189,7 @@ void loop() {
   {
     Serial.println((String)"ERROR: " + myME310.return_string(rc));
   }
-  /*rc = myME310.ftp_close();
-  Serial.println("The application has ended..."); */
+  rc = myME310.ftp_close();
+  Serial.println("The application has ended..."); 
   exit(0);
 }

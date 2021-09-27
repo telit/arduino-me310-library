@@ -11,7 +11,10 @@
     Sample test of the use of AT commands via ME310 library
 
   @details
-    In this example sketch, the use of methods offered by the ME310 library for using AT commands is shown.
+    In this example sketch, it is shown how to use AGNSS management, using ME310 library.\n
+    AGNSS is enable, GNSS configuration, GNSS controller power management, GNSS nmea configuration functions are shown.\n
+    GPS positions are acquired and response is printed.
+
 
   @version 
     1.0.0
@@ -31,30 +34,22 @@
 /*When NMEA_DEBUG is 0 Unsolicited NMEA is disable*/
 #define NMEA_DEBUG 0
 
-using namespace me310;
+#ifndef ARDUINO_TELIT_SAMD_CHARLIE
+#define ON_OFF 6 /*Select the GPIO to control ON_OFF*/
+#endif
 
+using namespace me310;
+/*
+ * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n 
+ * Please refer to your board configuration in variant.h file.
+ * Example:
+ * Uart Serial1(&sercom4, PIN_MODULE_RX, PIN_MODULE_TX, PAD_MODULE_RX, PAD_MODULE_TX, PIN_MODULE_RTS, PIN_MODULE_CTS);
+ * ME310 myME310 (Serial1); 
+ */
 ME310 myME310;
 
 ME310::return_t rc; 
 int count = 0;
-
-void turnOnModule (){
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(200);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(500);
-  
-  while(myME310.attention() == ME310::RETURN_TOUT)
-   {
-      digitalWrite(ON_OFF, HIGH);
-      digitalWrite(LED_BUILTIN, HIGH);
-      delay(6000);
-      digitalWrite(ON_OFF, LOW);
-      digitalWrite(LED_BUILTIN, LOW);
-      delay(1000);
-   }
-}
-
 
 void setup() {
   pinMode(ON_OFF, OUTPUT);
@@ -64,7 +59,7 @@ void setup() {
   Serial.begin(115200);
   myME310.begin(115200);
   delay(1000);
-  turnOnModule();
+  myME310.powerOn(ON_OFF);
   delay(5000);
   Serial.println("Telit Test AT GNSS command");
   Serial.println("ME310 ON");
@@ -98,7 +93,7 @@ void setup() {
 
   if (rc == ME310::RETURN_VALID)
   {
-    myME310.module_reboot();              //issue command AT#REBOOT 
+    myME310.module_reboot();              //issue command AT#REBOOT
     Serial.println(myME310.buffer_cstr(1));
   }
 
@@ -117,7 +112,7 @@ void setup() {
   Serial.println(ME310::return_string(rc));
   if (rc == ME310::RETURN_VALID)
   {
-    myME310.module_reboot();              //issue command AT#REBOOT 
+    myME310.module_reboot();              //issue command AT#REBOOT
     Serial.println(myME310.buffer_cstr(1));
   }
   delay(5000);
@@ -132,12 +127,12 @@ void setup() {
   Serial.println(ME310::return_string(rc));
   if (rc == ME310::RETURN_VALID)
   {
-    myME310.module_reboot();              //issue command AT#REBOOT 
+    myME310.module_reboot();              //issue command AT#REBOOT
     Serial.println(myME310.buffer_cstr(1));
   }
   delay(5000);
-  
- 
+
+
   /////////////////////////////////////
   // Set on/off GNSS controller
   // AT$GPSP=<status>
@@ -176,7 +171,7 @@ void setup() {
   //  Set the real-time clock of the module.
   //  AT+CCLK="05/07/21,12:40:00+00"
   /////////////////////////////////////
-  Serial.println("Set the real-time clock of the module.");  
+  Serial.println("Set the real-time clock of the module.");
   rc = myME310.clock_management("05/07/21,12:40:00+00");
   Serial.println(ME310::return_string(rc));
 
@@ -196,7 +191,7 @@ void setup() {
   //  Read command returns the requested and the active status for each agnss provider.
   //  $AGNSS: <provider>,<active>,<requested>
   //  Request value is 0 to disable or 1 to enable
-  ///////////////////////////////////// 
+  /////////////////////////////////////
   myME310.read_gnss_set_agnss_enable();
   Serial.println(myME310.buffer_cstr(1));
 }
@@ -226,7 +221,7 @@ void loop() {
           int len = tmp_pos.copy(valid_pos, ((len_pos2-1)-len_pos), len_pos+1);
           if(len > 2)
           {
-            digitalWrite(LED_BUILTIN, HIGH); 
+            digitalWrite(LED_BUILTIN, HIGH);
             delay(6000);
             digitalWrite(LED_BUILTIN, LOW);
             delay(1000);

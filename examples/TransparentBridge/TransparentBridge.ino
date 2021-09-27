@@ -1,42 +1,48 @@
-#include <ME310.h>
+/*Copyright (C) 2020 Telit Communications S.p.A. Italy - All Rights Reserved.*/
+/*    See LICENSE file in the project root for full license information.     */
 
-/*  
-    //sercom2
-    #define PIN_MODULE_RX 29
-    #define PIN_MODULE_TX 28
-    #define PAD_MODULE_TX UART_TX_PAD_0
-    #define PAD_MODULE_RX SERCOM_RX_PAD_1
-    #define PIN_MODULE_RTS 30
-    #define PIN_MODULE_CTS 31
+/**
+  @file
+    ME310.cpp
+    string.h
+    stdio.h
 
-    #define ON_OFF 27
-    
-    Uart SerialModule(&sercom4, PIN_MODULE_RX, PIN_MODULE_TX, PAD_MODULE_RX, PAD_MODULE_TX, PIN_MODULE_RTS, PIN_MODULE_CTS);
+  @brief
+    Driver Library for ME310 Telit Modem
 
-    ME310 myME310 (SerialModule); 
-    
+  @details
+    The library contains a single class that implements a C++ interface to all ME310 AT Commands.
+    It makes it easy to build Arduino applications that use the full power of ME310 module
+
+  @version
+    1.0.0
+  
+  @note
+
+  @author
+    Cristina Desogus
+
+  @date
+    28/10/2020
  */
 
-using namespace me310;
- 
-ME310 myME310; 
+#include <ME310.h>
 
-void turnOnModule (){
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(200);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(500);
-  
-  while(myME310.attention() == ME310::RETURN_TOUT)
-   {
-      digitalWrite(ON_OFF, HIGH);  
-      digitalWrite(LED_BUILTIN, HIGH); 
-      delay(6000);                      
-      digitalWrite(ON_OFF, LOW);
-      digitalWrite(LED_BUILTIN, LOW);    
-      delay(1000);                      
-   }
-}
+#ifndef ARDUINO_TELIT_SAMD_CHARLIE
+#define ON_OFF 6 /*Select the GPIO to control ON_OFF*/
+#endif
+
+using namespace me310;
+/*
+ * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n 
+ * Please refer to your board configuration in variant.h file.
+ * Example:
+ * Uart Serial1(&sercom4, PIN_MODULE_RX, PIN_MODULE_TX, PAD_MODULE_RX, PAD_MODULE_TX, PIN_MODULE_RTS, PIN_MODULE_CTS);
+ * ME310 myME310 (Serial1); 
+ */
+ME310 myME310;
+ME310::return_t rc;     //Enum of return value  methods
+
 
 void setup() {
   pinMode(ON_OFF, OUTPUT);
@@ -46,12 +52,12 @@ void setup() {
   Serial.begin(115200);
   myME310.begin(115200);
   delay(1000);
-  
+
   Serial.println("TURN ON ME310");
-  turnOnModule();
+  myME310.powerOn();
   Serial.println("ME310 TURNED ON");
   Serial.println("Bridge Communication Enabled");
-  
+
 }
 
 void loop() {

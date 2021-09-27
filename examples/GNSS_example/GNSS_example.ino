@@ -11,7 +11,10 @@
     Sample test of the use of AT commands via ME310 library
 
   @details
-    In this example sketch, the use of methods offered by the ME310 library for using AT commands is shown.
+    In this example sketch, it is shown how to use GNSS management using ME310 library.\n
+    GNSS configuration, GNSS controller power management, GNSS nmea configuration functions are shown.\n
+    GPS positions are acquired and response is printed.
+
 
   @version 
     1.0.0
@@ -21,7 +24,7 @@
   @author
     Cristina Desogus
 
-  @date
+  @date  
     02/07/2021
  */
 
@@ -31,29 +34,22 @@
 /*When NMEA_DEBUG is 0 Unsolicited NMEA is disable*/
 #define NMEA_DEBUG 0
 
+#ifndef ARDUINO_TELIT_SAMD_CHARLIE
+#define ON_OFF 6 /*Select the GPIO to control ON_OFF*/
+#endif
+
 using namespace me310;
-
+/*
+ * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n 
+ * Please refer to your board configuration in variant.h file.
+ * Example:
+ * Uart Serial1(&sercom4, PIN_MODULE_RX, PIN_MODULE_TX, PAD_MODULE_RX, PAD_MODULE_TX, PIN_MODULE_RTS, PIN_MODULE_CTS);
+ * ME310 myME310 (Serial1); 
+ */
 ME310 myME310;
+ME310::return_t rc;     //Enum of return value  methods
 
-ME310::return_t rc; 
 int count = 0;
-
-void turnOnModule (){
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(200);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(500);
-  
-  while(myME310.attention() == ME310::RETURN_TOUT)
-   {
-      digitalWrite(ON_OFF, HIGH);  
-      digitalWrite(LED_BUILTIN, HIGH); 
-      delay(6000);                      
-      digitalWrite(ON_OFF, LOW);
-      digitalWrite(LED_BUILTIN, LOW);    
-      delay(1000);                      
-   }
-}
 
 void setup() {
   pinMode(ON_OFF, OUTPUT);
@@ -63,10 +59,10 @@ void setup() {
   Serial.begin(115200);
   myME310.begin(115200);
   delay(1000);
-  turnOnModule();
+  myME310.powerOn();
   delay(5000);
-  Serial.println("Telit Test AT GNSS command");    
-  Serial.println("ME310 ON");  
+  Serial.println("Telit Test AT GNSS command");
+  Serial.println("ME310 ON");
   Serial.println("AT Command");
   ME310::return_t rc = myME310.attention();    // issue command and wait for answer or timeout
   Serial.println(myME310.buffer_cstr(0));       // print first line of modem answer
@@ -87,10 +83,10 @@ void setup() {
   // 0 : priority GNSS
   // 1 : priority WWAN
   /////////////////////////////////////
-  rc = myME310.gnss_configuration(0,0); 
+  rc = myME310.gnss_configuration(0,0);
   if (rc == ME310::RETURN_VALID)
   {
-    myME310.module_reboot();              //issue command AT#REBOOT 
+    myME310.module_reboot();              //issue command AT#REBOOT
     Serial.println(myME310.buffer_cstr(1));
   }
 
@@ -107,7 +103,7 @@ void setup() {
   rc = myME310.gnss_configuration(2,1);
   if (rc == ME310::RETURN_VALID)
   {
-    myME310.module_reboot();              //issue command AT#REBOOT 
+    myME310.module_reboot();              //issue command AT#REBOOT
     Serial.println(myME310.buffer_cstr(1));
   }
   delay(5000);
@@ -121,7 +117,7 @@ void setup() {
   rc = myME310.gnss_configuration(3,0);
   if (rc == ME310::RETURN_VALID)
   {
-    myME310.module_reboot();              //issue command AT#REBOOT 
+    myME310.module_reboot();              //issue command AT#REBOOT
     Serial.println(myME310.buffer_cstr(1));
   }
   delay(5000);
@@ -190,7 +186,7 @@ void loop() {
             digitalWrite(LED_BUILTIN, LOW);    
             delay(1000); 
           }
-        }        
+        }
     }
   }
   delay(5000);
@@ -221,6 +217,4 @@ void loop() {
     exit(0);
   }
   count++;
-  
 }
-

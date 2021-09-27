@@ -2,7 +2,7 @@
 /*         >>> Copyright (C) Telit Communications S.p.A. Italy All Rights Reserved. <<<          */
 /*!
   @file
-    StringParsing.h
+    PathParsing.h
 
   @brief
    Parsing string

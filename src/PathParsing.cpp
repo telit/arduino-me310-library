@@ -1,3 +1,30 @@
+/*Copyright (C) 2020 Telit Communications S.p.A. Italy - All Rights Reserved.*/
+/*    See LICENSE file in the project root for full license information.     */
+
+/**
+  @file
+    PathParsing.cpp
+
+  @brief
+    PathParsing interface for AT command
+
+  @details
+    This library contains a interface that implements a parsing functions for path.\n
+
+  @version
+    1.0.0
+  
+  @note
+    Dependencies:
+    PathParsing.h
+
+  @author
+    Cristina Desogus
+
+  @date
+    02/23/2021
+*/
+
 #include "PathParsing.h"
 #include <string.h>
 #include "Arduino.h"

@@ -28,45 +28,23 @@
  
  #include <ME310.h>
 
-/*  
-    //sercom2
-    #define PIN_MODULE_RX 29
-    #define PIN_MODULE_TX 28
-    #define PAD_MODULE_TX UART_TX_PAD_0
-    #define PAD_MODULE_RX SERCOM_RX_PAD_1
-    #define PIN_MODULE_RTS 30
-    #define PIN_MODULE_CTS 31
-
-    #define ON_OFF 27
-    
-    Uart SerialModule(&sercom4, PIN_MODULE_RX, PIN_MODULE_TX, PAD_MODULE_RX, PAD_MODULE_TX, PIN_MODULE_RTS, PIN_MODULE_CTS);
-
-    ME310 myME310 (SerialModule); 
-    
- */
+#ifndef ARDUINO_TELIT_SAMD_CHARLIE
+#define ON_OFF 6 /*Select the GPIO to control ON_OFF*/
+#endif
 
 using namespace me310;
- 
-ME310 myME310; 
+/*
+ * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n 
+ * Please refer to your board configuration in variant.h file.
+ * Example:
+ * Uart Serial1(&sercom4, PIN_MODULE_RX, PIN_MODULE_TX, PAD_MODULE_RX, PAD_MODULE_TX, PIN_MODULE_RTS, PIN_MODULE_CTS);
+ * ME310 myME310 (Serial1); 
+ */
+ME310 myME310;
+ME310::return_t rc;     //Enum of return value  methods
 
 void print_buffer(ME310 &aME310, const char *term = "OK");
 
-void turnOnModule (){
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(200);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(500);
-  
-  while(myME310.attention() == ME310::RETURN_TOUT)
-   {
-      digitalWrite(ON_OFF, HIGH);  
-      digitalWrite(LED_BUILTIN, HIGH); 
-      delay(6000);                      
-      digitalWrite(ON_OFF, LOW);
-      digitalWrite(LED_BUILTIN, LOW);    
-      delay(1000);                      
-   }
-}
 
 void setup() {
   pinMode(ON_OFF, OUTPUT);
@@ -79,7 +57,7 @@ void setup() {
 
   Serial.println("SERCOMM Telit Test AT");
   
-  turnOnModule();
+  myME310.powerOn();
   
   Serial.println("ME310 ON");
 
@@ -90,15 +68,14 @@ void setup() {
    Serial.print(ME310::return_string(rc));      // print return value
    Serial.println(" answer from ME310 MODULE");  
    if(rc != ME310::RETURN_VALID)                // exit on error
-      return;     
-
+      return;
 
    Serial.println();
    Serial.print("Soft Reset Command : ");
    rc = myME310.soft_reset ();                 // issue command and wait for answer or timeout
    Serial.println(ME310::return_string(rc));   // print return value
    if(rc != ME310::RETURN_VALID)               // exit on error
-      return;     
+      return;
    
    Serial.println();
    Serial.println("Display Config Profile : ");  
@@ -130,7 +107,7 @@ void setup() {
             else
                Serial.println("PIN required");
          }
-         else return;      
+         else return; 
 
          Serial.println();
          Serial.print("Print ICCID : ");  
@@ -146,15 +123,15 @@ void setup() {
             }
          }
          else return;
-         
-         Serial.print("Print IMSI : ");  
+
+         Serial.print("Print IMSI : ");
          rc = myME310.imsi();                 // no command echo
          if(rc == ME310::RETURN_VALID)
             Serial.println(myME310.buffer_cstr(1));
          else return;
-         
+
          Serial.println();
-         Serial.println("List Capabilities : ");  
+         Serial.println("List Capabilities : ");
          rc = myME310.capabilities_list();
          if(rc == ME310::RETURN_VALID)               // print all rows returned from ME310 except command echo (index = 0)
             Serial.println(myME310.buffer_cstr(1));
@@ -168,67 +145,67 @@ void setup() {
 
 
    Serial.println();
-   Serial.print("Manufacturer Identification : ");  
+   Serial.print("Manufacturer Identification : ");
    rc = myME310.manufacturer_identification();
-   if(rc == ME310::RETURN_VALID)               
+   if(rc == ME310::RETURN_VALID)
       Serial.println(myME310.buffer_cstr(1));
-   else return;   
+   else return;
    
-   Serial.print("Model Identification        : ");  
+   Serial.print("Model Identification        : ");
    rc = myME310.model_identification();
-   if(rc == ME310::RETURN_VALID)               
+   if(rc == ME310::RETURN_VALID)
       Serial.println(myME310.buffer_cstr(1));
-   else return;   
+   else return;
 
-   Serial.print("Revision Identification     : ");  
+   Serial.print("Revision Identification     : ");
    rc = myME310.revision_identification();
-   if(rc == ME310::RETURN_VALID)               
+   if(rc == ME310::RETURN_VALID)
       Serial.println(myME310.buffer_cstr(1));
-   else return;   
+   else return;
 
-   Serial.print("Serial Number               : ");  
+   Serial.print("Serial Number               : ");
    rc = myME310.serial_number();
-   if(rc == ME310::RETURN_VALID)               
+   if(rc == ME310::RETURN_VALID)
       Serial.println(myME310.buffer_cstr(1));
    else return;   
 
-   Serial.print("Request Manufacturer Ident. : ");  
+   Serial.print("Request Manufacturer Ident. : ");
    rc = myME310.request_manufacturer_identification();
-   if(rc == ME310::RETURN_VALID)               
+   if(rc == ME310::RETURN_VALID)
       Serial.println(myME310.buffer_cstr(1));
-   else return;   
-   
-   Serial.print("Request Model Ident.        : ");  
+   else return;
+
+   Serial.print("Request Model Ident.        : ");
    rc = myME310.request_model_identification();
-   if(rc == ME310::RETURN_VALID)               
+   if(rc == ME310::RETURN_VALID)
       Serial.println(myME310.buffer_cstr(1));
-   else return;   
+   else return;
 
-   Serial.print("Request Revision Ident.     : ");  
+   Serial.print("Request Revision Ident.     : ");
    rc = myME310.request_revision_identification();
-   if(rc == ME310::RETURN_VALID)               
+   if(rc == ME310::RETURN_VALID)
       Serial.println(myME310.buffer_cstr(1));
-   else return;   
+   else return;
 
-   Serial.print("Product Serial Number       : ");  
+   Serial.print("Product Serial Number       : ");
    rc = myME310.request_psn_identification();
-   if(rc == ME310::RETURN_VALID)               
+   if(rc == ME310::RETURN_VALID)
       Serial.println(myME310.buffer_cstr(1));
-   else return;   
-   
-   Serial.print("Product Code                : ");  
+   else return;
+
+   Serial.print("Product Code                : ");
    rc = myME310.request_product_code();
-   if(rc == ME310::RETURN_VALID)               
+   if(rc == ME310::RETURN_VALID)
       Serial.println(myME310.buffer_cstr(1));
-   else return;   
-   
-   Serial.println();  
-   Serial.println("Software Package Version    : ");  
+   else return;
+
+   Serial.println();
+   Serial.println("Software Package Version    : ");
    rc = myME310.request_software_package_version();
-   if(rc == ME310::RETURN_VALID)               
+   if(rc == ME310::RETURN_VALID)
       print_buffer(myME310);
-   else return;   
-   
+   else return;
+
 }
 
 void loop() {
@@ -254,9 +231,9 @@ void print_buffer(ME310 &aME310, const char *term)
         if(term)
         {
            if(strcmp(tmp,term))
-              Serial.println(tmp);         // print if not null  
+              Serial.println(tmp);         // print if not null
            else
-              break;   
+              break;
         }
       }
       else break;                          // exit loop if null

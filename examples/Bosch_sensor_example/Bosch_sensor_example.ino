@@ -30,12 +30,11 @@
 #include <BMA400.h>
 
 float x = 0, y = 0, z = 0;
-float xACC = 0, yACC = 0, zACC = 0; 
+float xACC = 0, yACC = 0, zACC = 0;
 int16_t temperature = 0;
 uint8_t idDev = 0; 
 
 void setup() {
-
   Wire.begin();
   Serial.begin(115200);
   delay(1000);
