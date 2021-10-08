@@ -1,5 +1,9 @@
 ME310 0.0.0 - ????.??.??
 
+ME310 2.5.0 - 2021.10.08
+* Changed Bosch example to use BMA400-API library
+* Minor code cleanup
+
 ME310 2.4.0 - 2021.09.27
 * Add SMS management in AT commands
 * Add binary mode improvements for sockets data
