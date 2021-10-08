@@ -47,11 +47,11 @@ const char *resp;
 #define ON_OFF 6 /*Select the GPIO to control ON_OFF*/
 #endif
 /*
- * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n 
+ * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n
  * Please refer to your board configuration in variant.h file.
  * Example:
  * Uart Serial1(&sercom4, PIN_MODULE_RX, PIN_MODULE_TX, PAD_MODULE_RX, PAD_MODULE_TX, PIN_MODULE_RTS, PIN_MODULE_CTS);
- * ME310 myME310 (Serial1); 
+ * ME310 myME310 (Serial1);
  */
 ME310 myME310;
 
