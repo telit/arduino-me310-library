@@ -13,9 +13,9 @@
     This library contains a interface that implements a parsing functions for AT command.\n
     Parser is an abstract class and handles common methods, like gets and parse.\n
     The concrete classes, derived by Parser, implement the parsing methods for the specific AT command.\n
-  @version 
-    1.0.0
-  
+  @version
+    1.1.1
+
   @note
     Dependencies:
     Parser.h
@@ -48,7 +48,7 @@ namespace telitAT
             return ch - 'A' + 10;
         return 0;
     }
-    
+
     static void ConvertBufferIRAToOctet(uint8_t* in, uint8_t* out, unsigned int len)
     {
         uint8_t LV_reg;
@@ -90,6 +90,29 @@ namespace telitAT
         }
     }
 
+    //! \brief Implements the parse method.
+    /*! \details
+        This methods calls the methods to parser the different part of received string.
+    * \param buf pointer to char buffer.
+    * \return 0 if the string is different from null, else -1.
+    */
+    int Parser::parse(char *buf)
+    {
+        _rawData = buf;
+        _buf = buf;
+        if (_rawData.size() != 0)
+        {
+            _recvBytes = receivedBytes();
+            _startPayloadOffset = findPayloadStart();
+            _response = searchCommandResponseString();
+            _payload = extractedData();
+            return 0;
+        }
+        else
+        {
+            return -1;
+        }
+    }
     //! \brief Class Destructor
     /*!
     */
@@ -110,7 +133,7 @@ namespace telitAT
     {
         return _recvBytes;
     }
-    
+
     //! \brief Gets the payload string
     /*! \details
         This method gets payload pointer. Before calling this method it is mandatory to call the parse() method.
@@ -132,7 +155,7 @@ namespace telitAT
     }
 
     //! \brief Gets the command response string
-    /*! \details 
+    /*! \details
         This method gets command response string pointer. Before calling this method it is mandatory to call the parse() method.
     /*! \return pointer of command response string
     */
@@ -142,7 +165,7 @@ namespace telitAT
     }
 
     //! \brief Gets the command response is
-    /*! \details 
+    /*! \details
         This method gets a boolean value of command response, if the command response is present, return true, else return false.\n
         Before calling this method it is mandatory to call the parse() method.
     /*! \return true if the command response string is in the string, otherwise false
@@ -219,7 +242,7 @@ namespace telitAT
         tmp_str = _rawData;
         char expBytes[16];
         size_t posComma = 0;
-        
+
         posComma = tmp_str.find_first_of(",", posComma + 1);
         if(posComma != string::npos)
         {
@@ -244,7 +267,7 @@ namespace telitAT
     //! \brief Implements  the search for payload data
     /*! \details
         This method parses the string to search the payload data, it is specific for #SRECV AT command.\n
-        It returns a pointer to payload data. 
+        It returns a pointer to payload data.
     /*! \return pointer to payload data if the format is right otherwise return null pointer.
     */
     uint8_t * SRECVParser::extractedData()
@@ -260,11 +283,11 @@ namespace telitAT
         int len = tmp_str.copy((char*)_payloadData, tmp_recvBytes, _startPayloadOffset+1);
         if(len != string::npos)
         {
-            _payloadData[len] = '\0'; 
+            _payloadData[len] = '\0';
             if(_isIRA)
             {
                 ConvertBufferIRAToOctet(_payloadData, _payloadData, len);
-            }      
+            }
             return _payloadData;
         }
         else
@@ -292,7 +315,7 @@ namespace telitAT
                 posComma = tmp_str.find_first_of(",", posComma + 1);
                 if(posComma != string::npos)
                 {
-                    posComma = tmp_str.find_first_of(",", posComma + 1);            
+                    posComma = tmp_str.find_first_of(",", posComma + 1);
                 }
                 if(posComma == string::npos)
                 {
@@ -307,18 +330,18 @@ namespace telitAT
                 {
                     int len = tmp_str.copy(recvBytes, ((posSecondNewRow-1) - posComma), posComma+1);
                     recvBytes[len] = '\0';
-                    return atoi(recvBytes); 
+                    return atoi(recvBytes);
                 }
                 else
                 {
                     return posSecondNewRow;
                 }
-            }  
+            }
             else
             {
                 return posComma;
             }
-        }  
+        }
         else
         {
             return posDots;
@@ -331,12 +354,12 @@ namespace telitAT
     /*! \return true if the format is right otherwise return false.
     */
     bool SRECVParser::searchCommandResponseString()
-    { 
+    {
         memset(_commandResponse, 0, MAX_CMD_RESPONSE);
         string tmp_str;
         tmp_str = _rawData;
         int len = tmp_str.copy(_commandResponse, tmp_str.length() - (_startPayloadOffset + _recvBytes), _startPayloadOffset + _recvBytes);
-       
+
         if(len != string::npos)
         {
             _commandResponse[len] = '\0';
@@ -485,7 +508,7 @@ namespace telitAT
                 }
             }
             else
-            { 
+            {
                 return posDots;
             }
         }
@@ -535,7 +558,7 @@ namespace telitAT
                 strcpy(_commandResponse, CME_ERROR_STRING);
                 return true;
             }
-            return false; 
+            return false;
             }
         else
         {
@@ -657,7 +680,7 @@ namespace telitAT
                         {
                             int len = tmp_str.copy(recvBytes, ((posSecondNewRow-1) - posSecondComma), posSecondComma+1);
                             recvBytes[len] = '\0';
-                            return atoi(recvBytes); 
+                            return atoi(recvBytes);
                         }
                         else
                         {
@@ -787,20 +810,8 @@ namespace telitAT
     uint8_t * M2MReadParser::extractedData()
     {
         memset(_payloadData, 0, MAX_PAYLOAD);
-        string tmp_str;
-        tmp_str = _rawData;
-        char pl[MAX_PAYLOAD];
-        int len = tmp_str.copy(pl, _recvBytes, _startPayloadOffset);
-        if(len != string::npos)
-        {
-            pl[len] = '\0';
-            memcpy(_payloadData, pl, len);
-            return _payloadData;
-        }
-        else
-        {
-            return nullptr;
-        }
+        memcpy(_payloadData, _buf + _startPayloadOffset, _recvBytes);
+        return _payloadData;
     }
 
     //! \brief Implements  the search for received bytes
@@ -822,8 +833,8 @@ namespace telitAT
     {
         memset(_commandResponse, 0, MAX_CMD_RESPONSE);
         string tmp_str;
-        tmp_str = _rawData;
-        int len = tmp_str.copy(_commandResponse, tmp_str.length() - (_startPayloadOffset + _recvBytes), _startPayloadOffset + _recvBytes);
+        tmp_str = _buf + (_startPayloadOffset + _recvBytes);
+        int len = tmp_str.copy(_commandResponse, tmp_str.length());
         if(len != string::npos)
         {
             _commandResponse[len] = '\0';
@@ -914,7 +925,7 @@ namespace telitAT
                 std::size_t pos1 = tmp.find("#");
                 string tmp1 = tmp.substr(0, pos1);
                 pld.insert(pld.length(),tmp1);
-                
+
                 while(pos != string::npos)
                 {
                     pos = tmp.find(":");
@@ -924,7 +935,7 @@ namespace telitAT
                     pld.insert(pld.length(),tmp1);
                     pos = tmp.find(":");
                 }
-                
+
                 len = pld.copy(pl, pld.length());
                 pl[len] = '\0';
                 memcpy(_payloadData, pl, len);

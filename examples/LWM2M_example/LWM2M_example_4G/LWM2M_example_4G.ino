@@ -35,7 +35,7 @@
 
 
 #include <ME310.h>
-#include "BMA400.h"
+#include <BMA400.h>
 using namespace me310;
 float x = 0, y = 0, z = 0;
 const byte INTERRUPT = ACC_INT_1;
@@ -63,13 +63,13 @@ void setup() {
   int rc;
   pinMode(ON_OFF, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(ON_OFF, LOW);
 
   Serial.begin(115200);
   myME310.begin(115200);
 
-  delay(3000);
-
+  delay(1000);
+  myME310.powerOn();
+  delay(5000);
   // issue command at#reboot
   myME310.module_reboot();
 

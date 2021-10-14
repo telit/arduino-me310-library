@@ -12,6 +12,8 @@
 
   @details
     In this example sketch, the use of sockets is shown through the commands offered by the ME310 library.\n   
+	NOTE:\n
+	For correct operation it is necessary to set the correct APN.
 
   @version 
     1.0.0
@@ -57,7 +59,6 @@ void setup() {
 
   pinMode(ON_OFF, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(ON_OFF, LOW);
 
   Serial.begin(115200);
   myME310.begin(115200);

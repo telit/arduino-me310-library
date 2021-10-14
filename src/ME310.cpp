@@ -17,7 +17,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version
-    2.4.0
+    2.6.0
 
   @note
 
@@ -5788,6 +5788,7 @@ This command stores a file in the file system.
 ME310::return_t ME310::m2m_write_file(const char *file_name, int size, int binToMod, char* data, tout_t aTimeout)
 {
    ME310::return_t ret;
+   SET_BIT_MASK(_option, _M2MWRITE_BIT);
    memset(mBuffer, 0, ME310_BUFFSIZE);
    if(ME310_BUFFSIZE-1 < size)
    {
@@ -5808,9 +5809,10 @@ ME310::return_t ME310::m2m_write_file(const char *file_name, int size, int binTo
       {
          memset(mBuffer, 0, ME310_BUFFSIZE);
          memcpy(mBuffer, data, size);
-         ret =  send_wait((char*)mBuffer, OK_STRING, TERMINATION_STRING, aTimeout);
+         ret =  send_wait((char*)mBuffer, size, OK_STRING, NULL, aTimeout);
       }
    }
+   UNSET_BIT_MASK(_option, _M2MWRITE_BIT);
    return ret;
 }
 
@@ -5838,6 +5840,7 @@ ME310::return_t ME310::m2m_list(tout_t aTimeout)
 {
    return m2m_list(".", aTimeout);
 }
+
 //! \brief Implements the AT\#M2MREAD command and waits for OK answer
 /*! \details
 This command reports the content of a file stored in the File System.
@@ -5847,16 +5850,23 @@ This command reports the content of a file stored in the File System.
  */
 ME310::return_t ME310::m2m_read(const char *file_name, tout_t aTimeout)
 {
+   ME310::return_t ret;
    memset(mBuffer, 0, ME310_BUFFSIZE);
    PathParsing strPar((char*)file_name);
    m2m_list(strPar.getPath());
    int fileSize = strPar.getFileSize((char*)buffer_cstr_raw());
+   SET_BIT_MASK(_option, _M2MREAD_BIT);
    if(fileSize > ME310_BUFFSIZE-1)
    {
-      return RETURN_ERROR;
+      ret = RETURN_ERROR;
    }
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#M2MREAD=\"%s\""), file_name);
-   return send_wait((char*)mBuffer, fileSize, OK_STRING, aTimeout);
+   else
+   {
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#M2MREAD=\"%s\""), file_name);
+      ret =  send_wait((char*)mBuffer, fileSize, OK_STRING, aTimeout);
+   }
+   UNSET_BIT_MASK(_option, _M2MREAD_BIT);
+   return ret;
 }
 
 //! \brief Implements the AT\#M2MRAM command and waits for OK answer
@@ -6201,7 +6211,7 @@ ME310::return_t ME310::get_position_GTP_WWAN_service(tout_t aTimeout)
    return send_wait(F("AT#GTP"), OK_STRING, aTimeout);
 }
 
-//! \brief Implements the AT$GPSACP command and waits for OK answer
+//! \brief Implements the AT#GTPENA command and waits for OK answer
 /*! \details
 This command returns information about the last GPS position.
  * \param aTimeout timeout in ms
@@ -6415,6 +6425,17 @@ void ME310::send(const char *aCommand, const char *aTerm)
    mSerial.write(aTerm);
 }
 
+//! \brief Sends binary data to the ME310 serial
+/*!
+ * \param data    data buffer to be sent
+ * \param len     amount of data to be written in bytes
+ */
+void ME310::send(const uint8_t* data, int len)
+{
+   on_command((char*)data); //callback
+   mSerial.write(data, len);
+}
+
 //! \brief Sends a read AT command and waits for answer or timeout
 /*!
  * \param aCommand command string to send
@@ -6492,7 +6513,14 @@ ME310::return_t ME310::send_wait(const char *aCommand, int flag,  const char *aA
  */
 ME310::return_t ME310::send_wait(const char *aCommand, int flag,  const char *aAnswer, const char* term, ME310::tout_t aTimeout)
 {
-   send(aCommand,term); // send with terminator
+   if(term)
+   {
+      send(aCommand,term); // send with terminator
+   }
+   else
+   {
+      send((uint8_t*) aCommand, flag);
+   }
    return wait_for(aCommand, flag, aAnswer, aTimeout);
 }
 
@@ -6570,7 +6598,6 @@ return RETURN_TOUT;
  */
 ME310::return_t ME310::wait_for(const char* aCommand, int flag, const char *aAnswer, ME310::tout_t aTimeout)
 {
-   /*TODO Check SRING SSLRING*/
    char cmd[64];
    strcpy(cmd, aCommand);
    ATCommandDataParsing* dataParsing;
@@ -6589,7 +6616,7 @@ ME310::return_t ME310::wait_for(const char* aCommand, int flag, const char *aAns
    unsigned long timeout = 0;
    do
    {
-      if(mBuffLen != ME310_BUFFSIZE)
+      if(mBuffLen < ME310_BUFFSIZE)
       {
          int bytesRead = mSerial.readBytes(mpBuffer, ME310_BUFFSIZE-mBuffLen-1);
          if(bytesRead > 1) /* if full string add to buffer */
@@ -6597,7 +6624,7 @@ ME310::return_t ME310::wait_for(const char* aCommand, int flag, const char *aAns
             mpBuffer[bytesRead+1] = '\0';
             bytesRead++;
             pBuffer = mpBuffer;
-            strcat(tmp_str, (char*)mpBuffer);
+            memcpy(tmp_str + mBuffLen, (char*)mpBuffer, bytesRead);
             mpBuffer += bytesRead;
             mBuffLen += bytesRead;
             rc = on_message((const char *)pBuffer);
@@ -6633,6 +6660,7 @@ ME310::return_t ME310::wait_for(const char* aCommand, int flag, const char *aAns
          if(dataParsing->commandResponseResult())
          {
             _payloadData = (uint8_t *) dataParsing->extractedPayload();
+
             if(str_equal(dataParsing->commandResponseString(), OK_STRING))
             {
                rc = RETURN_VALID;
@@ -6977,7 +7005,6 @@ This method converts buffer in IRA mode
 */
 void ME310::ConvertBufferToIRA(uint8_t* recv_buf, uint8_t* out_buf, int size)
 {
-   /*TODO check out_buf len and return size*2*/
     memset(out_buf, 0, (size*2)+1);
     for (unsigned int i = 0; i < size; i++)
     {

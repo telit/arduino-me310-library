@@ -10,9 +10,9 @@
   @details
     The class implements the data parsing function for AT command which need specific response.\n
     It is possible obtain data payload, receivedBytes
-  
+
   @version
-    1.2.0
+    1.2.1
 
   @note
     Dependencies:
@@ -40,7 +40,7 @@ using namespace telitAT;
 
 /*! \class ATCommandDataParsing
     \brief Implements the data parsing to AT command
-    \details 
+    \details
     The class implements the data parsing function.\n
 */
 class ATCommandDataParsing
@@ -65,6 +65,7 @@ class ATCommandDataParsing
     int _exBytes;         //!< Expected bytes
     int _recvBytes;       //!< Received bytes
     string _str;
+    char* _buf;
     char _command[64];    //!< Array to command string
     Parser *_parser;      //!< Pointer to class parser
 };

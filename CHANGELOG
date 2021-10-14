@@ -1,5 +1,10 @@
 ME310 0.0.0 - ????.??.??
 
+ME310 2.6.0 - 2021.10.14
+* File utilities improvements
+* sketches code improvements
+* code cleanup
+
 ME310 2.5.0 - 2021.10.08
 * Changed Bosch example to use BMA400-API library
 * Minor code cleanup

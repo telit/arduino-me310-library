@@ -11,9 +11,9 @@
     Driver Library for ME310 Telit Modem
 
   @details
-    The library contains a single class that implements a C++ interface to all ME310 AT Commands.
-    It makes it easy to build Arduino applications that use the full power of ME310 module
-
+    The library contains a single class that implements a C++ interface to all ME310 AT Commands.\n
+    It makes it easy to build Arduino applications that use the full power of ME310 module.\n
+	
   @version
     1.0.0
   
@@ -47,7 +47,6 @@ ME310::return_t rc;     //Enum of return value  methods
 void setup() {
   pinMode(ON_OFF, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(ON_OFF, LOW);
 
   Serial.begin(115200);
   myME310.begin(115200);

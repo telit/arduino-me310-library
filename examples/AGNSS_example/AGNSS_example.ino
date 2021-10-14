@@ -14,11 +14,12 @@
     In this example sketch, it is shown how to use AGNSS management, using ME310 library.\n
     AGNSS is enable, GNSS configuration, GNSS controller power management, GNSS nmea configuration functions are shown.\n
     GPS positions are acquired and response is printed.
+	NOTE:\n
+	For the sketch to work correctly, GNSS should be tested in open sky conditions to allow a fix. The fix may take a few minutes.
 
-
-  @version 
+  @version
     1.0.0
-  
+
   @note
 
   @author
@@ -29,7 +30,7 @@
  */
 
 #include <ME310.h>
-#include <string>  
+#include <string>
 
 /*When NMEA_DEBUG is 0 Unsolicited NMEA is disable*/
 #define NMEA_DEBUG 0
@@ -40,21 +41,20 @@
 
 using namespace me310;
 /*
- * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n 
+ * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n
  * Please refer to your board configuration in variant.h file.
  * Example:
  * Uart Serial1(&sercom4, PIN_MODULE_RX, PIN_MODULE_TX, PAD_MODULE_RX, PAD_MODULE_TX, PIN_MODULE_RTS, PIN_MODULE_CTS);
- * ME310 myME310 (Serial1); 
+ * ME310 myME310 (Serial1);
  */
 ME310 myME310;
 
-ME310::return_t rc; 
+ME310::return_t rc;
 int count = 0;
 
 void setup() {
   pinMode(ON_OFF, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(ON_OFF, LOW);
 
   Serial.begin(115200);
   myME310.begin(115200);
@@ -79,7 +79,7 @@ void setup() {
   // e.g. $GPSCFG: 0,4321,2,0
   /////////////////////////////////////
   Serial.println("Read GNSS configuration");
-  myME310.read_gnss_configuration();            //issue command AT$GPSCFG? 
+  myME310.read_gnss_configuration();            //issue command AT$GPSCFG?
   Serial.println(myME310.buffer_cstr(1));
   /////////////////////////////////////
   // Set GNSS priority
@@ -99,7 +99,7 @@ void setup() {
 
   delay(5000);
   /////////////////////////////////////
-  // Set constellations 
+  // Set constellations
   // AT$GPSCFG=2,X
   // 0 : the constellation is selected automatically based on Mobile Country Code (MCC) of camped network
   // 1 : GPS+GLO
@@ -149,7 +149,7 @@ void setup() {
     // Set GNGSA, GLGSV and GNRMC as available sentence in the unsolicited NMEA sentences.
     // AT$GPSNMUNEX=0,1,1,0,0,0,0,0,0,0,0,1,0
     /////////////////////////////////////
-    rc = myME310.gnss_nmea_extended_data_configuration(0,1,1,0,0,0,0,0,0,0,0,1,0); 
+    rc = myME310.gnss_nmea_extended_data_configuration(0,1,1,0,0,0,0,0,0,0,0,1,0);
     if(rc ==  ME310::RETURN_VALID)
     {
       /////////////////////////////////////
@@ -180,7 +180,7 @@ void setup() {
   //  AT$AGNSS=provider,status
   //  <status>:0 to disable
   //           1 to enable
-  ///////////////////////////////////// 
+  /////////////////////////////////////
   Serial.println("Set the AGNSS providers enable.");
   myME310.gnss_set_agnss_enable(0,1);
 
@@ -202,7 +202,7 @@ void loop() {
   //  Get Acquired Position
   //  AT$GPSACP
   /////////////////////////////////////
-  
+
   rc = myME310.gps_get_acquired_position();
 
   /*When the position is fixed, the led blinks*/
