@@ -13,7 +13,7 @@
     Parser is an abstract class and handles common methods, like gets and parse.\n
     The concrete classes, derived by Parser, implement the parsing methods for the specific AT command.\n
   @version 
-    1.1.0
+    1.1.1
   
   @note
     Dependencies:
@@ -44,6 +44,9 @@ using namespace std;
 #define _IS_IRA_TX_BIT   0x00
 #define _IS_IRA_RX_BIT   0x01
 #define _UDP_INFO_BIT    0x02
+#define _M2MWRITE_BIT    0x04
+#define _M2MREAD_BIT     0x08
+
  
 
 #define SET_BIT_MASK(m, L)    (m |= (1 << L))
@@ -65,7 +68,8 @@ namespace telitAT
     class Parser
     {
       public:
-        virtual int parse(string str); 
+        virtual int parse(string str);
+        virtual int parse(char *buf);
         virtual int getReceivedBytes();
         virtual uint8_t * getPayload();
         virtual int getPayloadStart();
@@ -84,6 +88,7 @@ namespace telitAT
         char _commandResponse[MAX_CMD_RESPONSE];    //!< Command Response buffer
         uint8_t *_payload;                          //!< Pointer to payload string
         string _rawData;                             //!< Pointer to string data received
+        char *_buf;
         int _recvBytes;                             //!< Received bytes
         int _startPayloadOffset;                    //!< Start position to payload offset
         bool _response;                             //!< Command Response flag

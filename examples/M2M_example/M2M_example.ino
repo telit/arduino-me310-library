@@ -52,8 +52,7 @@ void setup() {
    
   pinMode(ON_OFF, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(ON_OFF, LOW);
-
+  
   Serial.begin(115200);
   myME310.begin(115200);
 

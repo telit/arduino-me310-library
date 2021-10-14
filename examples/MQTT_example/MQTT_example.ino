@@ -13,7 +13,9 @@
   @details
     In this example sketch, it is shown how to use MQTT management, using ME310 library.\n
     MQTT enable, MQTT configuration, MQTT connect, MQTT topic subscribe, MQTT publish, MQTT read 
-    and MQTT disconnect methods are used and responses are printed.\
+    and MQTT disconnect methods are used and responses are printed.\n
+	NOTE:\n
+	For the sketch to work properly, you need to set the correct APN, client_id, client_username, client_password.
 
 
   @version 
@@ -64,7 +66,6 @@ void setup() {
 
   pinMode(ON_OFF, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(ON_OFF, LOW);
 
   Serial.begin(115200);
   myME310.begin(115200);

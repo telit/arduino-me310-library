@@ -12,6 +12,9 @@
 
   @details
     In this example sketch, it is shown how to use FTP management, using ME310 library.\n
+	NOTE:\n
+	For correct operation it is necessary to set the correct APN, username and password.
+
 
   @version
     1.0.0
@@ -40,11 +43,11 @@
 
 using namespace me310;
 /*
- * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n 
+ * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n
  * Please refer to your board configuration in variant.h file.
  * Example:
  * Uart Serial1(&sercom4, PIN_MODULE_RX, PIN_MODULE_TX, PAD_MODULE_RX, PAD_MODULE_TX, PIN_MODULE_RTS, PIN_MODULE_CTS);
- * ME310 myME310 (Serial1); 
+ * ME310 myME310 (Serial1);
  */
 ME310 myME310;
 ME310::return_t rc;     //Enum of return value  methods
@@ -57,7 +60,6 @@ void setup() {
 
   pinMode(ON_OFF, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(ON_OFF, LOW);
 
   Serial.begin(115200);
   myME310.begin(115200);
@@ -190,6 +192,6 @@ void loop() {
     Serial.println((String)"ERROR: " + myME310.return_string(rc));
   }
   rc = myME310.ftp_close();
-  Serial.println("The application has ended..."); 
+  Serial.println("The application has ended...");
   exit(0);
 }

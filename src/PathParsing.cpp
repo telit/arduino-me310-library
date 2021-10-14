@@ -13,7 +13,7 @@
 
   @version
     1.0.0
-  
+
   @note
     Dependencies:
     PathParsing.h
@@ -39,7 +39,7 @@ namespace telitAT
     const char *ResponseFind::NO_CARRIER_STRING = "NO CARRIER";   ///< String for NO CARRIER modem answer
 
     //! \brief Class Constructor
-    /*! 
+    /*!
     * \param str pointer to a char string
     */
     PathParsing::PathParsing(char* str)
@@ -47,12 +47,12 @@ namespace telitAT
         memset(_path, 0, 128);
         memset(_filename,0,64);
         string tmp_str;
-        
+
         tmp_str = str;
         std::size_t found = tmp_str.find_last_of("/\\");
         if(found != string::npos)
         {
-            int len = tmp_str.copy(_path, found, 0); 
+            int len = tmp_str.copy(_path, found, 0);
             _path[len] = '\0';
             len = tmp_str.copy(_filename, tmp_str.length() - len, found + 1);
             _filename[len] = '\0';
@@ -74,7 +74,7 @@ namespace telitAT
         return _path;
     }
 
-    //! \brief Gets the file name 
+    //! \brief Gets the file name
     /*! \details
     This method returns the file name identified within the string passed to the constructor.
     /*! \return file name string
@@ -84,9 +84,9 @@ namespace telitAT
         return _filename;
     }
 
-    //! \brief Gets the file size 
+    //! \brief Gets the file size
     /*! \details
-    Returns the size of the file identified in the list. The file name is the one identified in the constructor. 
+    Returns the size of the file identified in the list. The file name is the one identified in the constructor.
     The value of the size is an integer, if the file is not found, -1 is returned.
     * \param list list to parse.
     * \return file size
@@ -102,7 +102,7 @@ namespace telitAT
         {
             int posComma =  str.find_first_of(",", posFilename);
             int posNewRow = str.find_first_of("\n", posComma);
-            int len = str.copy(sizeFile, posNewRow - posComma,posComma+1); 
+            int len = str.copy(sizeFile, posNewRow - posComma,posComma+1);
             sizeFile[len] = '\0';
             return atoi(sizeFile);
         }
@@ -143,7 +143,7 @@ namespace telitAT
             strcpy(_commandResponse, NO_CARRIER_STRING);
             return true;
         }
-        return false;        
+        return false;
     }
 
     char* ResponseFind::getResponse(char* str)
@@ -151,7 +151,7 @@ namespace telitAT
         if(findResponse(str))
         {
             return _commandResponse;
-        }           
+        }
         else
         {
             return nullptr;

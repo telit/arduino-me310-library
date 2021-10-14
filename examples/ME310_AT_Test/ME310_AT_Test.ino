@@ -49,7 +49,6 @@ void print_buffer(ME310 &aME310, const char *term = "OK");
 void setup() {
   pinMode(ON_OFF, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(ON_OFF, LOW);
 
   Serial.begin(115200);
   myME310.begin(115200);

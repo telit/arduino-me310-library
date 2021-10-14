@@ -10,11 +10,11 @@
 
   @details
     The class implements the data parsing function for AT command which need specific response.\n
-    It is possible obtain data payload  
+    It is possible obtain data payload
 
   @version
-    1.1.0
-  
+    1.2.1
+
   @note
     Dependencies:
     Arduino.h
@@ -32,7 +32,7 @@
 using namespace telitAT;
 
 //!\brief Class Constructor
-/*! \details 
+/*! \details
     Calls findCommand to pars the command string and creates a specific parser class.
 /*!
  * \param str string to parse
@@ -40,17 +40,25 @@ using namespace telitAT;
 ATCommandDataParsing::ATCommandDataParsing(const char* aCommand, const char* str, int flag, uint32_t option)
 {
     _str = (char* )str;
+    _buf = NULL;
     char* cmd;
     cmd = findCommand(aCommand);
     if(cmd == NULL && flag == -1)
     {
         _parser = nullptr;
     }
-    else 
+    else
     {
-        if(flag != 0)
+        if(IS_BIT_SET(option, _M2MREAD_BIT))
         {
+            _buf = (char*)str;
             _parser = new M2MReadParser(flag);
+            _parser->parse(_buf);
+        }
+        else if(IS_BIT_SET(option, _M2MWRITE_BIT))
+        {
+            _parser = new GenericParser();
+            _parser->parse(_str);
         }
         else
         {
@@ -78,8 +86,9 @@ ATCommandDataParsing::ATCommandDataParsing(const char* aCommand, const char* str
             {
                 _parser = new GenericParser();
             }
+            _parser->parse(_str);
         }
-        _parser->parse(_str);
+
     }
 }
 
@@ -89,7 +98,7 @@ ATCommandDataParsing::ATCommandDataParsing(const char* aCommand, const char* str
 * \return payload string if parser class is different from null pointer otherwise return null.
 */
 uint8_t * ATCommandDataParsing::extractedPayload()
-{    
+{
     if(_parser == nullptr)
     {
         return NULL;
@@ -99,7 +108,7 @@ uint8_t * ATCommandDataParsing::extractedPayload()
 
 //! \brief Implements the control to parser class exists
 /*! \details
-    
+
 * \return true if parser class is different from null pointer otherwise return false.
 */
 bool ATCommandDataParsing::parserIs()
@@ -176,7 +185,7 @@ int ATCommandDataParsing::startPositionPayloadOffset()
 }
 //! \brief Implements the  extraction of the command from the string
 /*! \details
-    Searches the string of command 
+    Searches the string of command
 * \return command string if the format of string is right otherwise return null.
 */
 char* ATCommandDataParsing::findCommand(const char* aCommand)
@@ -184,7 +193,7 @@ char* ATCommandDataParsing::findCommand(const char* aCommand)
     string tmp_str;
     tmp_str = aCommand;
     memset(_command, 0, 64);
-    int len; 
+    int len;
     std::size_t posColon = tmp_str.find_first_of("=");
     if(posColon != string::npos)
     {

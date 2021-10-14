@@ -8,13 +8,13 @@
    Parsing string
 
   @details
-   
-  
-  @version 
+
+
+  @version
     1.0.0
 
   @note
-    Dependencies: 
+    Dependencies:
     string.h
 
   @author
@@ -38,8 +38,8 @@ namespace telitAT
 
 /*! \class PathParsing
     \brief Implements the path parsing.
-    \details 
-    The class implements the path parsing function.\n 
+    \details
+    The class implements the path parsing function.\n
     The constructor receives a string from which to extract the path, the file name and the file size. These values ​​are returned by their respective get functions as a string.
 */
   class PathParsing
@@ -64,7 +64,7 @@ namespace telitAT
     public:
       bool findResponse(char* str);
       char* getResponse(char* str);
-    
+
     private:
       char _commandResponse[64];
 
@@ -74,7 +74,7 @@ namespace telitAT
       static const char *ERROR_STRING;
       static const char *CME_ERROR_STRING;
       static const char *NO_CARRIER_STRING;
-    
+
   };
 } //end namespace
 
