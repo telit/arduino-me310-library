@@ -13,7 +13,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version
-    2.6.0
+    2.7.0
 
   @note
     Dependencies:
@@ -1243,7 +1243,12 @@ namespace me310
 
       return_t set_trace(int mode, char* configuration_string, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(set_trace, "AT#TRACE", TOUT_100MS)
-   // -----------------------------------------------------------------------------
+
+   // Generic Command---------------------------------------------------------------
+
+      return_t send_command(const char *aCommand, const char *aAnswer = OK_STRING, tout_t aTimeout = TOUT_200MS);
+
+
       const uint8_t *buffer(void) { return mBuffer;} //!< Returns pointer to local buffer
       size_t length(void) { return mBuffLen;}        //!< Returns length of local buffer
       const char * buffer_cstr(int aIndex = 0);

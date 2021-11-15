@@ -37,6 +37,7 @@ The following examples are available:
  - **[Ping_example](examples/Ping_example/Ping_example.ino)** : _Simple example that enables the connectivity and pings a server_
  - **[Socket_example](examples/Socket_example/Socket_example.ino)** : _Enables connectivity and uses a TCP socket example communicating with a demo server_
  - **[TransparentBridge](examples/TransparentBridge/TransparentBridge.ino)** : _Enable the modem and creates a bridge between Arduino serial and modem AT interface, allowing user to send AT commands manually_
+ - **[GenericCommand_example](examples/GenericCommand_example/GenericCommand_example.ino)** : _Shows how to send AT commands to the modem manually and manage the response (useful for complex AT commands or chains of commands)_
 
 
 ## Support

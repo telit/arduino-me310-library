@@ -17,7 +17,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version
-    2.6.0
+    2.7.0
 
   @note
 
@@ -6368,6 +6368,22 @@ ME310::return_t ME310::set_trace(int mode, char* configuration_string, tout_t aT
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#TRACE=%d,%s"), mode, configuration_string);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
+
+//! \brief Send the generic AT command and waits for a specific answer
+/*! \details
+ The command sends a generic AT command and waits for a specific answer.
+ * \param aCommand command string to send
+ * \param aAnswer  answer string to wait for
+ * \param aTimeout answer timeout
+ * \return return code
+ */
+ME310::return_t ME310::send_command(const char *aCommand, const char *aAnswer, tout_t aTimeout)
+{
+   memset(mBuffer, 0, ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, aCommand);
+   return send_wait((char*)mBuffer, aAnswer, aTimeout);
+}
+
 //--------------------------------------------------------------------------------------------------------------
 //! \brief Returns the string by index received from the ME310 serial connection
 /*!

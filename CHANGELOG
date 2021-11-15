@@ -1,5 +1,8 @@
 ME310 0.0.0 - ????.??.??
 
+ME310 2.7.0 - 2021.11.15
+* Added generic AT command utilities and example sketch
+
 ME310 2.6.0 - 2021.10.14
 * File utilities improvements
 * sketches code improvements
