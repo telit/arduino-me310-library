@@ -1,5 +1,9 @@
 ME310 0.0.0 - ????.??.??
 
+ME310 2.8.0 - 2021.11.19
+* Added lwm2m objset function
+* Added float to string method
+
 ME310 2.7.0 - 2021.11.15
 * Added generic AT command utilities and example sketch
 
