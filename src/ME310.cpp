@@ -17,7 +17,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version
-    2.7.0
+    2.8.0
 
   @note
 
@@ -2483,8 +2483,6 @@ The command is related to sending short messages.
 ME310::return_t ME310::send_short_message(int length, char *data, tout_t aTimeout)
 {
    ME310::return_t ret;
-   //read_message_format();
-   //parsing response
    memset(mBuffer, 0, ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CMGS=%d"), length);
    ret =  send_wait((char*)mBuffer, WAIT_DATA_STRING, aTimeout);
@@ -5619,10 +5617,74 @@ This function sets a user defined value to the specified resource, if whiteliste
  * \param aTimeout specifies the timeout
  * \return return code
 */
- ME310::return_t ME310::setResourcefloat(int type,int objID,int instanceID,int resourceID, int resourceInstance,float value, tout_t aTimeout)
+ME310::return_t ME310::setResourcefloat(int type, int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout)
+{
+   (void) type;
+   setResourceFloat(objID, instanceID, resourceID, resourceInstance, value, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MSET command and wait OK answer
+/*! \details
+This function sets a user defined value to the specified resource, if whitelisted.
+ * \param type specifies the type of data to insert
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value identifies the value to be set
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::setResourceFloat(int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout)
+{
+   char buff[20];
+   memset(mBuffer,0,ME310_BUFFSIZE);
+   floatToString(value, 6, buff, sizeof(buff));
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MSET=%d,%d,%d,%d,%d,%s"), LWM2M_SET_FLOAT, objID, instanceID, resourceID, resourceInstance, buff);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MOBJSET command and wait OK answer
+/*! \details
+This function sets a object by a json string.
+ * \param agent identifies the agent LWM2M
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param jsonString json string contained object parameters
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::setObject(int agent, int objID, int instanceID, char* jsonString,  tout_t aTimeout)
+{
+   ME310::return_t ret;
+   memset(mBuffer, 0, ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#LWM2MOBJSET=%d,%d,%d"), agent, objID, instanceID);
+   ret =  send_wait((char*)mBuffer, WAIT_DATA_STRING, aTimeout);
+   if ((ret == RETURN_VALID))
+   {
+      memset(mBuffer, 0, ME310_BUFFSIZE);
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, jsonString);
+      ret =  send_wait((char*)mBuffer, OK_STRING, CTRZ, aTimeout);
+   }
+   return ret;
+}
+
+/*! \brief Implements the AT#LWM2MSET command and wait OK answer
+/*! \details
+This function sets a user defined value to the specified resource, if whitelisted.
+ * \param type specifies the type of data to insert
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value identifies the value to be set
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ ME310::return_t ME310::setResourceInt(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout)
  {
 	memset(mBuffer,0,ME310_BUFFSIZE);
-	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MSET=%d,%d,%d,%d,%d,%f"), type,objID,instanceID,resourceID, resourceInstance,value);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MSET=%d,%d,%d,%d,%d,%d"), LWM2M_SET_INT, objID, instanceID,resourceID, resourceInstance, value);
 	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
 }
 
@@ -5660,11 +5722,66 @@ correspondent lwm2m agent enabled and working.
 */
 ME310::return_t ME310::readResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout)
 {
+	readResourceFloat(agent, objID, instanceID, resourceInstance, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MR command and wait OK answer
+/*! \details
+This function selects the parameters for the read operation on the lwm2m agent, it requires the
+correspondent lwm2m agent enabled and working.
+ * \param type specifies the type of data to insert
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value identifies the value to be set (int)
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::readResourceFloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout)
+{
 	memset(mBuffer,0,ME310_BUFFSIZE);
 	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MR=%d,%d,%d,%d,%d"), agent,objID,instanceID,resourceID, resourceInstance);
 	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
 }
 
+/*! \brief Implements the AT#LWM2MR command and wait OK answer
+/*! \details
+This function selects the parameters for the read operation on the lwm2m agent, it requires the
+correspondent lwm2m agent enabled and working.
+ * \param type specifies the type of data to insert
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value identifies the value to be set (int)
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::readResourceInt(int agent,int objID,int instanceID,int resourceID, int resourceInstance, int &value, tout_t aTimeout)
+{
+   ME310::return_t ret;
+   int i = 0;
+	memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MR=%d,%d,%d,%d,%d"), agent,objID,instanceID,resourceID, resourceInstance);
+	ret = send_wait((char*)mBuffer,OK_STRING, aTimeout);
+   if(ret == RETURN_VALID)
+   {
+      while(buffer_cstr(i) != NULL)
+      {
+         String retValue = buffer_cstr(i);
+         if(retValue.startsWith("#LWM2MR:"))
+         {
+            int pos = retValue.indexOf(":");
+            value = atoi(retValue.substring(pos +1).c_str());
+            ret = RETURN_VALID;
+            break;
+         }
+         i++;
+      }
+   }
+   return ret;
+}
 // M2M -------------------------------------------------------------------------
 
 //! \brief Implements the AT\#M2MCHDIR command and waits for OK answer
@@ -6383,7 +6500,6 @@ ME310::return_t ME310::send_command(const char *aCommand, const char *aAnswer, t
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, aCommand);
    return send_wait((char*)mBuffer, aAnswer, aTimeout);
 }
-
 //--------------------------------------------------------------------------------------------------------------
 //! \brief Returns the string by index received from the ME310 serial connection
 /*!
@@ -7030,4 +7146,83 @@ void ME310::ConvertBufferToIRA(uint8_t* recv_buf, uint8_t* out_buf, int size)
         out_buf[i*2+1] = nib2  < 0xA ? '0' + nib2  : 'A' + nib2  - 0xA;
     }
     out_buf[size*2] = '\0';
+}
+
+/*! \brief Convert float to string
+/*! \details
+This method converts float value to string
+ * \param number float value
+ * \param digits number of digits
+ * \param buf buffer to fill with float value
+ * \param size size of buffer
+ * \return string value
+*/
+char * ME310::floatToString(double number, int digits, char *buf, int size)
+{
+   int _len = size;
+   if (digits < 0)
+      digits = 2;
+
+   if (isnan(number))
+   {
+      strcpy(buf, "nan");
+      return buf;
+   }
+   if (isinf(number))
+   {
+      strcpy(buf, "inf");
+      return buf;
+   }
+   if (number > 4294967040.0) // constant determined empirically
+   {
+      strcpy(buf, "ovf");
+      return buf;
+   }
+   if (number < -4294967040.0) // constant determined empirically
+   {
+      strcpy(buf, "ovf");
+      return buf;
+   }
+
+   // Handle negative numbers
+   if (number < 0.0)
+   {
+      strcpy(buf,"-");
+      number = -number;
+      _len--;
+   }
+   else
+   {
+      strcpy(buf,"");
+   }
+
+   // Round correctly so that print(1.999, 2) prints as "2.00"
+   double rounding = 0.5;
+   for (uint8_t i=0; i<digits; ++i)
+   {
+      rounding /= 10.0;
+   }
+
+   number += rounding;
+
+   // Extract the integer part of the number and print it
+   unsigned long int_part = (unsigned long)number;
+   double remainder = number - (double)int_part;
+   _len -= snprintf(buf + strlen(buf), _len, "%d", int_part);
+
+   // Print the decimal point, but only if there are digits beyond
+   if (digits > 0)
+   {
+      _len -= snprintf(buf + strlen(buf), _len, ".");
+   }
+
+   // Extract digits from the remainder one at a time
+   while (digits-- > 0 && _len > 0)
+   {
+      remainder *= 10.0;
+      unsigned int toPrint = (unsigned int)remainder;
+      _len -= snprintf(buf + strlen(buf), _len, "%d", toPrint);
+      remainder -= toPrint;
+   }
+   return buf;
 }

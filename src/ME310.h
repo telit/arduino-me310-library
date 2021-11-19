@@ -13,7 +13,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version
-    2.7.0
+    2.8.0
 
   @note
     Dependencies:
@@ -89,6 +89,13 @@ namespace me310
          TOUT_1MIN  = 60000, TOUT_2MIN = 120000
       } tout_t;
 
+      typedef enum
+      {
+         LWM2M_SET_INT = 0,
+         LWM2M_SET_FLOAT = 1,
+         LWM2M_SET_STRING = 2,
+         LWM2M_SET_OPAQUE = 3
+      } LWM2M_SET_TYPE;
 
       #ifdef ARDUINO_TELIT_SAMD_CHARLIE
       ME310(Uart &aSerial = SerialModule);
@@ -1086,14 +1093,29 @@ namespace me310
       return_t disableLWM2M(int disable, tout_t aTimeout=TOUT_1SEC);
       _READ_TEST(disableLWM2M,"AT#LWM2MENA",TOUT_100MS);
 
-      return_t setResourcefloat(int type,int objID,int instanceID,int resourceID, int resourceInstance,float value, tout_t aTimeout=TOUT_100MS);
+      return_t setResourcefloat(int type, int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(setResorcefloat,"AT#LWM2MSET",TOUT_100MS);
 
-      return_t  setResourceBool(int type,int objID,int instanceID,int resourceID, int resourceInstance,int value, tout_t aTimeout=TOUT_100MS);
+      return_t setResourceFloat(int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(setResorceFloat,"AT#LWM2MSET",TOUT_100MS);
+
+      return_t setResourceInt(int objID,int instanceID,int resourceID, int resourceInstance, int value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(setResorceInt,"AT#LWM2MSET",TOUT_100MS);
+
+      return_t  setResourceBool(int type,int objID,int instanceID,int resourceID, int resourceInstance,int value, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(setResourceBool,"AT#LWM2MSET",TOUT_100MS);
 
       return_t readResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout=TOUT_100MS);
       _READ_TEST(readResourcefloat,"AT#LWM2MR",TOUT_100MS);
+
+      return_t readResourceFloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(readResourceFloat,"AT#LWM2MR",TOUT_100MS);
+
+      return_t readResourceInt(int agent,int objID,int instanceID,int resourceID, int resourceInstance, int &value, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(readResourceInt,"AT#LWM2MR",TOUT_100MS);
+
+      return_t setObject(int agent, int objID, int instanceID, char* jsonString,  tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(setObject,"AT#LWM2MOBJSET",TOUT_100MS);
 
       return_t FOTA_set_extended_URC(int enable = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(FOTA_set_extended_URC, "AT#FOTAURC", TOUT_100MS)
@@ -1288,6 +1310,8 @@ namespace me310
       return_t send_wait(const char *aCommand, int flag, const char *aAnswer = OK_STRING, const char* term = TERMINATION_STRING, tout_t aTimeout = TOUT_200MS);
 
       void CheckIRAOption(char* str);
+
+      char * floatToString(double number, int digits, char *buf, int size);
 
 
       Uart &mSerial;                    //!< Reference to Uart used for communication
