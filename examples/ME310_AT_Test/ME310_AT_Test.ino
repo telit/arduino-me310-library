@@ -47,20 +47,20 @@ void print_buffer(ME310 &aME310, const char *term = "OK");
 
 
 void setup() {
-  pinMode(ON_OFF, OUTPUT);
-  pinMode(LED_BUILTIN, OUTPUT);
+   pinMode(ON_OFF, OUTPUT);
+   pinMode(LED_BUILTIN, OUTPUT);
 
-  Serial.begin(115200);
-  myME310.begin(115200);
-  delay(1000);
+   Serial.begin(115200);
+   myME310.begin(115200);
+   delay(1000);
 
-  Serial.println("SERCOMM Telit Test AT");
-  
-  myME310.powerOn();
-  
-  Serial.println("ME310 ON");
+   Serial.println("SERCOMM Telit Test AT");
+   
+   myME310.powerOn();
+   
+   Serial.println("ME310 ON");
 
-  Serial.println();
+   Serial.println();
    Serial.println("AT Command");
    ME310::return_t rc = myME310.attention();    // issue command and wait for answer or timeout
    Serial.println(myME310.buffer_cstr());       // print first line of modem answer
@@ -94,51 +94,63 @@ void setup() {
    if(rc == ME310::RETURN_VALID)               // print all rows returned from ME310 except command echo (index = 0)
    {
       Serial.println(myME310.buffer_cstr(1));
-      if(strstr(myME310.buffer_cstr(1),"#QSS: 0,1"))
+      char *resp = (char* )myME310.buffer_cstr(1);
+      if(resp != NULL)
       {
-         Serial.println("SIM is inserted");
-         
-         rc = myME310.read_enter_pin();
-         if(rc == ME310::RETURN_VALID)               // print all rows returned from ME310 except command echo (index = 0)
+         if(strstr(resp,"#QSS: 0,1"))
          {
-            if(strstr(myME310.buffer_cstr(1),"READY"))
-               Serial.println("PIN not required");
-            else
-               Serial.println("PIN required");
-         }
-         else return; 
-
-         Serial.println();
-         Serial.print("Print ICCID : ");  
-         rc = myME310.read_iccid();
-         if(rc == ME310::RETURN_VALID)
-         {
-            const char *pLabel = strstr(myME310.buffer_cstr(1),"+CCID: ");
-            if(pLabel) 
+            Serial.println("SIM is inserted");
+            
+            rc = myME310.read_enter_pin();
+            if(rc == ME310::RETURN_VALID)               // print all rows returned from ME310 except command echo (index = 0)
             {
-               Serial.print("[");
-               Serial.write(pLabel+7,19);
-               Serial.println("]");
+               resp = (char*) myME310.buffer_cstr(1);
+               if(resp != NULL)
+               {
+                  if(strstr(resp,"READY"))
+                     Serial.println("PIN not required");
+                  else
+                     Serial.println("PIN required");
+               }
             }
+            else return; 
+
+            Serial.println();
+            Serial.print("Print ICCID : ");  
+            rc = myME310.read_iccid();
+            if(rc == ME310::RETURN_VALID)
+            {
+               resp = (char*) myME310.buffer_cstr(1);
+               if(resp != NULL)
+               {
+                  const char *pLabel = strstr(resp,"+CCID: ");
+                  if(pLabel) 
+                  {
+                     Serial.print("[");
+                     Serial.write(pLabel+7,19);
+                     Serial.println("]");
+                  }
+               }
+            }
+            else return;
+
+            Serial.print("Print IMSI : ");
+            rc = myME310.imsi();                 // no command echo
+            if(rc == ME310::RETURN_VALID)
+               Serial.println(myME310.buffer_cstr(1));
+            else return;
+
+            Serial.println();
+            Serial.println("List Capabilities : ");
+            rc = myME310.capabilities_list();
+            if(rc == ME310::RETURN_VALID)               // print all rows returned from ME310 except command echo (index = 0)
+               Serial.println(myME310.buffer_cstr(1));
+            else return;   
+
          }
-         else return;
-
-         Serial.print("Print IMSI : ");
-         rc = myME310.imsi();                 // no command echo
-         if(rc == ME310::RETURN_VALID)
-            Serial.println(myME310.buffer_cstr(1));
-         else return;
-
-         Serial.println();
-         Serial.println("List Capabilities : ");
-         rc = myME310.capabilities_list();
-         if(rc == ME310::RETURN_VALID)               // print all rows returned from ME310 except command echo (index = 0)
-            Serial.println(myME310.buffer_cstr(1));
-         else return;   
-
+         else
+            Serial.println("SIM not inserted");
       }
-      else
-         Serial.println("SIM not inserted");
    }
    else return;                                // exit on error
 

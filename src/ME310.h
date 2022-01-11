@@ -37,6 +37,7 @@ namespace me310
 
    #define ME310_BUFFSIZE 3100 ///< Exchange buffer size
    #define ME310_SEND_BUFFSIZE 1500
+   #define ME310_BUFFCOMMANDSIZE 64
 
    #define F(A) A
 
@@ -1269,6 +1270,9 @@ namespace me310
    // Generic Command---------------------------------------------------------------
 
       return_t send_command(const char *aCommand, const char *aAnswer = OK_STRING, tout_t aTimeout = TOUT_200MS);
+      void send_data(const char *aCommand, const char* term = TERMINATION_STRING, tout_t aTimeout = TOUT_200MS);
+      virtual return_t receive_data(tout_t aTimeout = TOUT_200MS);
+
 
 
       const uint8_t *buffer(void) { return mBuffer;} //!< Returns pointer to local buffer

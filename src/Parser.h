@@ -12,9 +12,9 @@
     This library contains a interface that implements a parsing functions for AT command.\n
     Parser is an abstract class and handles common methods, like gets and parse.\n
     The concrete classes, derived by Parser, implement the parsing methods for the specific AT command.\n
-  @version 
+  @version
     1.1.1
-  
+
   @note
     Dependencies:
     string
@@ -47,7 +47,7 @@ using namespace std;
 #define _M2MWRITE_BIT    0x04
 #define _M2MREAD_BIT     0x08
 
- 
+
 
 #define SET_BIT_MASK(m, L)    (m |= (1 << L))
 #define UNSET_BIT_MASK(m, L)  (m &= (~(1<< L)))
@@ -59,7 +59,7 @@ namespace telitAT
   /* Classes definitions ============================================================================*/
 
   /*! \class Parser
-      \brief Abstract class to parse received string     
+      \brief Abstract class to parse received string
       \details
       Being an abstract class it is not possible to instantiate it. It is therefore mandatory to instantiate one of the classes derived from it.\n
       It is a interface which offers a series of methods that allow to parse a string obtained as a response following an AT command.\n
@@ -132,7 +132,7 @@ namespace telitAT
     ----------------------------------*/
     /*! \class FTPRECVParser
         \brief Class to parse received string, specific to parsing #FTPRECV AT command
-        \details 
+        \details
         This is a derivated class by Parser, specific to parsing #FTPRECV AT command.\n
         It offers a series of methods that allow to parse a string obtained as a response following an AT#FTPRECV command.
     */
@@ -154,7 +154,7 @@ namespace telitAT
     -----------------------------------*/
     /*! \class MQREADParser
         \brief Class to parse received string, specific to parsing #MQREAD AT command
-        \details 
+        \details
         This is a derivated class by Parser, specific to parsing #MQREAD AT command.\n
         It offers a series of methods that allow to parse a string obtained as a response following an AT#MQREAD command.\n
         The expectedBytes() method returns always 0 value.
@@ -177,7 +177,7 @@ namespace telitAT
     -----------------------------------*/
     /*! \class M2MReadParser
         \brief Class to parse received string, specific to parsing #M2MREAD AT command
-        \details 
+        \details
         This is a derivated class by Parser, specific to parsing #M2MREAD AT command.\n
         It offers a series of methods that allow to parse a string obtained as a response following an AT#M2MREAD command.\n
         The expectedBytes() method returns always 0 value. The receivedBytes() method returns the file size to read.\n
@@ -204,7 +204,7 @@ namespace telitAT
     ----------------------------------*/
     /*! \class PingParser
         \brief Class to parse received string, specific to parsing #PING AT command
-        \details 
+        \details
         This is a derivated class by Parser, specific to parsing #PING AT command.\n
         It offers a series of methods that allow to parse a string obtained as a response following an AT#PING command.\n
     */
@@ -226,7 +226,7 @@ namespace telitAT
     ----------------------------------*/
     /*! \class SMSListParser
         \brief Class to parse received string, specific to parsing +CMGL AT command
-        \details 
+        \details
         This is a derivated class by Parser, specific to parsing +CMGL AT command.\n
         It offers a series of methods that allow to parse a string obtained as a response following an AT+CMGL command.\n
     */
@@ -250,7 +250,7 @@ namespace telitAT
     -----------------------------------*/
     /*! \class GenericParser
         \brief Class to parse received string, specific to parsing generic AT command
-        \details 
+        \details
         This is a derivated class by Parser, specific to parsing generic AT command.\n
         It offers a series of methods that allow to parse a string obtained as a response following an generic command.\n
     */

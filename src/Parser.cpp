@@ -228,6 +228,7 @@ namespace telitAT
                 return posNewRow;
             }
         }
+        return -1;
     }
 
     //! \brief Implements  the search for expected bytes
@@ -363,27 +364,12 @@ namespace telitAT
         if(len != string::npos)
         {
             _commandResponse[len] = '\0';
-            string tmp_cmd;
+            String tmp_cmd;
             tmp_cmd = _commandResponse;
-            std::size_t posNewRow = tmp_cmd.find_first_of("\n");
-            if(posNewRow != string::npos)
-            {
-                std::size_t posSecondNewRow = tmp_cmd.find_first_of("\n", posNewRow+1);
-                if(posSecondNewRow != string::npos)
-                {
-                    len = tmp_cmd.copy(_commandResponse, ((posSecondNewRow-1) - posNewRow), posNewRow+1);
-                    _commandResponse[len] = '\0';
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
+            tmp_cmd.trim();
+            memset(_commandResponse, 0, MAX_CMD_RESPONSE);
+            tmp_cmd.toCharArray(_commandResponse, MAX_CMD_RESPONSE);
+            return true;
         }
         else
         {
@@ -880,7 +866,8 @@ namespace telitAT
         std::size_t posNewRow = _rawData.find_first_of("\n");
         if(posNewRow != string::npos)
         {
-            return posNewRow++;
+            posNewRow++;
+            return posNewRow;
         }
         else
         {
@@ -997,8 +984,8 @@ namespace telitAT
             std::size_t posResponse = tmp_cmd.find(OK_STRING);
             if(posResponse != string::npos)
             {
-            strcpy(_commandResponse, OK_STRING);
-            return true;
+                strcpy(_commandResponse, OK_STRING);
+                return true;
             }
             posResponse = tmp_cmd.find(ERROR_STRING);
             if(posResponse != string::npos)
@@ -1011,6 +998,10 @@ namespace telitAT
             {
                 strcpy(_commandResponse, CME_ERROR_STRING);
                 return true;
+            }
+            else
+            {
+                return false;
             }
         }
         else

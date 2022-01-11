@@ -60,7 +60,7 @@ ME310 myME310;
 void setup() {
   char pin[] = "XXXX";
 
-  int rc;
+  ME310::return_t rc;
   pinMode(ON_OFF, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
 
@@ -86,51 +86,84 @@ void setup() {
   myME310.read_enter_pin();
 
   // read response in 1 array position
-  if (strcmp(myME310.buffer_cstr(1), "+CPIN: SIM PIN") == 0)
+  char *resp = (char*)myME310.buffer_cstr(1);
+  if(resp != NULL)
   {
-    Serial.println("Insert SIM PIN");
-
-    //issue command AT+CPIN=pin
-    rc = myME310.enter_pin(pin);
-    if (rc == ME310::RETURN_VALID)
+    if (strcmp(resp, "+CPIN: SIM PIN") == 0)
     {
-      Serial.println("PIN inserted");
+      Serial.println("Insert SIM PIN");
+
+      //issue command AT+CPIN=pin
+      rc = myME310.enter_pin(pin);
+      if (rc == ME310::RETURN_VALID)
+      {
+        Serial.println("PIN inserted");
+
+        //issue command AT+CREG? to check the network status
+        Serial.println("Network status");
+        rc = myME310.read_eps_network_registration_status();
+        if (rc == ME310::RETURN_VALID)
+        {
+          //if +CEREG!=0,1 and +CEREG!=0,5, wait 3 second than retry the reading
+          resp = (char*)myME310.buffer_cstr(1);
+          Serial.println(resp);
+          while(resp != NULL)
+          {
+            if ((strcmp(resp, "+CEREG: 0,1") != 0) &&  (strcmp(resp, "+CEREG: 0,5") != 0))
+            {
+              delay(3000);
+              rc = myME310.read_eps_network_registration_status();
+              if(rc != ME310::RETURN_VALID)
+              {
+                Serial.println("ERROR");
+                Serial.println(myME310.return_string(rc));
+                break;
+              }
+              Serial.println(myME310.buffer_cstr(1));
+              resp = (char*)myME310.buffer_cstr(1);
+            }
+            else
+            {
+              break;
+            }
+          }
+        }
+      }
+    }
+    else if (strcmp(resp, "+CPIN: READY") == 0)
+    {
 
       //issue command AT+CREG? to check the network status
       Serial.println("Network status");
       rc = myME310.read_eps_network_registration_status();
-      Serial.println(myME310.buffer_cstr(1));
       if (rc == ME310::RETURN_VALID)
       {
         //if +CEREG!=0,1 and +CEREG!=0,5, wait 3 second than retry the reading
-        while ((strcmp(myME310.buffer_cstr(1), "+CEREG: 0,1") != 0) &&  (strcmp(myME310.buffer_cstr(1), "+CEREG: 0,5") != 0))
+        resp = (char*)myME310.buffer_cstr(1);
+        Serial.println(resp);
+        while(resp != NULL)
         {
-          delay(3000);
-          myME310.read_eps_network_registration_status();
-          Serial.println(myME310.buffer_cstr(1));
+          if ((strcmp(resp, "+CEREG: 0,1") != 0) &&  (strcmp(resp, "+CEREG: 0,5") != 0))
+          {
+            delay(3000);
+            rc = myME310.read_eps_network_registration_status();
+            if(rc != ME310::RETURN_VALID)
+            {
+              Serial.println("ERROR");
+              Serial.println(myME310.return_string(rc));
+              break;
+            }
+            Serial.println(myME310.buffer_cstr(1));
+            resp = (char*)myME310.buffer_cstr(1);
+          }
+          else
+          {
+            break;
+          }
         }
       }
-
     }
-  } else if (strcmp(myME310.buffer_cstr(1), "+CPIN: READY") == 0) {
-
-    //issue command AT+CREG? to check the network status
-    Serial.println("Network status");
-    rc = myME310.read_eps_network_registration_status();
-    Serial.println(myME310.buffer_cstr(1));
-    if (rc == ME310::RETURN_VALID)
-    {
-      //if +CEREG!=0,1 and +CEREG!=0,5, wait 3 second than retry the reading
-      while ((strcmp(myME310.buffer_cstr(1), "+CEREG: 0,1") != 0) &&  (strcmp(myME310.buffer_cstr(1), "+CEREG: 0,5") != 0))
-      {
-        delay(3000);
-        myME310.read_eps_network_registration_status();
-        Serial.println(myME310.buffer_cstr(1));
-      }
-    }
-
   }
-
   /*Registers setup for detecting freefall. Some register can be fine-tuned*/
   Wire.begin();
   while (!Serial);
@@ -165,15 +198,17 @@ void setup() {
   Serial.print("Buffer LEN=");
   Serial.print(len, DEC);
   Serial.print("\n");
-  while (i < len)
+  if(buf != NULL)
   {
-    Serial.print("0x");
-    Serial.print(reg++, HEX);
-    Serial.print("\t0x");
-    Serial.print(buf[i++], HEX);
-    Serial.print("\n");
+    while (i < len)
+    {
+      Serial.print("0x");
+      Serial.print(reg++, HEX);
+      Serial.print("\t0x");
+      Serial.print(buf[i++], HEX);
+      Serial.print("\n");
+    }
   }
-
   pinMode (INTERRUPT, INPUT);
   digitalWrite (INTERRUPT, LOW);  // internal pull-down resistor
   attachInterrupt(digitalPinToInterrupt(INTERRUPT), freefall, RISING);
@@ -211,11 +246,13 @@ void loop() {
     Serial.println("Enabling and registering LWM2M client");
     r1 = myME310.enableLWM2M(1, 1, ME310::TOUT_45SEC);
 
-    if (r1 == ME310::RETURN_VALID) {
+    if (r1 == ME310::RETURN_VALID)
+    {
       delay(20000);
       Serial.println("Registered on server DM");
     }
-    else {
+    else
+    {
       Serial.println("Enabling LWM2M returned error");
     }
 
@@ -247,23 +284,32 @@ void loop() {
       while (radius == false) {
         myME310.readResourcefloat(0, 6, 0, 3, 0, ME310::TOUT_10SEC);
         resp = myME310.buffer_cstr(1);
-        char buffFloat[] = {resp[9], resp[10], resp[11], resp[12], resp[13], resp[14], resp[15], resp[16], resp[18], resp[19]};
-        //Serial.println(buffFloat);
-        float f = atof(buffFloat);
-        if (f > 0.0 && f < 20.00000) {
-          radius = true;
-        } else {
-          //do nothing
+        if(resp != NULL)
+        {
+          char buffFloat[] = {resp[9], resp[10], resp[11], resp[12], resp[13], resp[14], resp[15], resp[16], resp[18], resp[19]};
+          //Serial.println(buffFloat);
+          float f = atof(buffFloat);
+          if (f > 0.0 && f < 20.00000)
+          {
+            radius = true;
+          }
+          else
+          {
+            //do nothing
+          }
+          delay(10000);
         }
-        delay(10000);
       }
       if (radius == true) {
 
         //switch to WWAN priority
         r = myME310.gnss_configuration(3, 1, ME310::TOUT_30SEC);
-        if (r == ME310::RETURN_VALID) {
+        if (r == ME310::RETURN_VALID)
+        {
           Serial.println("Switched to WWAN");
-        } else {
+        }
+        else
+        {
           Serial.println("Couldn't switch to WWAN");
         }
         myME310.setResourceBool(0, 3200, 0, 5500, 0, 1, ME310::TOUT_30SEC);

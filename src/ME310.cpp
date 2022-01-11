@@ -2489,7 +2489,7 @@ ME310::return_t ME310::send_short_message(int length, char *data, tout_t aTimeou
    if ((ret == RETURN_VALID))
    {
       memset(mBuffer, 0, ME310_BUFFSIZE);
-      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, data);
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, "%s",data);
       ret =  send_wait((char*)mBuffer, OK_STRING, CTRZ, aTimeout);
    }
    return ret;
@@ -2512,7 +2512,7 @@ ME310::return_t ME310::send_short_message(const char *da, const char *toda, char
    if ((ret == RETURN_VALID))
    {
       memset(mBuffer, 0, ME310_BUFFSIZE);
-      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, data);
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, "%s", data);
       ret =  send_wait((char*)mBuffer, OK_STRING, CTRZ, aTimeout);
    }
    return ret;
@@ -3216,7 +3216,7 @@ ME310::return_t ME310::i2c_write(int sdaPin,int sclPin, int deviceId, int regist
    ret =  send_wait((char*)mBuffer, WAIT_DATA_STRING, aTimeout);
    if ((ret == RETURN_VALID))
    {
-      char dataF[ME310_BUFFSIZE-1];
+      char dataF[ME310_BUFFSIZE-1] = {};
       strcat(dataF, data);
       strcat(dataF, "0x1A");
       memset(mBuffer, 0, ME310_BUFFSIZE);
@@ -3266,7 +3266,7 @@ ME310::return_t ME310::i2c_write_read(int sdaPin,int sclPin, int deviceId, int l
       ret =  send_wait((char*)mBuffer, WAIT_DATA_STRING, aTimeout);
       if ((ret == RETURN_VALID))
       {
-         char dataF[ME310_BUFFSIZE-1];
+         char dataF[ME310_BUFFSIZE-1] = {};
          strcat(dataF, data);
          strcat(dataF, "0x1A");
          memset(mBuffer, 0, ME310_BUFFSIZE);
@@ -4087,9 +4087,10 @@ ME310::return_t ME310::socket_send_data_command_mode(int connId, char* data, int
    /*IS IRA*/
    read_socket_configuration_extended();
    /*Control if size is > 1500 if is not IRA  >3000 if is IRA*/
-   while(buffer_cstr(i) != NULL)
+   char* tmp_buf = (char*) buffer_cstr(i);
+   while(tmp_buf != NULL)
    {
-      tmp_str = buffer_cstr(i);
+      tmp_str = tmp_buf;
       string searchedString = "#SCFGEXT: ";
       searchedString.append(std::to_string(connId));
       size_t foundString = tmp_str.find(searchedString);
@@ -4098,6 +4099,7 @@ ME310::return_t ME310::socket_send_data_command_mode(int connId, char* data, int
          break;
       }
       i++;
+      tmp_buf = (char*)buffer_cstr(i);
    }
    CheckIRAOption((char*)tmp_str.c_str());
    memset(mBuffer, 0, ME310_BUFFSIZE);
@@ -4114,7 +4116,7 @@ ME310::return_t ME310::socket_send_data_command_mode(int connId, char* data, int
             return ret;
          }
       }
-      snprintf((char *)mBuffer, ME310_SEND_BUFFSIZE - 1, data);
+      snprintf((char *)mBuffer, ME310_SEND_BUFFSIZE - 1, "%s", data);
       ret =  send_wait((char*)mBuffer, OK_STRING, CTRZ, aTimeout);
    }
    return ret;
@@ -4170,9 +4172,10 @@ ME310::return_t ME310::socket_receive_data_command_mode(int connId, int maxByte,
    }
    read_socket_configuration_extended();
    /*Control if size is > 1500 if is not IRA  >3000 if is IRA*/
-   while(buffer_cstr(i) != NULL)
+   char* tmp_buf = (char*) buffer_cstr(i);
+   while(tmp_buf != NULL)
    {
-      tmp_str = buffer_cstr(i);
+      tmp_str = tmp_buf;
       string searchedString = "#SCFGEXT: ";
       searchedString.append(std::to_string(connId));
       size_t foundString = tmp_str.find(searchedString);
@@ -4181,6 +4184,7 @@ ME310::return_t ME310::socket_receive_data_command_mode(int connId, int maxByte,
          break;
       }
       i++;
+      tmp_buf = (char*) buffer_cstr(i);;
    }
    CheckIRAOption((char*)tmp_str.c_str());
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#SRECV=%d,%d,%d"), connId, maxByte, udpInfo);
@@ -4448,7 +4452,6 @@ ME310::return_t ME310::ping(const char *ipaddr, tout_t aTimeout)
 {
    memset(mBuffer, 0, ME310_BUFFSIZE);
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#PING=\"%s\""), ipaddr);
-   //return send_wait((char*)mBuffer, OK_STRING, aTimeout);
    return send_wait((char*)mBuffer,0, OK_STRING, aTimeout);
 }
 
@@ -5385,7 +5388,7 @@ ME310::return_t ME310::ssl_security_data(int ssid, int action, int dataType, int
       if ((ret == RETURN_VALID))
       {
          memset(mBuffer, 0, ME310_BUFFSIZE);
-         snprintf((char *)mBuffer, ME310_BUFFSIZE-1, data);
+         snprintf((char *)mBuffer, ME310_BUFFSIZE-1, "%s",data);
          ret = send_wait((char*)mBuffer, 0, OK_STRING, CTRZ, aTimeout);
          return ret;
       }
@@ -5620,7 +5623,7 @@ This function sets a user defined value to the specified resource, if whiteliste
 ME310::return_t ME310::setResourcefloat(int type, int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout)
 {
    (void) type;
-   setResourceFloat(objID, instanceID, resourceID, resourceInstance, value, aTimeout);
+   return setResourceFloat(objID, instanceID, resourceID, resourceInstance, value, aTimeout);
 }
 
 /*! \brief Implements the AT#LWM2MSET command and wait OK answer
@@ -5722,7 +5725,7 @@ correspondent lwm2m agent enabled and working.
 */
 ME310::return_t ME310::readResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout)
 {
-	readResourceFloat(agent, objID, instanceID, resourceInstance, aTimeout);
+	return readResourceFloat(agent, objID, instanceID, resourceInstance, aTimeout);
 }
 
 /*! \brief Implements the AT#LWM2MR command and wait OK answer
@@ -5971,7 +5974,8 @@ ME310::return_t ME310::m2m_read(const char *file_name, tout_t aTimeout)
    memset(mBuffer, 0, ME310_BUFFSIZE);
    PathParsing strPar((char*)file_name);
    m2m_list(strPar.getPath());
-   int fileSize = strPar.getFileSize((char*)buffer_cstr_raw());
+   char* tmp_data_raw = (char*)buffer_cstr_raw();
+   int fileSize = strPar.getFileSize(tmp_data_raw);
    SET_BIT_MASK(_option, _M2MREAD_BIT);
    if(fileSize > ME310_BUFFSIZE-1)
    {
@@ -6500,6 +6504,19 @@ ME310::return_t ME310::send_command(const char *aCommand, const char *aAnswer, t
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, aCommand);
    return send_wait((char*)mBuffer, aAnswer, aTimeout);
 }
+
+
+//! \brief Send the generic AT command, termination charater without waiting for an answer
+/*! \details
+ The command sends a generic AT command and waits for a specific answer.
+ * \param aCommand command string to send
+ * \param term  termination character (CR or LF or CRLF or other)
+ * \param aTimeout answer timeout
+ */
+void ME310::send_data(const char *aCommand, const char* term, tout_t aTimeout)
+{
+  send(aCommand, term);
+}
 //--------------------------------------------------------------------------------------------------------------
 //! \brief Returns the string by index received from the ME310 serial connection
 /*!
@@ -6554,6 +6571,7 @@ void ME310::send(const char *aCommand, const char *aTerm)
 {
    on_command(aCommand); //callback
    mSerial.write(aCommand);
+   delay(200);
    mSerial.write(aTerm);
 }
 
@@ -6730,8 +6748,6 @@ return RETURN_TOUT;
  */
 ME310::return_t ME310::wait_for(const char* aCommand, int flag, const char *aAnswer, ME310::tout_t aTimeout)
 {
-   char cmd[64];
-   strcpy(cmd, aCommand);
    ATCommandDataParsing* dataParsing;
    return_t rc;
    const uint8_t *pBuffer;
@@ -6756,7 +6772,7 @@ ME310::return_t ME310::wait_for(const char* aCommand, int flag, const char *aAns
             mpBuffer[bytesRead+1] = '\0';
             bytesRead++;
             pBuffer = mpBuffer;
-            memcpy(tmp_str + mBuffLen, (char*)mpBuffer, bytesRead);
+            strcat(tmp_str, (char*)mpBuffer);
             mpBuffer += bytesRead;
             mBuffLen += bytesRead;
             rc = on_message((const char *)pBuffer);
@@ -6783,7 +6799,7 @@ ME310::return_t ME310::wait_for(const char* aCommand, int flag, const char *aAns
       }
    }
    while(timeout < aTimeout);
-   dataParsing =  new  ATCommandDataParsing((char*) cmd, tmp_str, flag, _option);
+   dataParsing =  new  ATCommandDataParsing((char*)aCommand, tmp_str, flag, _option);
    if(dataParsing->parserIs())
    {
       receivedDataLen = dataParsing->receivedBytes();
@@ -6792,7 +6808,6 @@ ME310::return_t ME310::wait_for(const char* aCommand, int flag, const char *aAns
          if(dataParsing->commandResponseResult())
          {
             _payloadData = (uint8_t *) dataParsing->extractedPayload();
-
             if(str_equal(dataParsing->commandResponseString(), OK_STRING))
             {
                rc = RETURN_VALID;
@@ -6834,7 +6849,7 @@ ME310::return_t ME310::wait_for(const char* aCommand, int flag, const char *aAns
  * \param aTimeout answer timeout
  * \return return code
  */
-ME310::return_t ME310::wait_for_unsolicited(ME310::tout_t aTimeout)
+ME310::return_t ME310::receive_data(tout_t aTimeout)
 {
    char cmd[64];
    return_t rc;
@@ -6884,6 +6899,16 @@ ME310::return_t ME310::wait_for_unsolicited(ME310::tout_t aTimeout)
    _payloadData = (uint8_t *) tmp_str;
    on_timeout();
    return RETURN_VALID;
+}
+
+//! \brief Waits for the answer to an AT command or timeout
+/*!
+ * \param aTimeout answer timeout
+ * \return return code
+ */
+ME310::return_t ME310::wait_for_unsolicited(tout_t aTimeout)
+{
+   return receive_data(aTimeout);
 }
 
 //! \brief Reads a line from serial until answer or timeout
@@ -6982,21 +7007,20 @@ const char *ME310::str_start(const char *buffer, const char *string)
 {
    if(!buffer)
    {
-      return NULL;
+      return nullptr;
    }
    if(!string)
    {
-      return NULL;
+      return nullptr;
    }
    const char *rc = buffer;
    for(; ;buffer++,string++)
    {
       if(*buffer != *string)
-         return NULL; // exit if different
+         return nullptr; // exit if different
       else if(*buffer == 0)
          return rc; // exit if equal but = 0
    }
-   return NULL;
 }
 
 //! \brief Compares 2 strings from start

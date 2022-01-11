@@ -94,17 +94,24 @@ namespace telitAT
     int PathParsing::getFileSize(char* list)
     {
         string str;
-        str = list;
-        char sizeFile[16];
-
-        int posFilename = str.rfind(_filename);
-        if(posFilename != string::npos)
+        if(list != NULL)
         {
-            int posComma =  str.find_first_of(",", posFilename);
-            int posNewRow = str.find_first_of("\n", posComma);
-            int len = str.copy(sizeFile, posNewRow - posComma,posComma+1);
-            sizeFile[len] = '\0';
-            return atoi(sizeFile);
+            str = list;
+            char sizeFile[16];
+
+            int posFilename = str.rfind(_filename);
+            if(posFilename != string::npos)
+            {
+                int posComma =  str.find_first_of(",", posFilename);
+                int posNewRow = str.find_first_of("\n", posComma);
+                int len = str.copy(sizeFile, posNewRow - posComma,posComma+1);
+                sizeFile[len] = '\0';
+                return atoi(sizeFile);
+            }
+            else
+            {
+                return -1;
+            }
         }
         else
         {

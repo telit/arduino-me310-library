@@ -15,11 +15,11 @@
     The PDP context is defined, the registration status read, the context activated and finally the ping command is sent and the response printed.\n
 	NOTE:\n
 	For correct operation it is necessary to set the correct APN.
-    
 
-  @version 
+
+  @version
     1.0.0
-  
+
   @note
 
   @author
@@ -31,7 +31,7 @@
 #include <ME310.h>
 #include <string.h>
 
-#define APN "apn"
+#define APN "APN"
 
 #ifndef ARDUINO_TELIT_SAMD_CHARLIE
 #define ON_OFF 6 /*Select the GPIO to control ON_OFF*/
@@ -39,11 +39,11 @@
 
 using namespace me310;
 /*
- * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n 
+ * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n
  * Please refer to your board configuration in variant.h file.
  * Example:
  * Uart Serial1(&sercom4, PIN_MODULE_RX, PIN_MODULE_TX, PAD_MODULE_RX, PAD_MODULE_TX, PIN_MODULE_RTS, PIN_MODULE_CTS);
- * ME310 myME310 (Serial1); 
+ * ME310 myME310 (Serial1);
  */
 ME310 myME310;
 ME310::return_t rc;     //Enum of return value  methods
@@ -78,17 +78,33 @@ void setup() {
     Serial.println(myME310.buffer_cstr(1));           //print second line of modem answer
 
     Serial.print("gprs network registration status :");
-    rc = myME310.read_gprs_network_registration_status();  //issue command AT+CGREG=? (read mode) 
-    Serial.println(myME310.buffer_cstr(1));
+    rc = myME310.read_gprs_network_registration_status();  //issue command AT+CGREG=? (read mode)
+
     if(rc == ME310::RETURN_VALID)
     {
-        while ((strcmp(myME310.buffer_cstr(1), "+CGREG: 0,1") != 0) &&  (strcmp(myME310.buffer_cstr(1), "+CGREG: 0,5") != 0))
+      Serial.println(myME310.buffer_cstr(1));
+      char *resp = (char* )myME310.buffer_cstr(1);
+      while(resp != NULL)
+      {
+        if ((strcmp(resp, "+CGREG: 0,1") != 0) &&  (strcmp(resp, "+CGREG: 0,5") != 0))
         {
             delay(3000);
-            myME310.read_gprs_network_registration_status();
+            rc = myME310.read_gprs_network_registration_status();
+            if(rc != ME310::RETURN_VALID)
+            {
+              Serial.println("ERROR");
+              Serial.println(myME310.return_string(rc));
+              break;
+            }
             Serial.println(myME310.buffer_cstr(1));
+            resp = (char* )myME310.buffer_cstr(1);
         }
-    }   
+        else
+        {
+          break;
+        }
+      }
+    }
     Serial.println("Activate context");
     myME310.context_activation(cID, 1);        //issue command AT#SGACT=cid,state and wait for answer or timeout
   }

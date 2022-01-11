@@ -193,7 +193,7 @@ char* ATCommandDataParsing::findCommand(const char* aCommand)
     string tmp_str;
     tmp_str = aCommand;
     memset(_command, 0, 64);
-    int len;
+    int len = 0;
     std::size_t posColon = tmp_str.find_first_of("=");
     if(posColon != string::npos)
     {
@@ -202,7 +202,8 @@ char* ATCommandDataParsing::findCommand(const char* aCommand)
     }
     else
     {
-        tmp_str.copy(_command, tmp_str.length(), 0);
+        std::size_t command_len = tmp_str.length();
+        len = tmp_str.copy(_command, command_len, 0);
         _command[len] = '\0';
     }
     return _command;
