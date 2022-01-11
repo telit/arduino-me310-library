@@ -142,9 +142,10 @@ void setup() {
   Serial.println("Set on/off GNSS controller");
   rc = myME310.gnss_controller_power_management(1);
   Serial.println(ME310::return_string(rc));
+  #if NMEA_DEBUG
   if (rc == ME310::RETURN_VALID)
   {
-    #if NMEA_DEBUG
+
     /////////////////////////////////////
     // Set GNGSA, GLGSV and GNRMC as available sentence in the unsolicited NMEA sentences.
     // AT$GPSNMUNEX=0,1,1,0,0,0,0,0,0,0,0,1,0
@@ -158,15 +159,20 @@ void setup() {
       /////////////////////////////////////
       rc = myME310.gnss_nmea_data_configuration(2,1,0,1,1,1,0);
       int i = 0;
-      while(strcmp(myME310.buffer_cstr(i), "OK") != 0)
+      char* buff = (char*) myME310.buffer_cstr(0);
+      if(buff != NULL)
       {
-        Serial.println(myME310.buffer_cstr(i));
-        i++;
+        while(strcmp(buff, "OK") != 0)
+        {
+          buff = (char*) myME310.buffer_cstr(i);
+          Serial.println(buff);
+          i++;
+        }
       }
     }
-    #endif
-  }
 
+  }
+  #endif
   /////////////////////////////////////
   //  Set the real-time clock of the module.
   //  AT+CCLK="05/07/21,12:40:00+00"
@@ -208,12 +214,16 @@ void loop() {
   /*When the position is fixed, the led blinks*/
   if (rc == ME310::RETURN_VALID)
   {
-    Serial.println(myME310.buffer_cstr(1));
+    char* buff = (char*)myME310.buffer_cstr(1);
+    Serial.println(buff);
     std::string tmp_pos;
-    tmp_pos = myME310.buffer_cstr(1);
-    std::size_t len_pos = tmp_pos.find(":");
-    if(len_pos != std::string::npos)
+
+    if(buff != NULL)
     {
+      tmp_pos = buff;
+      std::size_t len_pos = tmp_pos.find(":");
+      if(len_pos != std::string::npos)
+      {
         std::size_t len_pos2 = tmp_pos.find(",");
         char valid_pos[64];
         if(len_pos2 != std::string::npos)
@@ -227,6 +237,7 @@ void loop() {
             delay(1000);
           }
         }
+      }
     }
   }
   delay(5000);
@@ -244,7 +255,7 @@ void loop() {
       rc = myME310.gnss_nmea_extended_data_configuration(0);
       if(rc == ME310::RETURN_VALID)
       {
-      Serial.println("De-activate unsolicited NMEA sentences flow");
+        Serial.println("De-activate unsolicited NMEA sentences flow");
       }
     #endif
     /////////////////////////////////////

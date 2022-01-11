@@ -70,49 +70,68 @@ void setup() {
   Serial.println("AT Command");
   myME310.report_mobile_equipment_error(2);           //issue command AT+CMEE=2 and wait for answer or timeout
   rc = myME310.read_enter_pin();                            //issue command AT+cpin? in read mode, check that the SIM is inserted and the module is not waiting for the PIN
-  if(strcmp(myME310.buffer_cstr(2), "OK") == 0)        // read response in 2 array position
+  char *resp = (char*)myME310.buffer_cstr(2);
+  if(resp != NULL)
   {
-    delay(2000);
-    Serial.println("Define PDP Context");
-    rc = myME310.define_pdp_context(cID, ipProt, APN);   //issue command AT+CGDCONT=cid,PDP_type,APN
-    if(rc == ME310::RETURN_VALID)
+    if(strcmp(resp, "OK") == 0)        // read response in 2 array position
     {
-      myME310.read_define_pdp_context();              //issue command AT+CGDCONT=? (read mode)
-      Serial.print("pdp context read :");
-      Serial.println(myME310.buffer_cstr(1));              //print second line of modem answer
-
-      Serial.print("gprs network registration status :");
-      rc = myME310.read_gprs_network_registration_status();  //issue command AT+CGREG? (read mode)
-      Serial.println(myME310.buffer_cstr(1));
+      delay(2000);
+      Serial.println("Define PDP Context");
+      rc = myME310.define_pdp_context(cID, ipProt, APN);   //issue command AT+CGDCONT=cid,PDP_type,APN
       if(rc == ME310::RETURN_VALID)
       {
-          while ((strcmp(myME310.buffer_cstr(1), "+CGREG: 0,1") != 0) &&  (strcmp(myME310.buffer_cstr(1), "+CGREG: 0,5") != 0))
+        myME310.read_define_pdp_context();              //issue command AT+CGDCONT=? (read mode)
+        Serial.print("pdp context read :");
+        Serial.println(myME310.buffer_cstr(1));              //print second line of modem answer
+
+        Serial.print("gprs network registration status :");
+        rc = myME310.read_gprs_network_registration_status();  //issue command AT+CGREG? (read mode)
+        Serial.println(myME310.buffer_cstr(1));
+        if(rc == ME310::RETURN_VALID)
+        {
+          resp = (char*)myME310.buffer_cstr(1);
+          while(resp != NULL)
           {
+            if((strcmp(resp, "+CGREG: 0,1") != 0) &&  (strcmp(resp, "+CGREG: 0,5") != 0))
+            {
               delay(3000);
-              myME310.read_gprs_network_registration_status();
+              rc = myME310.read_gprs_network_registration_status();
+              if(rc !=  ME310::RETURN_VALID)
+              {
+                Serial.println("ERROR");
+                Serial.println(myME310.return_string(rc));
+                break;
+              }
               Serial.println(myME310.buffer_cstr(1));
+              resp = (char*) myME310.buffer_cstr(1);
+            }
+            else
+            {
+              break;
+            }
           }
-      }
-      Serial.println("Activate context");
-      myME310.context_activation(cID, 1);        //issue command AT#SGACT=cid,state and wait for answer or timeout
+        }
+        Serial.println("Activate context");
+        myME310.context_activation(cID, 1);        //issue command AT#SGACT=cid,state and wait for answer or timeout
 
-      rc = myME310.calling_line_identification_presentation(1);   //issue command AT+CLIP=enable and wait for answer or timeout
-      Serial.println(rc);
-      if(rc == ME310::RETURN_VALID)
-      {
-        Serial.println("Calling Line Identity is enable");
-        flag = true;
-      }
-      else
-      {
-        Serial.println((String)"Error: " + rc + " Error string: " + myME310.buffer_cstr(2));
-        flag = false;
+        rc = myME310.calling_line_identification_presentation(1);   //issue command AT+CLIP=enable and wait for answer or timeout
+        Serial.println(myME310.return_string(rc));
+        if(rc == ME310::RETURN_VALID)
+        {
+          Serial.println("Calling Line Identity is enable");
+          flag = true;
+        }
+        else
+        {
+          Serial.println((String)"Error: " + rc + " Error string: " + myME310.buffer_cstr(2));
+          flag = false;
+        }
       }
     }
-  }
-  else
-  {
-      Serial.println((String)"Error: " + rc + " Error string: " + myME310.buffer_cstr(2));
+    else
+    {
+        Serial.println((String)"Error: " + rc + " Error string: " + myME310.buffer_cstr(2));
+    }
   }
 }
 

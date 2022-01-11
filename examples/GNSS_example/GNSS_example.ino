@@ -131,30 +131,30 @@ void setup() {
     // 1 : GNSS controller is powered up
     /////////////////////////////////////
     rc = myME310.gnss_controller_power_management(1);
-    if (rc == ME310::RETURN_VALID)
-    {
-      #if NMEA_DEBUG
-      /////////////////////////////////////
-      // Set GNGSA, GLGSV and GNRMC as available sentence in the unsolicited NMEA sentences.
-      // AT$GPSNMUNEX=0,1,1,0,0,0,0,0,0,0,0,1,0
-      /////////////////////////////////////
-      rc = myME310.gnss_nmea_extended_data_configuration(0,1,1,0,0,0,0,0,0,0,0,1,0);
-      if(rc ==  ME310::RETURN_VALID)
+    #if NMEA_DEBUG
+      if (rc == ME310::RETURN_VALID)
       {
         /////////////////////////////////////
-        //  Activate unsolicited NMEA sentences flow in the AT port and GPGGA,GPRMC, GPGSA and GPGSV sentences.
-        //  AT$GPSNMUN=2,1,0,1,1,1,0
+        // Set GNGSA, GLGSV and GNRMC as available sentence in the unsolicited NMEA sentences.
+        // AT$GPSNMUNEX=0,1,1,0,0,0,0,0,0,0,0,1,0
         /////////////////////////////////////
-        rc = myME310.gnss_nmea_data_configuration(2,1,0,1,1,1,0);
-        int i = 0;
-        while(strcmp(myME310.buffer_cstr(i), "OK") != 0)
+        rc = myME310.gnss_nmea_extended_data_configuration(0,1,1,0,0,0,0,0,0,0,0,1,0);
+        if(rc ==  ME310::RETURN_VALID)
         {
-          Serial.println(myME310.buffer_cstr(i));
-          i++;
+          /////////////////////////////////////
+          //  Activate unsolicited NMEA sentences flow in the AT port and GPGGA,GPRMC, GPGSA and GPGSV sentences.
+          //  AT$GPSNMUN=2,1,0,1,1,1,0
+          /////////////////////////////////////
+          rc = myME310.gnss_nmea_data_configuration(2,1,0,1,1,1,0);
+          int i = 0;
+          while(strcmp(myME310.buffer_cstr(i), "OK") != 0)
+          {
+            Serial.println(myME310.buffer_cstr(i));
+            i++;
+          }
         }
       }
-      #endif
-    }
+    #endif
 }
 
 void loop() {
@@ -170,11 +170,14 @@ void loop() {
   if (rc == ME310::RETURN_VALID)
   {
     Serial.println(myME310.buffer_cstr(1));
+    char* buff = (char*)myME310.buffer_cstr(1);
     std::string tmp_pos;
-    tmp_pos = myME310.buffer_cstr(1);
-    std::size_t len_pos = tmp_pos.find(":");
-    if(len_pos != std::string::npos)
+    if(buff != NULL)
     {
+      tmp_pos = buff;
+      std::size_t len_pos = tmp_pos.find(":");
+      if(len_pos != std::string::npos)
+      {
         std::size_t len_pos2 = tmp_pos.find(",");
         char valid_pos[64];
         if(len_pos2 != std::string::npos)
@@ -188,6 +191,7 @@ void loop() {
             delay(1000);
           }
         }
+      }
     }
   }
   delay(5000);
