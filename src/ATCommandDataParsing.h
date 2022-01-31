@@ -12,7 +12,7 @@
     It is possible obtain data payload, receivedBytes
 
   @version
-    1.2.1
+    2.10.0
 
   @note
     Dependencies:

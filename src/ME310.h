@@ -13,7 +13,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version
-    2.8.0
+    2.10.0
 
   @note
     Dependencies:
@@ -95,9 +95,19 @@ namespace me310
          LWM2M_SET_INT = 0,
          LWM2M_SET_FLOAT = 1,
          LWM2M_SET_STRING = 2,
-         LWM2M_SET_OPAQUE = 3
+         LWM2M_SET_OPAQUE = 3, 
+         LWM2M_SET_OBJECT_LINK = 4,
+         LWM2M_SET_TIME = 5
       } LWM2M_SET_TYPE;
 
+      typedef enum
+      {
+         DEREGISTER = 0,
+         FULL_REGISTRATION = 1,
+         REGISTRATION_UPDATE = 2,
+         REGISTRATION_INFO = 3
+      } LWM2M_REG_ACTION;
+      
       #ifdef ARDUINO_TELIT_SAMD_CHARLIE
       ME310(Uart &aSerial = SerialModule);
       #else
@@ -1031,7 +1041,7 @@ namespace me310
 
    // SSL -------------------------------------------------------------------------
 
-      return_t ssl_configure_general_param(int ssid , int cid, int pktSx =0, int maxTo = 90, int defTo = 100, int txTo = 50, int SSLSRingMode = 0, int noCarrierMode = 0, int skipHostMismatch = 1, int equalizeTx = 0, int unused1 = 0, int unused2 = 0,tout_t aTimeout = TOUT_100MS);
+      return_t ssl_configure_general_param(int ssid , int cid, int pktSx = 0, int maxTo = 90, int defTo = 100, int txTo = 50, int SSLSRingMode = 0, int noCarrierMode = 0, int skipHostMismatch = 1, int equalizeTx = 0, int unused1 = 0, int unused2 = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(ssl_configure_general_param,"AT#SSLCFG",TOUT_100MS)
 
       return_t ssl_configure_security_param(int ssid, int cipherSuite = 0, int authMode = 0,tout_t aTimeout = TOUT_100MS);
@@ -1082,42 +1092,6 @@ namespace me310
       return_t odis_command_saving_retrieving_parameters(char* hostUniqueDevId = "HUID0", char *hostManufacturer = "HMAN0", char* hostModel = "HMOD0", char *hostSwVersion = "HSW0", tout_t aTimeout = TOUT_100MS);
       _READ_TEST(odis_command_saving_retrieving_parameters, "AT+ODIS", TOUT_100MS)
 
-      return_t enableLWM2M(int enable, int ctxID,tout_t aTimeout=TOUT_1SEC);
-      _READ_TEST(enableLWM2M,"AT#LWM2MENA",TOUT_100MS)
-
-      return_t writeResource(int agent,int objID,int instanceID,int resourceID, int resourceInstance,int value, tout_t aTimeout=TOUT_100MS);
-      _READ_TEST(writeResource,"AT#LWM2MW",TOUT_100MS);
-
-      return_t  writeResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance,float value, tout_t aTimeout=TOUT_100MS);
-      _READ_TEST(writeResourcefloat,"AT#LWM2MW", TOUT_100MS);
-
-      return_t disableLWM2M(int disable, tout_t aTimeout=TOUT_1SEC);
-      _READ_TEST(disableLWM2M,"AT#LWM2MENA",TOUT_100MS);
-
-      return_t setResourcefloat(int type, int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(setResorcefloat,"AT#LWM2MSET",TOUT_100MS);
-
-      return_t setResourceFloat(int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(setResorceFloat,"AT#LWM2MSET",TOUT_100MS);
-
-      return_t setResourceInt(int objID,int instanceID,int resourceID, int resourceInstance, int value, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(setResorceInt,"AT#LWM2MSET",TOUT_100MS);
-
-      return_t  setResourceBool(int type,int objID,int instanceID,int resourceID, int resourceInstance,int value, tout_t aTimeout = TOUT_100MS);
-      _READ_TEST(setResourceBool,"AT#LWM2MSET",TOUT_100MS);
-
-      return_t readResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout=TOUT_100MS);
-      _READ_TEST(readResourcefloat,"AT#LWM2MR",TOUT_100MS);
-
-      return_t readResourceFloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout=TOUT_100MS);
-      _READ_TEST(readResourceFloat,"AT#LWM2MR",TOUT_100MS);
-
-      return_t readResourceInt(int agent,int objID,int instanceID,int resourceID, int resourceInstance, int &value, tout_t aTimeout=TOUT_100MS);
-      _READ_TEST(readResourceInt,"AT#LWM2MR",TOUT_100MS);
-
-      return_t setObject(int agent, int objID, int instanceID, char* jsonString,  tout_t aTimeout=TOUT_100MS);
-      _READ_TEST(setObject,"AT#LWM2MOBJSET",TOUT_100MS);
-
       return_t FOTA_set_extended_URC(int enable = 0, tout_t aTimeout = TOUT_100MS);
       _READ_TEST(FOTA_set_extended_URC, "AT#FOTAURC", TOUT_100MS)
 
@@ -1127,6 +1101,126 @@ namespace me310
       return_t odis_parameters_management(int param, int action, char* value = "", int instance = 0, tout_t aTimeout = TOUT_100MS);
       _TEST(odis_parameters_management, "AT#HOSTODIS", TOUT_100MS)
 
+   // LWM2M -----------------------------------------------------------------------
+
+      return_t LWM2M_enable(int enable, int ctxID, tout_t aTimeout=TOUT_1SEC);
+      _READ_TEST(LWM2M_enable,"AT#LWM2MENA",TOUT_100MS)
+
+      return_t LWM2M_disable(int disable, tout_t aTimeout=TOUT_1SEC);
+      _READ_TEST(LWM2M_disable,"AT#LWM2MENA",TOUT_100MS)
+
+      return_t LWM2M_write_resource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout=TOUT_100MS);
+      return_t LWM2M_write_resource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout=TOUT_100MS);
+      return_t LWM2M_write_resource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(LWM2M_write_resource,"AT#LWM2MW",TOUT_100MS)
+
+      return_t LWM2M_write_resource_float(int agent, int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(LWM2M_write_resource_float,"AT#LWM2MW", TOUT_100MS)
+
+      return_t LWM2M_set_resource_float(int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_set_resource_float,"AT#LWM2MSET",TOUT_100MS)
+
+       return_t LWM2M_set_resource_int(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_set_resource_int,"AT#LWM2MSET",TOUT_100MS)
+
+      return_t LWM2M_set_resource_bool(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_set_resource_bool,"AT#LWM2MSET",TOUT_100MS)
+
+      return_t LWM2M_set_resource_string(int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_set_resource_string,"AT#LWM2MSET",TOUT_100MS)
+
+      return_t LWM2M_set_resource_object_link(int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_set_resource_object_link,"AT#LWM2MSET",TOUT_100MS)
+
+      return_t LWM2M_set_resource_time(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_set_resource_time,"AT#LWM2MSET",TOUT_100MS)
+
+      return_t LWM2M_read_resource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(LWM2M_read_resource,"AT#LWM2MR",TOUT_100MS)
+
+      return_t LWM2M_read_resource_float(int agent, int objID, int instanceID, int resourceID, int resourceInstance, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(LWM2M_read_resource_float,"AT#LWM2MR",TOUT_100MS)
+
+      return_t LWM2M_read_resource_int(int agent, int objID, int instanceID, int resourceID, int resourceInstance, int &value, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(LWM2M_read_resource_int,"AT#LWM2MR",TOUT_100MS)
+
+      return_t LWM2M_read_resource_string(int agent, int objID, int instanceID, int resourceID, int resourceInstance, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(LWM2M_read_resource_string,"AT#LWM2MR",TOUT_100MS)
+
+      return_t LWM2M_set_object(int agent, int objID, int instanceID, char* jsonString, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(LWM2M_set_object,"AT#LWM2MOBJSET",TOUT_100MS)
+
+      return_t LWM2M_check_agent_exist(int agentInstance, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(LWM2M_check_agent_exist,"AT#LWM2MEXIST",TOUT_100MS)
+
+      return_t LWM2M_check_object_exist(int agentInstance, int objectNumber, int objectInstanceNumber, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(LWM2M_check_object_exist,"AT#LWM2MEXIST",TOUT_100MS)
+
+      return_t LWM2M_check_URI_exist(int agentInstance, int objectNumber, int objectInstanceNumber, int resourceNumber, int resourceInstanceNumber, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(LWM2M_check_URI_exist,"AT#LWM2MEXIST",TOUT_100MS)
+
+      return_t LWM2M_create_new_object_instance(int agentInstance, int objectID, int objectInstanceID, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(LWM2M_create_new_object_instance,"AT#LWM2MNEWINST",TOUT_100MS)
+
+      return_t LWM2M_send_ACK(tout_t aTimeout=TOUT_100MS);
+      _TEST(LWM2M_send_ACK,"AT#LWM2MACK",TOUT_100MS)
+
+      return_t LWM2M_set_configuration(int agentID, int paramID, int value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_set_configuration,"AT#LWM2MCFG",TOUT_100MS)
+
+      return_t LWM2M_get_configuration(int agentID, int paramID, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_get_configuration,"AT#LWM2MCFG",TOUT_100MS)
+
+      return_t LWM2M_set_ciphers(int agentID, int cipher_mode, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_set_ciphers,"AT#LWM2MCIPHERENA",TOUT_100MS)
+
+      return_t LWM2M_set_general_parameter(int paramID, char* data, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_set_general_parameter,"AT#LWM2MCUST",TOUT_100MS)
+
+      return_t LWM2M_client_resource_exec(int agentInstance, int objectID, int objectInstanceID, int resourceID, int resourceInstanceID, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_client_resource_exec,"AT#LWM2ME",TOUT_100MS)
+
+      return_t LWM2M_get_resource(int type, int objectID, int objectInstanceID, int resourceID, int resourceInstanceID, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_get_resource,"AT#LWM2MGET",TOUT_100MS)
+
+      return_t LWM2M_get_report_object(int agentInstance, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_get_report_object,"AT#LWM2MLIST",TOUT_100MS)
+
+      return_t LWM2M_activate_resource(int action, int objectID, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_activate_resource,"AT#LWM2MMON",TOUT_100MS)
+
+      return_t LWM2M_control_URC_reporting(int agentInstanceID, int action, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_control_URC_reporting,"AT#LWM2MNFYACKENA",TOUT_100MS)
+
+      return_t LWM2M_manage_URI_reporting(int agentInstanceID, int action, int objectID, int objectInstanceID, int resourceID, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_manage_URI_reporting,"AT#LWM2MNFYACKURI",TOUT_100MS)
+
+      return_t LWM2M_get_object(int agentInstanceID, int objectID, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_get_object,"AT#LWM2MOBJGET",TOUT_100MS)
+
+      return_t LWM2M_get_object_instance(int agentInstanceID, int objectID, int objectInstanceID, tout_t aTimeout = TOUT_100MS);  
+      _READ_TEST(LWM2M_get_object_instance,"AT#LWM2MOBJGET",TOUT_100MS)
+
+      return_t LWM2M_get_object_resource(int agentInstanceID, int objectID, int objectInstanceID, int resourceID, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_get_object_resource,"AT#LWM2MOBJGET",TOUT_100MS)
+
+      return_t LWM2M_client_current_status(tout_t aTimeout = TOUT_100MS);
+      _TEST(LWM2M_client_current_status,"AT#LWM2MSTAT",TOUT_100MS)
+
+      return_t LWM2M_registration(int agentInstanceID, int actionID, int shortServerID, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_registration,"AT#LWM2MREG",TOUT_100MS)
+
+      return_t LWM2M_registration_info(int agentInstanceID, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_registration_info,"AT#LWM2MREG",TOUT_100MS)
+
+      return_t LWM2M_FOTA_operation_confirmation(int agentInstanceID, int action = 1, tout_t aTimeout = TOUT_100MS);
+      _TEST(LWM2M_FOTA_operation_confirmation,"AT#LWM2MFOTAACK",TOUT_100MS)
+
+      return_t LWM2M_FOTA_configuration(int agentInstanceID, int mode = 0, int timeoutAction = 0, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_FOTA_configuration,"AT#LWM2MFOTACFG",TOUT_100MS)
+
+      return_t LWM2M_FOTA_state(int agentInstanceID, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(LWM2M_FOTA_state,"AT#LWM2MFOTASTATE",TOUT_100MS)
    // M2M -------------------------------------------------------------------------
 
       return_t m2m_chdir(const char *path,tout_t aTimeout = TOUT_100MS);
@@ -1249,7 +1343,7 @@ namespace me310
 
    // PSM -------------------------------------------------------------------------
 
-      return_t psm_setting(int mode, const char * reqPeriodicRau, const char * reqGPRSreadyTimer, const char * reqPeriodicTau, const char * reqActiveTime, tout_t aTimeout = TOUT_100MS);
+      return_t psm_setting(int mode, const char * reqPeriodicRau = "", const char * reqGPRSreadyTimer = "", const char * reqPeriodicTau = "", const char * reqActiveTime = "", tout_t aTimeout = TOUT_100MS);
       _READ_TEST(psm_setting,"AT+CPSMS",TOUT_100MS)
 
       return_t psm_setting2(int mode, int reqPeriodicRau, int reqGPRSreadyTimer, int reqPeriodicTau, int reqActiveTime, int psmVersion, int psmThreshold, tout_t aTimeout = TOUT_100MS);
@@ -1272,6 +1366,103 @@ namespace me310
       return_t send_command(const char *aCommand, const char *aAnswer = OK_STRING, tout_t aTimeout = TOUT_200MS);
       void send_data(const char *aCommand, const char* term = TERMINATION_STRING, tout_t aTimeout = TOUT_200MS);
       virtual return_t receive_data(tout_t aTimeout = TOUT_200MS);
+
+   // Deprecated methods-----------------------------------------------------------
+      [[deprecated("Use LWM2M_enable(int enable, int ctxID, tout_t aTimeout) instead.")]]
+      return_t enableLWM2M(int enable, int ctxID,tout_t aTimeout=TOUT_1SEC);
+      _READ_TEST(enableLWM2M,"AT#LWM2MENA",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_disable(int disable, tout_t aTimeout) instead.")]]
+      return_t disableLWM2M(int disable, tout_t aTimeout=TOUT_1SEC);
+      _READ_TEST(disableLWM2M,"AT#LWM2MENA",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_write_resource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout) instead.")]]
+      return_t writeResource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout=TOUT_100MS); 
+      [[deprecated("Use LWM2M_write_resource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout) instead.")]]
+      return_t writeResource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout=TOUT_100MS);
+      [[deprecated("Use LWM2M_write_resource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout) instead.")]]
+      return_t writeResource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(writeResource,"AT#LWM2MW",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_write_resource_float(int agent, int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout) instead.")]]
+      return_t writeResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance,float value, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(writeResourcefloat,"AT#LWM2MW", TOUT_100MS)
+
+      [[deprecated("Use LWM2M_set_resource_float(int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout) instead.")]]
+      return_t setResourcefloat(int type, int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(setResourcefloat,"AT#LWM2MSET",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_set_resource_float(int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout) instead.")]]
+      return_t setResourceFloat(int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(setResourceFloat,"AT#LWM2MSET",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_set_resource_int(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout) instead.")]]
+      return_t setResourceInt(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(setResourceInt,"AT#LWM2MSET",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_set_resource_bool(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout) instead.")]]
+      return_t setResourceBool(int type, int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout = TOUT_100MS);
+      [[deprecated("Use LWM2M_set_resource_bool(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout) instead.")]]
+      return_t setResourceBool(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(setResourceBool,"AT#LWM2MSET",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_set_resource_string(int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout) instead.")]]
+      return_t setResourceString(int type, int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout = TOUT_100MS);
+      [[deprecated("Use LWM2M_set_resource_string(int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout) instead.")]]
+      return_t setResourceString(int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(setResourceString,"AT#LWM2MSET",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_set_resource_object_link(int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout) instead.")]]
+      return_t setResourceObjectLink(int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(setResourceObjectLink,"AT#LWM2MSET",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_set_resource_time(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout) instead.")]]
+      return_t setResourceTime(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout = TOUT_100MS);
+      _READ_TEST(setResourceTime,"AT#LWM2MSET",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_read_resource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, tout_t aTimeout) instead.")]]
+      return_t readResource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(readResource,"AT#LWM2MR",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_read_resource_float(int agent, int objID, int instanceID, int resourceID, int resourceInstance, tout_t aTimeout) instead.")]]
+      return_t readResourcefloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(readResourcefloat,"AT#LWM2MR",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_read_resource_float(int agent, int objID, int instanceID, int resourceID, int resourceInstance, tout_t aTimeout) instead.")]]
+      return_t readResourceFloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(readResourceFloat,"AT#LWM2MR",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_read_resource_int(int agent, int objID, int instanceID, int resourceID, int resourceInstance, int &value, tout_t aTimeout) instead.")]]
+      return_t readResourceInt(int agent, int objID, int instanceID, int resourceID, int resourceInstance, int &value, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(readResourceInt,"AT#LWM2MR",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_read_resource_string(int agent, int objID, int instanceID, int resourceID, int resourceInstance, tout_t aTimeout) instead.")]]
+      return_t readResourceString(int agent, int objID, int instanceID, int resourceID, int resourceInstance, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(readResourceString,"AT#LWM2MR",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_set_object(int agent, int objID, int instanceID, char* jsonString, tout_t aTimeout) instead.")]]
+      return_t setObject(int agent, int objID, int instanceID, char* jsonString, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(setObject,"AT#LWM2MOBJSET",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_check_agent_exist(int agentInstance, tout_t aTimeout) instead.")]]
+      return_t checkAgentExist(int agentInstance, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(checkAgentExist,"AT#LWM2MEXIST",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_check_object_exist(int agentInstance, int objectNumber, int objectInstanceNumber, tout_t aTimeout) instead.")]]
+      return_t checkObjectExist(int agentInstance, int objectNumber, int objectInstanceNumber, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(checkObjectExist,"AT#LWM2MEXIST",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_check_URI_exist(int agentInstance, int objectNumber, int objectInstanceNumber, int resourceNumber, int resourceInstanceNumber, tout_t aTimeout) instead.")]]
+      return_t checkURIExist(int agentInstance, int objectNumber, int objectInstanceNumber, int resourceNumber, int resourceInstanceNumber, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(checkURIExist,"AT#LWM2MEXIST",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_create_new_object_instance(int agentInstance, int objectID, int objectInstanceID, tout_t aTimeout) instead.")]]
+      return_t createNewObjectInstance(int agentInstance, int objectID, int objectInstanceID, tout_t aTimeout=TOUT_100MS);
+      _READ_TEST(createNewObjectInstance,"AT#LWM2MNEWINST",TOUT_100MS)
+
+      [[deprecated("Use LWM2M_send_ACK(tout_t aTimeout) instead.")]]
+      return_t sendLWM2MACK(tout_t aTimeout=TOUT_100MS);
+      _TEST(sendLWM2MACK,"AT#LWM2MACK",TOUT_100MS)
 
 
 

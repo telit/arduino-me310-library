@@ -12,7 +12,7 @@
     This library contains a interface that implements a parsing functions for path.\n
 
   @version
-    1.0.0
+    2.10.0
 
   @note
     Dependencies:

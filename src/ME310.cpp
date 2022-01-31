@@ -17,7 +17,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version
-    2.8.0
+    2.10.0
 
   @note
 
@@ -5174,7 +5174,7 @@ This command configures SSL connection parameters.
 ME310::return_t ME310::ssl_configure_general_param(int ssid , int cid, int pktSx, int maxTo, int defTo, int txTo, int SSLSRingMode, int noCarrierMode, int skipHostMismatch , int equalizeTx, int unused1, int unused2, tout_t aTimeout)
 {
    memset(mBuffer, 0, ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#SSLCFG=%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d"), ssid, cid, pktSx, maxTo, defTo, txTo, SSLSRingMode, noCarrierMode, skipHostMismatch, equalizeTx, unused1, unused2);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#SSLCFG=%d,%d,%d,%d,%d,%d,%d,%d,%d,%d"), ssid, cid, pktSx, maxTo, defTo, txTo, SSLSRingMode, noCarrierMode, skipHostMismatch, equalizeTx);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 
@@ -5533,7 +5533,20 @@ This function enables the Telit LwM2M Client feature.
  * \param aTimeout timeout in ms
  * \return return code
  */
-ME310::return_t ME310::enableLWM2M(int enable, int ctxID,tout_t aTimeout)
+ME310::return_t ME310::enableLWM2M(int enable, int ctxID, tout_t aTimeout)
+{
+   return LWM2M_enable(enable, ctxID, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MENA command and waits for unsolicited message
+/*! \details
+This function enables the Telit LwM2M Client feature.
+ * \param enable contains the value that enables the LWM2M client
+ * \param ctxID  contains the PDP context identifier
+ * \param aTimeout timeout in ms
+ * \return return code
+ */
+ME310::return_t ME310::LWM2M_enable(int enable, int ctxID,tout_t aTimeout)
 {
    ME310::return_t ret;
 	memset(mBuffer,0,ME310_BUFFSIZE);
@@ -5555,6 +5568,18 @@ This function disable the Telit LwM2M Client feature.
  * \return return code
  */
 ME310::return_t ME310::disableLWM2M(int disable, tout_t aTimeout)
+{
+   return LWM2M_disable(disable, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MENA command and waits for unsolicited message
+/*! \details
+This function disable the Telit LwM2M Client feature.
+ * \param disable contains the value that disables the LWM2M client
+ * \param aTimeout timeout in ms
+ * \return return code
+ */
+ME310::return_t ME310::LWM2M_disable(int disable, tout_t aTimeout)
 {
    ME310::return_t ret;
 	memset(mBuffer,0,ME310_BUFFSIZE);
@@ -5581,10 +5606,104 @@ correspondent lwm2m agent enabled and working.
  * \param aTimeout timeout in ms
  * \return return code
 */
- ME310::return_t ME310::writeResource(int agent, int objID, int instanceID,int resourceID, int resourceInstance, int value, tout_t aTimeout)
+ ME310::return_t ME310::writeResource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout)
+ {
+	return LWM2M_write_resource(agent, objID, instanceID, resourceID, resourceInstance, value, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MW command and wait OK answer
+/*! \details
+This function selects the parameters for the write operation on the lwm2m agent, it requires the
+correspondent lwm2m agent enabled and working.
+ * \param agent specifies the agent (0=telit agent)
+ * \param objID  identifies the object ID
+ * \param instanceID identifies the object instance
+ * \param resourceID identifies the resource ID
+ * \param resourceInstance identifies the resource instance
+ * \param value sets the resource value
+ * \param aTimeout timeout in ms
+ * \return return code
+*/
+ ME310::return_t ME310::LWM2M_write_resource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout)
  {
 	memset(mBuffer,0,ME310_BUFFSIZE);
 	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MW=%d,%d,%d,%d,%d,%d"), agent,objID,instanceID,resourceID, resourceInstance,value);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MW command and wait OK answer
+/*! \details
+This function selects the parameters for the write operation on the lwm2m agent, it requires the
+correspondent lwm2m agent enabled and working.
+ * \param agent specifies the agent (0=telit agent)
+ * \param objID  identifies the object ID
+ * \param instanceID identifies the object instance
+ * \param resourceID identifies the resource ID
+ * \param resourceInstance identifies the resource instance
+ * \param value sets the resource value
+ * \param aTimeout timeout in ms
+ * \return return code
+*/
+ ME310::return_t ME310::writeResource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout)
+ {
+	return LWM2M_write_resource(agent, objID, instanceID, resourceID, resourceInstance, value);
+}
+
+/*! \brief Implements the AT#LWM2MW command and wait OK answer
+/*! \details
+This function selects the parameters for the write operation on the lwm2m agent, it requires the
+correspondent lwm2m agent enabled and working.
+ * \param agent specifies the agent (0=telit agent)
+ * \param objID  identifies the object ID
+ * \param instanceID identifies the object instance
+ * \param resourceID identifies the resource ID
+ * \param resourceInstance identifies the resource instance
+ * \param value sets the resource value
+ * \param aTimeout timeout in ms
+ * \return return code
+*/
+ ME310::return_t ME310::LWM2M_write_resource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout)
+ {
+	memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MW=%d,%d,%d,%d,%d,%s"), agent,objID,instanceID,resourceID, resourceInstance,value);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MW command and wait OK answer
+/*! \details
+This function selects the parameters for the write operation on the lwm2m agent, it requires the
+correspondent lwm2m agent enabled and working.
+ * \param agent specifies the agent (0=telit agent)
+ * \param objID  identifies the object ID
+ * \param instanceID identifies the object instance
+ * \param resourceID identifies the resource ID
+ * \param resourceInstance identifies the resource instance
+ * \param value sets the resource value
+ * \param aTimeout timeout in ms
+ * \return return code
+*/
+ ME310::return_t ME310::writeResource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout)
+ {
+	return LWM2M_write_resource(agent, objID, instanceID, resourceID, resourceInstance, value, aTimeout);
+ }
+
+/*! \brief Implements the AT#LWM2MW command and wait OK answer
+/*! \details
+This function selects the parameters for the write operation on the lwm2m agent, it requires the
+correspondent lwm2m agent enabled and working.
+ * \param agent specifies the agent (0=telit agent)
+ * \param objID  identifies the object ID
+ * \param instanceID identifies the object instance
+ * \param resourceID identifies the resource ID
+ * \param resourceInstance identifies the resource instance
+ * \param value sets the resource value
+ * \param aTimeout timeout in ms
+ * \return return code
+*/
+ ME310::return_t ME310::LWM2M_write_resource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout)
+ {
+	memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MW=%d,%d,%d,%d,%d,%f"), agent,objID,instanceID,resourceID, resourceInstance,value);
 	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
 }
 
@@ -5601,7 +5720,25 @@ correspondent lwm2m agent enabled and working.
  * \param aTimeout timeout in ms
  * \return return code
 */
-ME310::return_t ME310::writeResourcefloat(int agent, int objID, int instanceID,int resourceID, int resourceInstance, float value, tout_t aTimeout)
+ME310::return_t ME310::writeResourcefloat(int agent, int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout)
+{
+	return LWM2M_write_resource_float(agent, objID, instanceID, resourceID, resourceInstance, value, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MW command and wait OK answer
+/*! \details
+This function selects the parameters for the write operation on the lwm2m agent, it requires the
+correspondent lwm2m agent enabled and working.
+ * \param agent specifies the agent (0=telit agent)
+ * \param objID  identifies the object ID
+ * \param instanceID identifies the object instance
+ * \param resourceID identifies the resource ID
+ * \param resourceInstance identifies the resource instance
+ * \param value sets the resource value (float)
+ * \param aTimeout timeout in ms
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_write_resource_float(int agent, int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout)
 {
 	memset(mBuffer,0,ME310_BUFFSIZE);
 	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MW=%d,%d,%d,%d,%d,%f"), agent,objID,instanceID,resourceID, resourceInstance,value);
@@ -5629,16 +5766,31 @@ ME310::return_t ME310::setResourcefloat(int type, int objID, int instanceID, int
 /*! \brief Implements the AT#LWM2MSET command and wait OK answer
 /*! \details
 This function sets a user defined value to the specified resource, if whitelisted.
- * \param type specifies the type of data to insert
  * \param objID identifies the object LWM2M
  * \param instanceID identifies the instance of the object
  * \param resourceID identifies the resource of the object
  * \param resourceInstance identifies the instance of the resource
- * \param value identifies the value to be set
+ * \param value identifies the value to be set (float)
  * \param aTimeout specifies the timeout
  * \return return code
 */
 ME310::return_t ME310::setResourceFloat(int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout)
+{
+   return LWM2M_set_resource_float(objID, instanceID, resourceID, resourceInstance, value, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MSET command and wait OK answer
+/*! \details
+This function sets a user defined value to the specified resource, if whitelisted.
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value identifies the value to be set (float)
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_set_resource_float(int objID, int instanceID, int resourceID, int resourceInstance, float value, tout_t aTimeout)
 {
    char buff[20];
    memset(mBuffer,0,ME310_BUFFSIZE);
@@ -5647,45 +5799,35 @@ ME310::return_t ME310::setResourceFloat(int objID, int instanceID, int resourceI
 	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
 }
 
-/*! \brief Implements the AT#LWM2MOBJSET command and wait OK answer
+/*! \brief Implements the AT#LWM2MSET command and wait OK answer
 /*! \details
-This function sets a object by a json string.
- * \param agent identifies the agent LWM2M
+This function sets a user defined value to the specified resource, if whitelisted.
  * \param objID identifies the object LWM2M
  * \param instanceID identifies the instance of the object
- * \param jsonString json string contained object parameters
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value identifies the value to be set (int)
  * \param aTimeout specifies the timeout
  * \return return code
 */
-ME310::return_t ME310::setObject(int agent, int objID, int instanceID, char* jsonString,  tout_t aTimeout)
+ME310::return_t ME310::setResourceInt(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout)
 {
-   ME310::return_t ret;
-   memset(mBuffer, 0, ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#LWM2MOBJSET=%d,%d,%d"), agent, objID, instanceID);
-   ret =  send_wait((char*)mBuffer, WAIT_DATA_STRING, aTimeout);
-   if ((ret == RETURN_VALID))
-   {
-      memset(mBuffer, 0, ME310_BUFFSIZE);
-      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, jsonString);
-      ret =  send_wait((char*)mBuffer, OK_STRING, CTRZ, aTimeout);
-   }
-   return ret;
+	return LWM2M_set_resource_int(objID, instanceID, resourceID, resourceInstance, value, aTimeout);
 }
 
 /*! \brief Implements the AT#LWM2MSET command and wait OK answer
 /*! \details
 This function sets a user defined value to the specified resource, if whitelisted.
- * \param type specifies the type of data to insert
  * \param objID identifies the object LWM2M
  * \param instanceID identifies the instance of the object
  * \param resourceID identifies the resource of the object
  * \param resourceInstance identifies the instance of the resource
- * \param value identifies the value to be set
+ * \param value identifies the value to be set (int)
  * \param aTimeout specifies the timeout
  * \return return code
 */
- ME310::return_t ME310::setResourceInt(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout)
- {
+ME310::return_t ME310::LWM2M_set_resource_int(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout)
+{
 	memset(mBuffer,0,ME310_BUFFSIZE);
 	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MSET=%d,%d,%d,%d,%d,%d"), LWM2M_SET_INT, objID, instanceID,resourceID, resourceInstance, value);
 	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
@@ -5699,27 +5841,253 @@ This function sets a user defined value to the specified resource, if whiteliste
  * \param instanceID identifies the instance of the object
  * \param resourceID identifies the resource of the object
  * \param resourceInstance identifies the instance of the resource
- * \param value identifies the value to be set (int)
+ * \param value identifies the value to be set (bool)
  * \param aTimeout specifies the timeout
  * \return return code
 */
-ME310::return_t ME310::setResourceBool(int type,int objID,int instanceID,int resourceID, int resourceInstance,int value, tout_t aTimeout)
+ME310::return_t ME310::setResourceBool(int type, int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout)
+{
+   (void)type;
+	return setResourceBool(objID, instanceID, resourceID, resourceInstance, value);
+}
+
+/*! \brief Implements the AT#LWM2MSET command and wait OK answer
+/*! \details
+This function sets a user defined value to the specified resource, if whitelisted.
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value identifies the value to be set (bool)
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::setResourceBool(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout)
+{
+	return LWM2M_set_resource_bool(objID, instanceID, resourceID, resourceInstance, value, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MSET command and wait OK answer
+/*! \details
+This function sets a user defined value to the specified resource, if whitelisted.
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value identifies the value to be set (bool)
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_set_resource_bool(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout)
 {
 	memset(mBuffer,0,ME310_BUFFSIZE);
-	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MSET=%d,%d,%d,%d,%d,%d"), type,objID,instanceID,resourceID, resourceInstance,value);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MSET=%d,%d,%d,%d,%d,%d"), LWM2M_SET_INT, objID, instanceID, resourceID, resourceInstance, value);
 	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MSET command and wait OK answer
+/*! \details
+This function sets a user defined value to the specified resource, if whitelisted.
+ * \param type specifies the type of data to insert
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value identifies the value to be set (char*)
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::setResourceString(int type, int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout)
+{
+   (void) type;
+	return setResourceString(objID, instanceID, resourceID, resourceInstance, value);
+}
+
+/*! \brief Implements the AT#LWM2MSET command and wait OK answer
+/*! \details
+This function sets a user defined value to the specified resource, if whitelisted.
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value identifies the value to be set (char*)
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::setResourceString(int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout)
+{
+	return LWM2M_set_resource_string(objID, instanceID, resourceID, resourceInstance, value, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MSET command and wait OK answer
+/*! \details
+This function sets a user defined value to the specified resource, if whitelisted.
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value identifies the value to be set (char*)
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_set_resource_string(int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout)
+{
+	memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MSET=%d,%d,%d,%d,%d,%s"), LWM2M_SET_STRING, objID, instanceID, resourceID, resourceInstance, value);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MSET command and wait OK answer
+/*! \details
+This function sets a user defined value to the specified resource, if whitelisted.
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value object link values, string of max 11 characters, represented as a couple of integer numbers separated by colon, which represent an Object ID and an Object Instance ID.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::setResourceObjectLink(int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout)
+{
+	return LWM2M_set_resource_object_link(objID, instanceID, resourceID, resourceInstance, value, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MSET command and wait OK answer
+/*! \details
+This function sets a user defined value to the specified resource, if whitelisted.
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value object link values, string of max 11 characters, represented as a couple of integer numbers separated by colon, which represent an Object ID and an Object Instance ID.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_set_resource_object_link(int objID, int instanceID, int resourceID, int resourceInstance, char* value, tout_t aTimeout)
+{
+	memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MSET=%d,%d,%d,%d,%d,%s"), LWM2M_SET_OBJECT_LINK, objID, instanceID, resourceID, resourceInstance, value);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MSET command and wait OK answer
+/*! \details
+This function sets a user defined value to the specified resource, if whitelisted.
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value time values, same notation as integer values, expressed as the number of seconds since Jan 1st, 1970 in the UTC time zone.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::setResourceTime(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout)
+{
+	return LWM2M_set_resource_time(objID, instanceID, resourceID, resourceInstance, value, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MSET command and wait OK answer
+/*! \details
+This function sets a user defined value to the specified resource, if whitelisted.
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value time values, same notation as integer values, expressed as the number of seconds since Jan 1st, 1970 in the UTC time zone.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_set_resource_time(int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout)
+{
+	memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MSET=%d,%d,%d,%d,%d,%d"), LWM2M_SET_TIME, objID, instanceID,resourceID, resourceInstance, value);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MOBJSET command and wait OK answer
+/*! \details
+This function sets a object by a json string.
+ * \param agent identifies the agent LWM2M
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param jsonString json string contained object parameters
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::setObject(int agent, int objID, int instanceID, char* jsonString, tout_t aTimeout)
+{
+   return LWM2M_set_object(agent, objID, instanceID, jsonString, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MOBJSET command and wait OK answer
+/*! \details
+This function sets a object by a json string.
+ * \param agent identifies the agent LWM2M
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param jsonString json string contained object parameters
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_set_object(int agent, int objID, int instanceID, char* jsonString, tout_t aTimeout)
+{
+   ME310::return_t ret;
+   memset(mBuffer, 0, ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#LWM2MOBJSET=%d,%d,%d"), agent, objID, instanceID);
+   ret =  send_wait((char*)mBuffer, WAIT_DATA_STRING, aTimeout);
+   if ((ret == RETURN_VALID))
+   {
+      memset(mBuffer, 0, ME310_BUFFSIZE);
+      snprintf((char *)mBuffer, ME310_BUFFSIZE-1, jsonString);
+      ret =  send_wait((char*)mBuffer, OK_STRING, CTRZ, aTimeout);
+   }
+   return ret;
+}
+/*! \brief Implements the AT#LWM2MR command and wait OK answer
+/*! \details
+This function selects the parameters for the read operation on the lwm2m agent, it requires the
+correspondent lwm2m agent enabled and working.
+ * \param agent identifies the agent LWM2M
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::readResource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, tout_t aTimeout)
+{
+	return LWM2M_read_resource(agent, objID, instanceID, resourceID, resourceInstance, aTimeout);
 }
 
 /*! \brief Implements the AT#LWM2MR command and wait OK answer
 /*! \details
 This function selects the parameters for the read operation on the lwm2m agent, it requires the
 correspondent lwm2m agent enabled and working.
- * \param type specifies the type of data to insert
+ * \param agent identifies the agent LWM2M
  * \param objID identifies the object LWM2M
  * \param instanceID identifies the instance of the object
  * \param resourceID identifies the resource of the object
  * \param resourceInstance identifies the instance of the resource
- * \param value identifies the value to be set (int)
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_read_resource(int agent, int objID, int instanceID, int resourceID, int resourceInstance, tout_t aTimeout)
+{
+	memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MR=%d,%d,%d,%d,%d"), agent,objID,instanceID,resourceID, resourceInstance);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+/*! \brief Implements the AT#LWM2MR command and wait OK answer
+/*! \details
+This function selects the parameters for the read operation on the lwm2m agent, it requires the
+correspondent lwm2m agent enabled and working.
+ * \param agent identifies the agent LWM2M
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
  * \param aTimeout specifies the timeout
  * \return return code
 */
@@ -5732,16 +6100,32 @@ ME310::return_t ME310::readResourcefloat(int agent,int objID,int instanceID,int 
 /*! \details
 This function selects the parameters for the read operation on the lwm2m agent, it requires the
 correspondent lwm2m agent enabled and working.
- * \param type specifies the type of data to insert
+ * \param agent identifies the agent LWM2M
  * \param objID identifies the object LWM2M
  * \param instanceID identifies the instance of the object
  * \param resourceID identifies the resource of the object
  * \param resourceInstance identifies the instance of the resource
- * \param value identifies the value to be set (int)
  * \param aTimeout specifies the timeout
  * \return return code
 */
-ME310::return_t ME310::readResourceFloat(int agent,int objID,int instanceID,int resourceID, int resourceInstance, tout_t aTimeout)
+ME310::return_t ME310::readResourceFloat(int agent, int objID, int instanceID, int resourceID, int resourceInstance, tout_t aTimeout)
+{
+	return LWM2M_read_resource_float(agent, objID, instanceID, resourceID, resourceInstance, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MR command and wait OK answer
+/*! \details
+This function selects the parameters for the read operation on the lwm2m agent, it requires the
+correspondent lwm2m agent enabled and working.
+ * \param agent identifies the agent LWM2M
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_read_resource_float(int agent, int objID, int instanceID, int resourceID, int resourceInstance, tout_t aTimeout)
 {
 	memset(mBuffer,0,ME310_BUFFSIZE);
 	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MR=%d,%d,%d,%d,%d"), agent,objID,instanceID,resourceID, resourceInstance);
@@ -5752,7 +6136,7 @@ ME310::return_t ME310::readResourceFloat(int agent,int objID,int instanceID,int 
 /*! \details
 This function selects the parameters for the read operation on the lwm2m agent, it requires the
 correspondent lwm2m agent enabled and working.
- * \param type specifies the type of data to insert
+ * \param agent identifies the agent LWM2M
  * \param objID identifies the object LWM2M
  * \param instanceID identifies the instance of the object
  * \param resourceID identifies the resource of the object
@@ -5761,7 +6145,7 @@ correspondent lwm2m agent enabled and working.
  * \param aTimeout specifies the timeout
  * \return return code
 */
-ME310::return_t ME310::readResourceInt(int agent,int objID,int instanceID,int resourceID, int resourceInstance, int &value, tout_t aTimeout)
+ME310::return_t ME310::readResourceInt(int agent, int objID, int instanceID, int resourceID, int resourceInstance, int &value, tout_t aTimeout)
 {
    ME310::return_t ret;
    int i = 0;
@@ -5784,6 +6168,525 @@ ME310::return_t ME310::readResourceInt(int agent,int objID,int instanceID,int re
       }
    }
    return ret;
+}
+
+/*! \brief Implements the AT#LWM2MR command and wait OK answer
+/*! \details
+This function selects the parameters for the read operation on the lwm2m agent, it requires the
+correspondent lwm2m agent enabled and working.
+ * \param agent identifies the agent LWM2M
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param value identifies the value to be set (int)
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_read_resource_int(int agent, int objID, int instanceID, int resourceID, int resourceInstance, int &value, tout_t aTimeout)
+{
+   ME310::return_t ret;
+   int i = 0;
+	memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MR=%d,%d,%d,%d,%d"), agent,objID,instanceID,resourceID, resourceInstance);
+	ret = send_wait((char*)mBuffer,OK_STRING, aTimeout);
+   if(ret == RETURN_VALID)
+   {
+      while(buffer_cstr(i) != NULL)
+      {
+         String retValue = buffer_cstr(i);
+         if(retValue.startsWith("#LWM2MR:"))
+         {
+            int pos = retValue.indexOf(":");
+            value = atoi(retValue.substring(pos +1).c_str());
+            ret = RETURN_VALID;
+            break;
+         }
+         i++;
+      }
+   }
+   return ret;
+}
+
+/*! \brief Implements the AT#LWM2MR command and wait OK answer
+/*! \details
+This function selects the parameters for the read operation on the lwm2m agent, it requires the
+correspondent lwm2m agent enabled and working.
+ * \param agent identifies the agent LWM2M
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::readResourceString(int agent, int objID, int instanceID, int resourceID, int resourceInstance, tout_t aTimeout)
+{
+   return LWM2M_read_resource_string(agent, objID, instanceID, resourceID, resourceInstance, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MR command and wait OK answer
+/*! \details
+This function selects the parameters for the read operation on the lwm2m agent, it requires the
+correspondent lwm2m agent enabled and working.
+ * \param agent identifies the agent LWM2M
+ * \param objID identifies the object LWM2M
+ * \param instanceID identifies the instance of the object
+ * \param resourceID identifies the resource of the object
+ * \param resourceInstance identifies the instance of the resource
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_read_resource_string(int agent, int objID, int instanceID, int resourceID, int resourceInstance, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MR=%d,%d,%d,%d,%d"), agent, objID, instanceID, resourceID, resourceInstance);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MEXIST command and wait OK answer
+/*! \details
+This function allows the end-user to query the module in order to discover if a given agent exist.
+ * \param agentInstance identifies the agent LWM2M
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::checkAgentExist(int agentInstance, tout_t aTimeout)
+{
+	return LWM2M_check_agent_exist(agentInstance, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MEXIST command and wait OK answer
+/*! \details
+This function allows the end-user to query the module in order to discover if a given agent exist.
+ * \param agentInstance identifies the agent LWM2M
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_check_agent_exist(int agentInstance, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MEXIST=%d"), agentInstance);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MEXIST command and wait OK answer
+/*! \details
+This function allows the end-user to query the module in order to discover if agiven agent and URI path combination exist.
+ * \param agentInstance identifies the agent LWM2M
+ * \param objectNumber object number to be selected
+ * \param objectInstanceNumber object instance for the query
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::checkObjectExist(int agentInstance, int objectNumber, int objectInstanceNumber, tout_t aTimeout)
+{
+   return LWM2M_check_object_exist(agentInstance, objectNumber, objectInstanceNumber, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MEXIST command and wait OK answer
+/*! \details
+This function allows the end-user to query the module in order to discover if agiven agent and URI path combination exist.
+ * \param agentInstance identifies the agent LWM2M
+ * \param objectNumber object number to be selected
+ * \param objectInstanceNumber object instance for the query
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_check_object_exist(int agentInstance, int objectNumber, int objectInstanceNumber, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MEXIST=%d,%d,%d"), agentInstance, objectNumber, objectInstanceNumber);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MEXIST command and wait OK answer
+/*! \details
+This function allows the end-user to query the module in order to discover if agiven agent and URI path combination exist.
+ * \param agentInstance identifies the agent LWM2M
+ * \param objectNumber object number to be selected
+ * \param objectInstanceNumber object instance for the query
+ * \param resourceNumber resource number for the query
+ * \param resourceInstanceNumber resource instance number for the query
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::checkURIExist(int agentInstance, int objectNumber, int objectInstanceNumber, int resourceNumber, int resourceInstanceNumber, tout_t aTimeout)
+{
+  return LWM2M_check_URI_exist(agentInstance, objectNumber, objectInstanceNumber, resourceNumber, resourceInstanceNumber, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MEXIST command and wait OK answer
+/*! \details
+This function allows the end-user to query the module in order to discover if agiven agent and URI path combination exist.
+ * \param agentInstance identifies the agent LWM2M
+ * \param objectNumber object number to be selected
+ * \param objectInstanceNumber object instance for the query
+ * \param resourceNumber resource number for the query
+ * \param resourceInstanceNumber resource instance number for the query
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_check_URI_exist(int agentInstance, int objectNumber, int objectInstanceNumber, int resourceNumber, int resourceInstanceNumber, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MEXIST=%d,%d,%d,%d,%d"), agentInstance, objectNumber, objectInstanceNumber, resourceNumber, resourceInstanceNumber);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MNEWINST command and wait OK answer
+/*! \details
+This function can be used to create dynamically the new object instance ID of the specified object.
+ * \param agentInstance identifies the agent LWM2M
+ * \param objectID object number to be selected
+ * \param objectInstanceID object instance for the query
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::createNewObjectInstance(int agentInstance, int objectID, int objectInstanceID, tout_t aTimeout)
+{
+   return LWM2M_create_new_object_instance(agentInstance, objectID, objectInstanceID, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MNEWINST command and wait OK answer
+/*! \details
+This function can be used to create dynamically the new object instance ID of the specified object.
+ * \param agentInstance identifies the agent LWM2M
+ * \param objectID object number to be selected
+ * \param objectInstanceID object instance for the query
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_create_new_object_instance(int agentInstance, int objectID, int objectInstanceID, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MNEWINST=%d,%d,%d"), agentInstance, objectID, objectInstanceID);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MACK command and wait OK answer
+/*! \details
+This function requires an ACK to performs its operations on the dedicated data context.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::sendLWM2MACK(tout_t aTimeout)
+{
+   return LWM2M_send_ACK(aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MACK command and wait OK answer
+/*! \details
+This function requires an ACK to performs its operations on the dedicated data context.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_send_ACK(tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MACK=1"));
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+/*! \brief Implements the AT#LWM2MCFG command and wait OK answer
+/*! \details
+This function allows the user to configure a parameter specified by parameter ID.
+ * \param agentID identifier of the LwM2M agent related to the request
+ * \param paramID identifier of the parameter to be configured
+ * \param actionID the required action
+ * \param value identifier of the configured value
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_set_configuration(int agentID, int paramID, int value, tout_t aTimeout)
+{
+   int actionID = 0;
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MCFG=%d,%d,%d,%d"), agentID, paramID, actionID, value);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MCFG command and wait OK answer
+/*! \details
+This function allows the user to configure a parameter specified by parameter ID.
+ * \param agentID identifier of the LwM2M agent related to the request
+ * \param paramID identifier of the parameter to be configured
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_get_configuration(int agentID, int paramID, tout_t aTimeout)
+{
+   int actionID = 1;
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MCFG=%d,%d,%d,%d"), agentID, paramID, actionID);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MCIPHERENA command and wait OK answer
+/*! \details
+This function sets the cipher suits for the agent specified.
+ * \param agentID identifier of the LwM2M agent related to the request
+ * \param cipher_mode Cipher mode (0 is default ciphers, 1 is advanced ciphers)
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_set_ciphers(int agentID, int cipher_mode, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MCIPHERENA=%d,%d"), agentID, cipher_mode);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MCUST command and wait OK answer
+/*! \details
+This function allows the end-user to set LwM2M customization parameters related to the module.\n
+Those settings are generally neither related nor manageable with other LwM2M agent commands
+ * \param paramID identifier of the parameter to be set.
+ * \param data data to be set.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_set_general_parameter(int paramID, char* data, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MCUST=%d,%s"), paramID, data);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2ME command and wait OK answer
+/*! \details
+This function allows the end-user to set LwM2M customization parameters related to the module.\n
+Those settings are generally neither related nor manageable with other LwM2M agent commands
+ * \param agentInstance selects the lwm2m instance.
+ * \param objectID select object identifier.
+ * \param objectInstanceID select object Instance identifier for the query
+ * \param resourceID select resource identifier
+ * \param resourceInstanceID selects the resource instance identifier
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_client_resource_exec(int agentInstance, int objectID, int objectInstanceID, int resourceID, int resourceInstanceID, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2ME=%d,%d,%d,%d,%d"), agentInstance, objectID, objectInstanceID, resourceID, resourceInstanceID);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MGET command and wait OK answer
+/*! \details
+This function gets a user defined value to the specified resource, if URI is whitelisted; error otherwise.
+ * \param type data type to be inserted.
+ * \param objectID select object identifier.
+ * \param objectInstanceID select object Instance identifier for the query
+ * \param resourceID select resource identifier
+ * \param resourceInstanceID selects the resource instance identifier
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_get_resource(int type, int objectID, int objectInstanceID, int resourceID, int resourceInstanceID, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MGET=%d,%d,%d,%d,%d"), type, objectID, objectInstanceID, resourceID, resourceInstanceID);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MLIST command and wait OK answer
+/*! \details
+This function allows the end-user to query the module to retrieve the list of the objects and object instances supported for a given agent.
+ * \param agentInstance selects the lwm2m instance.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_get_report_object(int agentInstance, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MLIST=%d"), agentInstance);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MMON command and wait OK answer
+/*! \details
+This function can be used to activate/deactivate the resource changes monitoring.
+ * \param action activate (value is 1), deactivate (value is 0) the resource monitoring.
+ * \param objectID object identifier.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_activate_resource(int action, int objectID, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MMON=%d,%d"), action, objectID);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MNFYACKENA command and wait OK answer
+/*! \details
+This function can be used to activate/deactivate the resource changes monitoring.
+ * \param agentInstanceID selects the lwm2m instance
+ * \param action disable URC reporting (value is 0), enable URC reporting (value is 1), read URC reporting status (value is 2).
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_control_URC_reporting(int agentInstanceID, int action, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MNFYACKENA=%d,%d"), agentInstanceID, action);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MNFYACKURI command and wait OK answer
+/*! \details
+This function can be used to remove, add and list the URIs of the resources\n
+for issuing an URC at reception of an Ack sent from a server that receives a LWM2M notify for that resource.
+ * \param agentInstanceID selects the lwm2m instance.
+ * \param action remove URI reporting (value is 0), add URI reporting (value is 1), list URI reporting (value is 2).
+ * \param objectID selects the object identifier of the URI.
+ * \param objectInstanceID selects the object instance identifier of the URI,
+ * \param resourceID selects the resource identifier of the URI.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_manage_URI_reporting(int agentInstanceID, int action, int objectID, int objectInstanceID, int resourceID, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MNFYACKURI=%d,%d,%d,%d,%d"), agentInstanceID, action, objectID, objectInstanceID, resourceID);
+	return send_wait((char*)mBuffer,OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MOBJGET command and wait OK answer
+/*! \details
+This function allows the user to read a LWM2M object.
+ * \param agentInstanceID selects the lwm2m instance.
+ * \param objectID selects the object identifier of the URI.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_get_object(int agentInstanceID, int objectID, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MOBJGET=%d,%d"), agentInstanceID, objectID);
+	return send_wait((char*)mBuffer, 0, OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MOBJGET command and wait OK answer
+/*! \details
+This function allows the user to read a LWM2M object instance.
+ * \param agentInstanceID selects the lwm2m instance.
+ * \param objectID selects the object identifier of the URI.
+ * \param objectInstanceID selects object instance identifier.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_get_object_instance(int agentInstanceID, int objectID, int objectInstanceID, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MOBJGET=%d,%d,%d"), agentInstanceID, objectID, objectInstanceID);
+	return send_wait((char*)mBuffer, 0, OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MOBJGET command and wait OK answer
+/*! \details
+This function allows the user to read a LWM2M object resource.
+ * \param agentInstanceID selects the lwm2m instance.
+ * \param objectID selects the object identifier of the URI.
+ * \param objectInstanceID selects object instance identifier.
+ * \param resourceID selects resource identifier
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_get_object_resource(int agentInstanceID, int objectID, int objectInstanceID, int resourceID, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MOBJGET=%d,%d,%d,%d"), agentInstanceID, objectID, objectInstanceID,resourceID);
+	return send_wait((char*)mBuffer, 0, OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MSTAT command and wait OK answer
+/*! \details
+This function sends a query about the status to the Telit LwM2M client.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_client_current_status(tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MSTAT"));
+	return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MREG command and wait OK answer
+/*! \details
+This function allows the user to request a full registration, a deregistration or a registration update to a LwM2M server.
+ * \param agentInstanceID identifier of the LwM2M agent related to the request.
+ * \param actionID identifier of the required action.
+ * \param shortServerID identifier of the server related to the request.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_registration(int agentInstanceID, int actionID, int shortServerID, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MREG=%d,%d,%d"), agentInstanceID, actionID, shortServerID);
+	return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MREG command and wait OK answer
+/*! \details
+This function allows the user to request the registration info to a LwM2M server.
+ * \param agentInstanceID identifier of the LwM2M agent related to the request.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_registration_info(int agentInstanceID, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MREG=%d,%d"), agentInstanceID, REGISTRATION_INFO);
+	return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MFOTAACK command and wait OK answer
+/*! \details
+This function sends an ACK to the LwM2M Client to authorize the FOTA operation required to the specified client.
+ * \param agentInstanceID identifier of the LwM2M agent related to the request.
+ * \param action acknowledge to the FOTA required operation
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_FOTA_operation_confirmation(int agentInstanceID, int action, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MFOTAACK=%d,%d"), agentInstanceID, action);
+	return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MFOTACFG command and wait OK answer
+/*! \details
+This function sends an ACK to the LwM2M Client to authorize the FOTA operation required to the specified client.
+ * \param agentInstanceID identifier of the LwM2M agent related to the request.
+ * \param mode select the FOTA mode
+ * \param timeoutAction select the action to be performed after the FOTA timeout for ACK expiration.
+ * \param aTimeout specifies the timeout
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_FOTA_configuration(int agentInstanceID, int mode, int timeoutAction, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MFOTACFG=%d,%d,%d"), agentInstanceID, mode, timeoutAction);
+	return send_wait((char*)mBuffer, OK_STRING, aTimeout);
+}
+
+/*! \brief Implements the AT#LWM2MFOTASTATE command and wait OK answer
+/*! \details
+This function allows the end-user to query the module in order to retrieve, for a given agent, the FOTA client state,
+both in terms of the LwM2M specification status and the internal FOTA client management status.
+ * \param agentInstanceID identifier of the LwM2M agent related to the request.
+ * \param aTimeout specifies the timeout.
+ * \return return code
+*/
+ME310::return_t ME310::LWM2M_FOTA_state(int agentInstanceID, tout_t aTimeout)
+{
+   memset(mBuffer,0,ME310_BUFFSIZE);
+	snprintf((char*)mBuffer, ME310_BUFFSIZE-1,F("AT#LWM2MFOTASTATE=%d"), agentInstanceID);
+	return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 // M2M -------------------------------------------------------------------------
 
@@ -6434,8 +7337,33 @@ This command enables/disables Power Saving Mode (PSM) mode.
  */
 ME310::return_t ME310::psm_setting(int mode, const char *reqPeriodicRau, const char *reqGPRSreadyTimer, const char *reqPeriodicTau, const char *reqActiveTime, tout_t aTimeout)
 {
+   const int size_buf = 12;
+   char reqPeriodicRau_tmp[size_buf] = "";
+   char reqGPRSreadyTimer_tmp[size_buf] = "";
+   char reqPeriodicTau_tmp[size_buf] = "";
+   char reqActiveTime_tmp[size_buf] = "";
+   if(strlen(reqPeriodicRau) != 0)
+   {
+      memset(reqPeriodicRau_tmp, 0, size_buf);
+      snprintf(reqPeriodicRau_tmp, size_buf-1, F("\"%s\""), reqPeriodicRau);
+   }
+   if(strlen(reqGPRSreadyTimer) != 0)
+   {
+      memset(reqGPRSreadyTimer_tmp, 0, size_buf);
+      snprintf(reqGPRSreadyTimer_tmp, size_buf-1, F("\"%s\""), reqGPRSreadyTimer);
+   }
+   if(strlen(reqPeriodicTau) != 0)
+   {
+      memset(reqPeriodicTau_tmp, 0, size_buf);
+      snprintf(reqPeriodicTau_tmp, size_buf-1, F("\"%s\""), reqPeriodicTau);
+   }
+   if(strlen(reqActiveTime) != 0)
+   {
+      memset(reqActiveTime_tmp, 0, size_buf);
+      snprintf(reqActiveTime_tmp, size_buf-1, F("\"%s\""), reqActiveTime);
+   }
    memset(mBuffer, 0, ME310_BUFFSIZE);
-   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CPSMS=%d,\"%s\",\"%s\",\"%s\",\"%s\""), mode, reqPeriodicRau, reqGPRSreadyTimer, reqPeriodicTau, reqActiveTime);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT+CPSMS=%d,%s,%s,%s,%s"), mode, reqPeriodicRau_tmp, reqGPRSreadyTimer_tmp, reqPeriodicTau_tmp, reqActiveTime_tmp);
    return send_wait((char*)mBuffer, OK_STRING, aTimeout);
 }
 

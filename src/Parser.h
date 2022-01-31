@@ -13,7 +13,7 @@
     Parser is an abstract class and handles common methods, like gets and parse.\n
     The concrete classes, derived by Parser, implement the parsing methods for the specific AT command.\n
   @version
-    1.1.1
+    2.10.0
 
   @note
     Dependencies:
