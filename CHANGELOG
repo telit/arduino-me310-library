@@ -1,5 +1,14 @@
 ME310 0.0.0 - ????.??.??
 
+
+ME310 2.10.0 - 2022.01.31
+* Added several lwm2m utility functions
+* Fixed issue with psm_setting method empty parameters management
+* Fixed unused parameter in ssl_configure_general_param method
+
+ME310 2.9.0 - 2022.01.11
+* code cleanup
+
 ME310 2.8.0 - 2021.11.19
 * Added lwm2m objset function
 * Added float to string method

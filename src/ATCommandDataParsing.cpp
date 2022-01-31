@@ -13,7 +13,7 @@
     It is possible obtain data payload
 
   @version
-    1.2.1
+    2.10.0
 
   @note
     Dependencies:
