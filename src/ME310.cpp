@@ -17,7 +17,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version
-    2.10.0
+    2.11.0
 
   @note
 
@@ -66,9 +66,10 @@ ME310::~ME310()
 /*! \brief Begin method
    \param baudRate baud rate of Uart for serial communication
 */
-void ME310::begin(unsigned long baudRate)
+void ME310::begin(unsigned long baudRate, bool debug)
 {
    mBaudrate = baudRate;
+   _debug = debug;
    mSerial.begin(baudRate);
 }
 
@@ -5848,7 +5849,7 @@ This function sets a user defined value to the specified resource, if whiteliste
 ME310::return_t ME310::setResourceBool(int type, int objID, int instanceID, int resourceID, int resourceInstance, int value, tout_t aTimeout)
 {
    (void)type;
-	return setResourceBool(objID, instanceID, resourceID, resourceInstance, value);
+	return setResourceBool(objID, instanceID, resourceID, resourceInstance, value, aTimeout);
 }
 
 /*! \brief Implements the AT#LWM2MSET command and wait OK answer
@@ -7498,6 +7499,11 @@ const char *ME310::buffer_cstr_raw()
 void ME310::send(const char *aCommand, const char *aTerm)
 {
    on_command(aCommand); //callback
+   if(_debug)
+   {
+      Serial.print(aCommand);
+      Serial.println(aTerm);
+   }
    mSerial.write(aCommand);
    delay(200);
    mSerial.write(aTerm);
@@ -7511,6 +7517,10 @@ void ME310::send(const char *aCommand, const char *aTerm)
 void ME310::send(const uint8_t* data, int len)
 {
    on_command((char*)data); //callback
+   if(_debug)
+   {
+      Serial.println((char*)data);
+   }
    mSerial.write(data, len);
 }
 

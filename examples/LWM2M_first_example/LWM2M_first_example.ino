@@ -408,7 +408,8 @@ This function checks whether or not a particular agent exists.
 bool checkExistAgent(String LWM2MEXISTCommand)
 {
   bool ret = false;
-  myRc = myME310.send_command(LWM2MEXISTCommand.c_str(), OK_ANSWER); //issue command AT#LWM2MEXIST=agentInstance, objectNumber, objecttInstanceNumber.
+  const char *answer = OK_ANSWER;
+  myRc = myME310.send_command(LWM2MEXISTCommand.c_str(), answer); //issue command AT#LWM2MEXIST=agentInstance, objectNumber, objecttInstanceNumber.
   String resp = myME310.buffer_cstr(1);
   if(resp.endsWith("OK"))
   {

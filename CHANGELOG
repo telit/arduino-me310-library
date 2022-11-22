@@ -1,5 +1,10 @@
 ME310 0.0.0 - ????.??.??
 
+ME310 2.10.0 - 2022.11.22
+* Added hello world example
+* Added sleep example
+* Added debug flag in ME310 class
+
 
 ME310 2.10.0 - 2022.01.31
 * Added several lwm2m utility functions
