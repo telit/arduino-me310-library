@@ -19,7 +19,7 @@
 
 
   @version
-    1.0.0
+    1.1.0
 
   @note
 
@@ -34,7 +34,7 @@
 #include <ME310.h>
 #include <string.h>
 
-#define APN "\"APN\""
+#define APN "APN"
 #define HOSTNAME "api-dev.devicewise.com"
 #define PORT 1883
 
@@ -61,6 +61,7 @@ int cID = 1;          //PDP Context Identifier
 char ipProt[]= "IP";  //Packet Data Protocol type
 
 int count = 0;
+bool isConnect = false;
 
 void setup() {
 
@@ -117,6 +118,10 @@ void setup() {
                 resp = (char*)myME310.buffer_cstr(1);
                 Serial.println(resp);
             }
+            else
+            {
+              break;
+            }
           }
         }
         ///////////////////////////////////
@@ -151,24 +156,27 @@ void setup() {
         ///////////////////////////////////
         // AT#MQCFG=instance Number, hostname, port, cid, sslEN
         ///////////////////////////////////
-        Serial.println("mqtt configure");
+        Serial.print("mqtt configure:");
         rc = myME310.mqtt_configure(1, HOSTNAME , PORT, cID); //issue command  AT#MQCFG=instance Number, hostname, port, cid, sslEN and wait for answer or timeout
         Serial.println(myME310.buffer_cstr(1));
         delay(1000);
         ///////////////////////////////////
         // AT#MQCONN=instance Number, client_id, username, password
         ///////////////////////////////////
-        if(rc == 0)
+        if(rc == ME310::RETURN_VALID)
         {
+          Serial.print("mqtt connect: ");
           rc = myME310.mqtt_connect(1, CLIENT_ID, CLIENT_USERNAME, CLIENT_PASSWORD, ME310::TOUT_1MIN); //issue command  AT#MQCONN=instance Number, client_id, username, password and wait for answer or timeout
           Serial.println(myME310.buffer_cstr(1));
-          if(rc == 0)
+          if(rc == ME310::RETURN_VALID)
           {
+            isConnect = true;
             ////////////////////////////////////
             // COMMAND TO SUBSCRIBE
             //
             // AT#MQSUB=instance_number, topic
             /////////////////////////////////////
+            Serial.print("MQTT Topic Subscribe: ");
             myME310.mqtt_topic_subscribe(1,"topic");  //issue command AT#MQSUB=instance_number, topic and wait for answer or timeout
             Serial.println(myME310.buffer_cstr(1));
 
@@ -177,7 +185,7 @@ void setup() {
             //
             // AT#MQPUBS=instance_number, topic, retain, qos, message
             ////////////////////////////////////
-
+            Serial.print("MQTT Publish: ");
             myME310.mqtt_publish(1, "topic", 1, 0, "message");  //issue command AT#MQPUBS=instance_number, topic, retain, qos, message and wait for answer or timeout
             Serial.println(myME310.buffer_cstr(1));
 
@@ -189,7 +197,7 @@ void setup() {
     {
         Serial.println((String)"Error: " + rc + " Error string: " + myME310.buffer_cstr(2));
     }
-}
+  }
   else
   {
       Serial.println((String)"Error: " + rc + " Error string: " + myME310.buffer_cstr(2));
@@ -197,30 +205,52 @@ void setup() {
 }
 
 void loop(){
-  /////////////////////////////////////
-  // COMMAND TO CHECK IF SOME MESSAGES HAVE ARRIVED
-  //
-  // AT#MQREAD?
-  ////////////////////////////////////
-  myME310.read_mqtt_read();       //issue command AT#MQREAD? and wait for answer or timeout
-  Serial.println(myME310.buffer_cstr(1));
-
-  /////////////////////////////////////
-  // COMMAND TO READ A MESSAGE
-  //
-  // AT#MQREAD=instance_number, id_message
-  ////////////////////////////////////
-  myME310.mqtt_read(1,1);                     //issue command AT#MQREAD=instance_number, id_message and wait for answer or timeout
-  Serial.println(myME310.buffer_cstr_raw());  //print response in raw mode
-  count++;
-  if (count == 100)
+  if(isConnect)
   {
-      /////////////////////////////////////
-      // COMMAND TO DISCONNECT
-      //
-      // AT#MQDISC=instance_number
-      ////////////////////////////////////
-      myME310.mqtt_disconnect(1);   //AT#MQDISC=instance_number
-      exit(0);
+  /////////////////////////////////////
+    // COMMAND TO CHECK IF SOME MESSAGES HAVE ARRIVED
+    //
+    // AT#MQREAD?
+    ////////////////////////////////////
+    Serial.print("MQTT read value: ");
+    myME310.read_mqtt_read();       //issue command AT#MQREAD? and wait for answer or timeout
+    Serial.println(myME310.buffer_cstr(1));
+    char *resp = (char* )myME310.buffer_cstr(1);
+    if(resp != NULL)
+    {
+      if ((strcmp(resp, "#MQREAD: 1,1")) == 0)
+      {
+        /////////////////////////////////////
+        // COMMAND TO READ A MESSAGE
+        //
+        // AT#MQREAD=instance_number, id_message
+        ////////////////////////////////////
+        Serial.print("MQTT read: ");
+        myME310.mqtt_read(1,1);                     //issue command AT#MQREAD=instance_number, id_message and wait for answer or timeout
+        Serial.println(myME310.buffer_cstr_raw());  //print response in raw mode
+        myME310.mqtt_disconnect(1);   //AT#MQDISC=instance_number
+        exit(0);
+      }
+      else
+      {
+        count++;
+      }
+    }
+    
+    if (count == 5)
+    {
+        /////////////////////////////////////
+        // COMMAND TO DISCONNECT
+        //
+        // AT#MQDISC=instance_number
+        ////////////////////////////////////
+        myME310.mqtt_disconnect(1);   //AT#MQDISC=instance_number
+        exit(0);
+    }
+  }
+  else
+  {
+    Serial.println("Connection error");
+    exit(0);
   }
 }

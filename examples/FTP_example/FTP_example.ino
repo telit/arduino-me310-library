@@ -17,7 +17,7 @@
 
 
   @version
-    1.0.0
+    1.0.1
 
   @note
 
@@ -141,10 +141,6 @@ void loop() {
     Serial.println(myME310.return_string(rc));
     if(rc == ME310::RETURN_VALID)
     {
-      Serial.println("Ftp list in current directory: ");
-      myME310.ftp_list(ME310::TOUT_10SEC);
-      Serial.println(myME310.buffer_cstr_raw());
-
       Serial.print("Ftp Change Working Directory: ");
       rc = myME310.ftp_change_working_directory("/CristinaDe", ME310::TOUT_10SEC); //issue command AT#FTPCWD=path directory and wait for answer or timeout
       Serial.println(myME310.return_string(rc));    //returns a string with return_t codes

@@ -14,9 +14,9 @@
     The library contains a single class that implements a C++ interface to all ME310 AT Commands.
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
-  @version 
+  @version
     1.0.0
-  
+
   @note
 
   @author
@@ -25,8 +25,8 @@
   @date
     28/10/2020
  */
- 
- #include <ME310.h>
+
+#include <ME310.h>
 
 #ifndef ARDUINO_TELIT_SAMD_CHARLIE
 #define ON_OFF 6 /*Select the GPIO to control ON_OFF*/
@@ -34,11 +34,11 @@
 
 using namespace me310;
 /*
- * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n 
+ * If a Telit-Board Charlie is not in use, the ME310 class needs the Uart Serial instance in the constructor, that will be used to communicate with the modem.\n
  * Please refer to your board configuration in variant.h file.
  * Example:
  * Uart Serial1(&sercom4, PIN_MODULE_RX, PIN_MODULE_TX, PAD_MODULE_RX, PAD_MODULE_TX, PIN_MODULE_RTS, PIN_MODULE_CTS);
- * ME310 myME310 (Serial1); 
+ * ME310 myME310 (Serial1);
  */
 ME310 myME310;
 ME310::return_t rc;     //Enum of return value  methods
@@ -55,9 +55,9 @@ void setup() {
    delay(1000);
 
    Serial.println("SERCOMM Telit Test AT");
-   
+
    myME310.powerOn();
-   
+
    Serial.println("ME310 ON");
 
    Serial.println();
@@ -65,7 +65,7 @@ void setup() {
    ME310::return_t rc = myME310.attention();    // issue command and wait for answer or timeout
    Serial.println(myME310.buffer_cstr());       // print first line of modem answer
    Serial.print(ME310::return_string(rc));      // print return value
-   Serial.println(" answer from ME310 MODULE");  
+   Serial.println(" answer from ME310 MODULE");
    if(rc != ME310::RETURN_VALID)                // exit on error
       return;
 
@@ -75,21 +75,21 @@ void setup() {
    Serial.println(ME310::return_string(rc));   // print return value
    if(rc != ME310::RETURN_VALID)               // exit on error
       return;
-   
+
    Serial.println();
-   Serial.println("Display Config Profile : ");  
+   Serial.println("Display Config Profile : ");
    rc = myME310.display_config_profile();      // issue command and wait for answer or timeout
    if(rc == ME310::RETURN_VALID)               // print all rows returned from ME310 except command echo (index = 0)
       print_buffer(myME310);
    else return;                                // exit on error
-   
+
    Serial.println();
-   Serial.print("Query SIM Status : ");  
+   Serial.print("Query SIM Status : ");
    myME310.query_sim_status();
    Serial.println(myME310.buffer_cstr(1));
 
    Serial.println();
-   Serial.println("Read Query SIM Status : ");  
+   Serial.println("Read Query SIM Status : ");
    rc = myME310.read_query_sim_status();
    if(rc == ME310::RETURN_VALID)               // print all rows returned from ME310 except command echo (index = 0)
    {
@@ -100,7 +100,7 @@ void setup() {
          if(strstr(resp,"#QSS: 0,1"))
          {
             Serial.println("SIM is inserted");
-            
+
             rc = myME310.read_enter_pin();
             if(rc == ME310::RETURN_VALID)               // print all rows returned from ME310 except command echo (index = 0)
             {
@@ -113,10 +113,10 @@ void setup() {
                      Serial.println("PIN required");
                }
             }
-            else return; 
+            else return;
 
             Serial.println();
-            Serial.print("Print ICCID : ");  
+            Serial.print("Print ICCID : ");
             rc = myME310.read_iccid();
             if(rc == ME310::RETURN_VALID)
             {
@@ -124,7 +124,7 @@ void setup() {
                if(resp != NULL)
                {
                   const char *pLabel = strstr(resp,"+CCID: ");
-                  if(pLabel) 
+                  if(pLabel)
                   {
                      Serial.print("[");
                      Serial.write(pLabel+7,19);
@@ -145,7 +145,7 @@ void setup() {
             rc = myME310.capabilities_list();
             if(rc == ME310::RETURN_VALID)               // print all rows returned from ME310 except command echo (index = 0)
                Serial.println(myME310.buffer_cstr(1));
-            else return;   
+            else return;
 
          }
          else
@@ -161,7 +161,7 @@ void setup() {
    if(rc == ME310::RETURN_VALID)
       Serial.println(myME310.buffer_cstr(1));
    else return;
-   
+
    Serial.print("Model Identification        : ");
    rc = myME310.model_identification();
    if(rc == ME310::RETURN_VALID)
@@ -178,7 +178,7 @@ void setup() {
    rc = myME310.serial_number();
    if(rc == ME310::RETURN_VALID)
       Serial.println(myME310.buffer_cstr(1));
-   else return;   
+   else return;
 
    Serial.print("Request Manufacturer Ident. : ");
    rc = myME310.request_manufacturer_identification();
@@ -237,7 +237,7 @@ void print_buffer(ME310 &aME310, const char *term)
    for(int index = 1;;index++)
    {
       const char * tmp = aME310.buffer_cstr(index);
-      if(tmp) 
+      if(tmp)
       {
         if(term)
         {
