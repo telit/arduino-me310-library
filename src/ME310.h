@@ -13,7 +13,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version
-    2.10.0
+    2.11.0
 
   @note
     Dependencies:
@@ -122,7 +122,7 @@ namespace me310
       void powerOn(unsigned int onoff_gpio);
       #endif
 
-      void begin(unsigned long baudRate);
+      void begin(unsigned long baudRate, bool debug = false);
       void end();
 
    // Command Line Prefixes -------------------------------------------------------
@@ -1518,6 +1518,7 @@ namespace me310
 
       uint32_t _option = 0;
       bool _isIRARx, _isIRATx;
+      bool _debug;
 
       static const char CTRZ[1];
 
