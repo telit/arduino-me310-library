@@ -19,7 +19,7 @@
 	  For the sketch to work correctly, it is necessary to load the XML of the object 3313 on the board.\n
 
   @version
-    1.0.0
+    1.0.1
 
   @note
 
@@ -49,7 +49,9 @@
 
 #define OK_ANSWER "OK"
 
-#define ON_OFF 6 /*Select the GPIO to control ON_OFF*/
+#ifndef ARDUINO_TELIT_SAMD_CHARLIE
+#define ON_OFF 6 /*Select the right GPIO to control ON_OFF*/
+#endif
 
 /* Earth's gravity in m/s^2 */
 #define GRAVITY_EARTH     (9.80665f)

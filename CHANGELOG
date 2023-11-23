@@ -1,5 +1,8 @@
 ME310 0.0.0 - ????.??.??
 
+ME310 2.12.1 - 2023.11.23
+* Fixes in LWM2M_first example
+
 ME310 2.12.0 - 2022.11.23
 * Fixes in MQTT and FTP examples
 
