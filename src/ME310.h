@@ -13,7 +13,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version
-    2.11.0
+    2.13.1
 
   @note
     Dependencies:
@@ -1032,7 +1032,8 @@ namespace me310
       return_t send_http_query(int prof_id, int command, const char *resource, tout_t aTimeout = TOUT_100MS);
       _TEST(send_http_query,"AT#HTTPQRY",TOUT_100MS)
 
-      return_t send_http_send(int prof_id, int command, const char *resource, int data_len, char *data, const char *post_param ="", const char *extra_header_line = "",tout_t aTimeout = TOUT_100MS);
+      return_t send_http_send(int prof_id, int command, const char *resource, int data_len, char *data, const char *post_param ="", const char *extra_header_line = "", tout_t aTimeout = TOUT_100MS);
+      return_t send_http_send_without_params(int prof_id, int command, const char *resource, int data_len, char *data, tout_t aTimeout = TOUT_100MS);
       _TEST(send_http_send,"AT#HTTPSND",TOUT_100MS)
 
       void receive_http_data_start(int prof_id, int max_byte = 0);

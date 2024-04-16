@@ -17,7 +17,7 @@
     It makes it easy to build Arduino applications that use the full power of ME310 module
 
   @version
-    2.11.0
+    2.13.1
 
   @note
 
@@ -43,7 +43,7 @@ const char *ME310::OK_STRING = "OK";                   ///< String for OK modem 
 const char *ME310::ERROR_STRING = "ERROR";             ///< String for ERROR modem answer
 const char *ME310::CONNECT_STRING = "CONNECT";         ///< String for CONNECT modem answer
 const char *ME310::CME_ERROR_STRING = "+CME ERROR: ";  ///< String for +CME ERROR modem answer
-const char *ME310::SEQUENCE_STRING = ">>> ";           ///< Sequence string
+const char *ME310::SEQUENCE_STRING = ">>>";           ///< Sequence string
 const char *ME310::WAIT_DATA_STRING = "> ";            ///< Wait Data string
 const char *ME310::TERMINATION_STRING = "";            ///< Termination character
 const char *ME310::NO_CARRIER_STRING = "NO CARRIER";   ///< String for NO CARRIER modem answer
@@ -5114,7 +5114,38 @@ ME310::return_t ME310::send_http_send(int prof_id, int command, const char *reso
 {
    ME310::return_t ret;
    memset(mBuffer, 0, ME310_BUFFSIZE);
+   if( post_param == "")
+   {
+      ret = send_http_send_without_params(prof_id, command, resource, data_len, data, aTimeout);
+      return ret;
+   }
+
    snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#HTTPSND=%d,%d,\"%s\",%d,\"%s\",\"%s\""), prof_id, command, resource, data_len, post_param, extra_header_line);
+   ret =  send_wait((char*)mBuffer,SEQUENCE_STRING,aTimeout);
+   if ((ret == RETURN_VALID))
+   {
+      memset(mBuffer, 0, ME310_BUFFSIZE);
+      memcpy(mBuffer, data, data_len);
+      ret =  send_wait((char*)mBuffer,OK_STRING,TERMINATION_STRING,aTimeout);
+   }
+   return ret;
+}
+
+//! \brief Implements the AT\#HTTPSND command and waits for OK answer
+/*! \details
+This command performs a POST or PUT request to HTTP server and starts sending data to the server.
+ * \param prof_id    profile identifier
+ * \param command    command requested to HTTP server
+ * \param resource    HTTP resource (uri), object of the request
+ * \param data_len    data length to send in bytes
+ * \param aTimeout timeout in ms
+ * \return return code
+ */
+ME310::return_t ME310::send_http_send_without_params(int prof_id, int command, const char *resource, int data_len, char *data, tout_t aTimeout)
+{
+   ME310::return_t ret;
+   memset(mBuffer, 0, ME310_BUFFSIZE);
+   snprintf((char *)mBuffer, ME310_BUFFSIZE-1, F("AT#HTTPSND=%d,%d,\"%s\",%d"), prof_id, command, resource, data_len);
    ret =  send_wait((char*)mBuffer,SEQUENCE_STRING,aTimeout);
    if ((ret == RETURN_VALID))
    {
@@ -7612,7 +7643,6 @@ ME310::return_t ME310::send_wait(const char *aCommand, int flag,  const char *aA
    return wait_for(aCommand, flag, aAnswer, aTimeout);
 }
 
-
 //! \brief Waits for the answer to an AT command or timeouts
 /*!
  * \param aAnswer  answer string to wait for
@@ -7644,6 +7674,11 @@ ME310::return_t ME310::wait_for(const char *aAnswer, ME310::tout_t aTimeout)
             if(rc != RETURN_CONTINUE)
                return rc;
             if(str_equal((const char *)pBuffer,aAnswer))
+            {
+               on_valid((const char *)pBuffer);
+               return RETURN_VALID;
+            }
+            if(str_start((const char *)pBuffer,aAnswer))
             {
                on_valid((const char *)pBuffer);
                return RETURN_VALID;
@@ -7952,12 +7987,17 @@ const char *ME310::str_start(const char *buffer, const char *string)
       return nullptr;
    }
    const char *rc = buffer;
-   for(; ;buffer++,string++)
+
+   String bufTMP, strTMP;
+   bufTMP = buffer;
+   strTMP = string;
+   if(bufTMP.startsWith(strTMP))
    {
-      if(*buffer != *string)
-         return nullptr; // exit if different
-      else if(*buffer == 0)
-         return rc; // exit if equal but = 0
+      return rc;
+   }
+   else
+   {
+      return nullptr;
    }
 }
 
