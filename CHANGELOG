@@ -1,5 +1,10 @@
 ME310 0.0.0 - ????.??.??
 
+ME310 2.13.1 - 2024.04.16
+* Fixes in M2MWrite
+* Added Http_send_without_parameter
+* Fixes str_start
+
 ME310 2.12.1 - 2023.11.23
 * Fixes in LWM2M_first example
 
